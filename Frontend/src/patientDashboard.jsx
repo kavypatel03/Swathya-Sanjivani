@@ -25,12 +25,12 @@ const DashboardPage = () => {
         }
       } catch (err) {
         console.error("Error fetching data:", err);
-<<<<<<< HEAD
+
         navigate("/patientLogin");
         alert("You Need to login first!")
-=======
+
         setError("Error fetching data. Please try again.");
->>>>>>> aae954db8b90537076a5c8c56e3ff237bd26c5c4
+
       } finally {
         setLoading(false);
       }
@@ -42,7 +42,6 @@ const DashboardPage = () => {
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
-<<<<<<< HEAD
   const handleLogout = async () => {
     try {
       // Call the logout endpoint to clear the cookie on the server
@@ -56,14 +55,9 @@ const DashboardPage = () => {
       console.error("Logout failed:", error);
     }
   };
-  
-=======
-  const handleLogout = () => {
-    // You can add any logout logic here (clearing tokens, etc.)
-    navigate("/patientLogin");
-  };
->>>>>>> aae954db8b90537076a5c8c56e3ff237bd26c5c4
 
+
+  
   return (
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-indigo-600 shadow-sm">
