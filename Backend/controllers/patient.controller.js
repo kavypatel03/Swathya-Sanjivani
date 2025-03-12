@@ -68,8 +68,11 @@ module.exports.getPatientDetails = async (req, res) => {
         });
     }
 };
+<<<<<<< HEAD
 
 module.exports.logout = (req, res) => {
         res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "Strict" });
         res.status(200).json({ success: true, message: "Logged out successfully" });
 }
+=======
+>>>>>>> aae954db8b90537076a5c8c56e3ff237bd26c5c4

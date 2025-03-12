@@ -15,6 +15,9 @@ router.post('/register', [
 
 router.get('/dashboard', authMiddleware, patientController.getPatientDetails);
 
+<<<<<<< HEAD
 router.get('/logout', authMiddleware, patientController.logout);
 
+=======
+>>>>>>> aae954db8b90537076a5c8c56e3ff237bd26c5c4
 module.exports = router
