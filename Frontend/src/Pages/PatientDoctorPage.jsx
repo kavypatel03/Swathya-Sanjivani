@@ -1,5 +1,5 @@
 import React from 'react';
-import PatientUserProfile from '../Components/PatientUserProfile';
+import UserProfile from '../Components/PatientUserProfile';
 import PatientDoctorPending from '../Components/PatientDoctorPending';
 import PDoctorAccess from '../Components/PDoctorAccess';
 
@@ -8,7 +8,7 @@ const PatientFamilyPage = () => {
     <div className="min-h-screen bg-gray-100">
       <main className="container mx-auto p-4">
         {/* ✅ Pass props to avoid errors */}
-        <PatientUserProfile name="Guest User" lastLogin="Unknown" />
+        <UserProfile />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
           <div className="col-span-2">
             <PatientDoctorPending />

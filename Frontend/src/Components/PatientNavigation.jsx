@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/logo.png";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function Navigation() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const location = useLocation(); // Get current route
+     const navigate = useNavigate();
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -12,6 +15,21 @@ function Navigation() {
 
     // Function to check if the link is active
     const isActive = (path) => location.pathname === path ? "border-[#0e606e] text-[#0e606e]" : "border-transparent text-gray-500 hover:text-gray-700";
+
+    const handleLogout = async () => {
+        try {
+          // Call the logout endpoint to clear the cookie on the server
+          await axios.get("http://localhost:4000/patient/logout", {
+            withCredentials: true, // Ensures cookies are included in the request
+          });
+      
+          // Redirect to login page after successful logout
+          navigate("/PatientLogin");
+        } catch (error) {
+          console.error("Logout failed:", error);
+        }
+      };
+      
 
     return (
         <nav className="bg-white shadow z-50 relative">
@@ -44,10 +62,12 @@ function Navigation() {
 
                     {/* Logout Button */}
                     <div className="flex items-center">
-                        <a href="/PatientLogin" className="text-[#0e606e] hover:text-[#0e606e] flex items-center text-l font-bold">
+                        <button className="text-[#0e606e] hover:text-[#0e606e] flex items-center text-l font-bold"
+                            onClick={handleLogout}
+                        >
                             <i className="ri-logout-box-line mr-1"></i>
                             Logout
-                        </a>
+                        </button>
                     </div>
 
                     {/* Mobile Menu Button */}

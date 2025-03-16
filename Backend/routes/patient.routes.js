@@ -31,7 +31,6 @@ router.post('/send-otp', async (req, res) => {
 });
 
 
-
 router.post('/verify-otp', async (req, res) => {
     const { mobile, otp } = req.body;
     if (!mobile || !otp) {

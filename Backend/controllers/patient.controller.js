@@ -80,7 +80,7 @@ module.exports.loginPatient = async (req, res, next) => {
 }
 
 module.exports.getPatientDetails = async (req, res) => {
-    try {
+    try {       
         const patient = await patientModel.findById(req.user._id).select("-password");
 
         if (!patient) {
@@ -90,9 +90,14 @@ module.exports.getPatientDetails = async (req, res) => {
             });
         }
 
+        // Add last login timestamp (Example)
+        const lastLogin = new Date().toLocaleString('en-IN', { 
+            weekday: 'long', hour: '2-digit', minute: '2-digit' 
+        });
+
         res.status(200).json({
             success: true,
-            data: patient,
+            data: { ...patient._doc, lastLogin } // Merge data with lastLogin
         });
     } catch (error) {
         res.status(500).json({
