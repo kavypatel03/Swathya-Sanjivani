@@ -16,7 +16,7 @@ const Navbar = () => (
             color="currentColor"
             className="mr-1"
             />
-            Register</Link>
+            Register Now</Link>
     </nav>
 );
 
