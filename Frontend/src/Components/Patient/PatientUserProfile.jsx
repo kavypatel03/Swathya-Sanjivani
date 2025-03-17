@@ -42,7 +42,7 @@ function UserProfile() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-6 mt-5">
       <ToastContainer position="top-right" autoClose={3000} />
       <div className="flex justify-between items-center">
         <div className="flex items-center">

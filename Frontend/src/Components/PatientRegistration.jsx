@@ -19,6 +19,7 @@ const PatientRegistrationForm = () => {
   const [isOtpVerified, setIsOtpVerified] = useState(false);
   const [email, setemail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -235,14 +236,17 @@ const PatientRegistrationForm = () => {
             </label>
             <div className="relative">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 placeholder="A-Z, a-b, 1-9, Special character : @ # $ % & . _ !"
                 className="w-full border border-gray-300 p-1 rounded pr-10 text-sm"
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                <i className="ri-eye-line text-gray-400"></i>
+              <div 
+                className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                <i className={showPassword ? "ri-eye-off-line text-gray-400" : "ri-eye-line text-gray-400"}></i>
               </div>
             </div>
           </div>

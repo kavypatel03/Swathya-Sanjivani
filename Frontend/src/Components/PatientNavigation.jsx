@@ -32,7 +32,7 @@ function Navigation() {
       
 
     return (
-        <nav className="bg-white shadow z-50 relative">
+        <nav className="bg-white shadow z-50 relative py-2 ">
             <div className="mx-auto px-4">
                 <div className="flex justify-between h-16">
                     {/* Logo */}
