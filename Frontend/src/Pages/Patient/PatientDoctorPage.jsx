@@ -1,7 +1,7 @@
 import React from 'react';
-import UserProfile from '../Components/PatientUserProfile';
-import PatientDoctorPending from '../Components/PatientDoctorPending';
-import PDoctorAccess from '../Components/PDoctorAccess';
+import UserProfile from '../../Components/Patient/PatientUserProfile';
+import PatientDoctorPending from '../../Components/Patient/PatientDoctorPending';
+import PDoctorAccess from '../../Components/Patient/PDoctorAccess';
 
 const PatientFamilyPage = () => {
   return (

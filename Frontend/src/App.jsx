@@ -5,17 +5,20 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Nav from './Components/Nav'
 import RegistrationNav from './Components/RegistrationNav'
 import PatientRegistrationForm from './Components/PatientRegistration'
-import DoctorRegistrationForm from './Components/DoctorRegistration'
-import AssistantRegistrationForm from './Components/AssistantRegistration'
-import DoctorLogin from'./Components/DoctorLogin'
-import PatientLogin from'./Components/PatientLogin'
-import AssistantLogin from './Components/AssistantLogin'
+import DoctorRegistrationForm from './Components/Registration/DoctorRegistration'
+import AssistantRegistrationForm from './Components/Registration/AssistantRegistration'
+import DoctorLogin from'./Components/Login/DoctorLogin'
+import PatientLogin from'./Components/Login/PatientLogin'
+import AssistantLogin from './Components/Login/AssistantLogin'
 import Navigation from './Components/PatientNavigation';
-import PatientDashboard from './Pages/PatientDashboard';
-import PatientFamilyPage from './Pages/PatientFamilyPage'
-import PatientDoctorPage from './Pages/PatientDoctorPage';
-import PatientGuide from './Pages/PatientGuide';
-import UploadToast from './Components/UploadTost'
+import PatientDashboard from './Pages/Patient/PatientDashboard';
+import PatientFamilyPage from './Pages/Patient/PatientFamilyPage'
+import PatientDoctorPage from './Pages/Patient/PatientDoctorPage';
+import PatientGuide from './Pages/Patient/PatientGuide';
+import DoctorDashbord from './Pages/Doctor/DoctorDashbord';
+import DocNavigation from './Components/DoctorNavigation';
+import PatientFamily from './Pages/Doctor/PatientFamily';
+import DoctorGuide from './Pages/Doctor/DoctorGuide';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -132,13 +135,33 @@ function App() {
       )
     },
     {
-      path: "/UploadToast",
+      path: "/DoctorDashboard",
       element: (
         <>
-          <UploadToast />
+          <DocNavigation/>
+          <DoctorDashbord />
         </>
       )
     },
+    {
+      path: "/DoctorFamily",
+      element: (
+        <>
+          <DocNavigation/>
+          <PatientFamily />
+        </>
+      )
+    },
+    {
+      path: "/DoctorGuide",
+      element: (
+        <>
+          <DocNavigation/>
+          <DoctorGuide />
+        </>
+      )
+    },
+
   ])
   
   return (

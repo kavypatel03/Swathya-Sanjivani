@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';  // Import for redirection
 import axios from 'axios';
-import UserProfile from '../Components/PatientUserProfile';
-import HealthDocuments from '../Components/PatientHealthDocument';
-import FamilyMembers from '../Components/PatientFamily';
-import DoctorAccess from '../Components/PatientDoctorAccess';
+import UserProfile from '../../Components/Patient/PatientUserProfile';
+import HealthDocuments from '../../Components/Patient/PatientHealthDocument';
+import FamilyMembers from '../../Components/Patient/PatientFamily';
+import DoctorAccess from '../../Components/Patient/PatientDoctorAccess';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 

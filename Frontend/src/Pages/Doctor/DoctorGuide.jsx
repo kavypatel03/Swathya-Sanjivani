@@ -1,11 +1,10 @@
 import React from 'react';
-import Navigation from '../Components/PatientNavigation';
-import UserProfile from '../Components/PatientUserProfile';
-import Guidance from '../Components/Guide';
+import UserProfile from '../../Components/Doctor/DoctorProfile';
+import Guidance from '../../Components/Guide';
 
 const PatientGuidePage = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100">
       {/* Navigation component */}
       
       {/* Main content area */}
