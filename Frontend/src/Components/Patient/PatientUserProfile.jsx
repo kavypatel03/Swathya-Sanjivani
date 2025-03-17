@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,Link } from 'react-router-dom';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -57,9 +57,9 @@ function UserProfile() {
             <div className="text-sm text-gray-500">Last login: {lastLogin}</div>
           </div>
         </div>
-        <a href="#" className="flex items-center text-[#0e606e] hover:text-[#0e606e]/80 font-bold">
+        <Link to="/PatientFamilyPage" className="flex items-center text-[#0e606e] hover:text-[#0e606e]/80 font-bold">
           Profile
-        </a>
+        </Link>
       </div>
     </div>
   );
