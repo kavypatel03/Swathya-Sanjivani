@@ -180,7 +180,7 @@ const PatientRegistrationForm = () => {
               />
               <button
                 type="button"
-                className={`bg-[#0e606e] hover:bg-[#0b5058] text-white px-2 py-1 text-sm rounded-r"
+                className={`bg-[#0e606e] hover:bg-[#0b5058] text-white px-2 py-1 text-sm rounded-r w-24
                 ${isOtpVerified ? "bg-gray-400 cursor-not-allowed" : ""}`}
                 onClick={sendOTP}
                 disabled={isMobileVerified} // ✅ Disable Send OTP button on success
@@ -206,7 +206,7 @@ const PatientRegistrationForm = () => {
               />
               <button
                 type="button"
-                className={`bg-[#0e606e] hover:bg-[#0b5058] text-white px-2 py-1 text-sm rounded-r 
+                className={`bg-[#0e606e] hover:bg-[#0b5058] text-white px-2 py-1 text-sm rounded-r w-24
                 ${isOtpVerified ? "bg-gray-400 cursor-not-allowed" : ""}`}
                 onClick={verifyOTP}
                 disabled={isOtpVerified} // ✅ Disable Verify OTP button on success
