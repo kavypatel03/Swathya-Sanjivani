@@ -1,7 +1,7 @@
 const patientModel = require('../models/patient.model');
 
 module.exports.createPatient = async ({
-    fullname, mobile, email, password
+    fullname, mobile, email, password, dob, age, gender
 }) => {
     if (!fullname || !mobile || !email || !password) {
         throw new Error('All fields are required');
@@ -18,15 +18,28 @@ module.exports.createPatient = async ({
         throw new Error('Email already registered');
     }
 
+    // Create patient with "Self" in family list
     const patient = await patientModel.create({
         fullname,
         mobile,
         email,
-        password
+        password,
+        dob,
+        age,
+        gender,
+        family: [
+            {
+                fullName: fullname,
+                birthDate: dob || null,
+                age: age || null,
+                relationWithMainPerson: "Self",
+                gender: gender || null
+            }
+        ]
     });
 
     return patient;
-}
+};
 
 module.exports.loginPatient = async ({ mobile, email, password }) => {
     if (!mobile || !email || !password) {

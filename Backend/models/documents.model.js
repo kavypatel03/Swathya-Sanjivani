@@ -19,19 +19,20 @@ const documentSchema = new Schema({
         default: Date.now 
     },
 
-    // 🩺 Reference to Patient Model
+    // 🩺 Reference to Different Models
     uploadedBy: {
-        patientName: { 
-            type: String, 
-            ref: 'Patient' 
-        }, // Referencing Patient's Name
-        patientId: {
+        userId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Patient', // Correctly references 'Patient' model
+            required: true,
+            refPath: 'uploadedBy.userType'  // Dynamic reference based on `userType`
+        },
+        userType: {
+            type: String,
+            enum: ['Patient', 'Doctor', 'Admin'],
             required: true
         }
     },
-
+    
     createdAt: { 
         type: Date, 
         default: Date.now 

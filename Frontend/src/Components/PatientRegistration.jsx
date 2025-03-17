@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useLocation } from "react-router-dom";
 
 const PatientRegistrationForm = () => {
   const [error, setError] = useState("");
@@ -19,24 +20,26 @@ const PatientRegistrationForm = () => {
   const [email, setemail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const [userType, setUserType] = useState(params.get("userType") || "Patient");
 
   const sendOTP = async () => {
     try {
-        const response = await axios.post(
-            "http://localhost:4000/patient/send-otp",
-            { mobile }   // Ensure mobile is correctly passed
-        );
+      const response = await axios.post(
+        "http://localhost:4000/patient/send-otp",
+        { mobile } // Ensure mobile is correctly passed
+      );
 
-        if (response?.data?.success) {
-            toast.success("📲 OTP sent successfully!");
-        } else {
-            toast.error(response?.data?.message || "Failed to send OTP.");
-        }
+      if (response?.data?.success) {
+        toast.success("📲 OTP sent successfully!");
+      } else {
+        toast.error(response?.data?.message || "Failed to send OTP.");
+      }
     } catch (error) {
-        toast.error("Error sending OTP. Try again.");
+      toast.error("Error sending OTP. Try again.");
     }
-};
-
+  };
 
   const verifyOTP = async () => {
     try {
@@ -64,7 +67,6 @@ const PatientRegistrationForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 🔒 Prevent registration if OTP is not verified
     if (!isOtpVerified) {
       toast.error("Please verify OTP before registration.");
       return;
@@ -73,7 +75,7 @@ const PatientRegistrationForm = () => {
     try {
       const response = await axios.post(
         "http://localhost:4000/patient/register",
-        { fullname, mobile, email, password },
+        { fullname, mobile, email, password, userType }, // Add `userType` here
         { withCredentials: true }
       );
 
@@ -89,11 +91,11 @@ const PatientRegistrationForm = () => {
       console.error("Registration error:", error);
       setisMobileVerified(false);
       setIsOtpVerified(false);
-      setmobile("")
-      setotp("")
+      setmobile("");
+      setotp("");
 
       if (error.response) {
-        toast.error(error.response.data.message || "egistration failed");
+        toast.error(error.response.data.message || "Registration failed");
       } else if (error.request) {
         toast.error("No response from server. Please try again later.");
       } else {
@@ -126,9 +128,16 @@ const PatientRegistrationForm = () => {
 
         <div className="flex justify-center mb-4">
           <div className="flex gap-4 w-[28rem]">
-            <button className="flex-1 bg-[#ff9700] hover:bg-[#e68a00] text-white py-2 text-sm rounded-md font-medium text-center">
+            <Link
+              to={{
+                pathname: "/PatientRegistration",
+                search: "?userType=Patient",
+              }}
+              className="flex-1 bg-[#ff9700] hover:bg-[#e68a00] text-white py-2 text-sm rounded-md font-medium text-center"
+            >
               Patient
-            </button>
+            </Link>
+
             <Link
               to="/DoctorRegistration"
               className="flex-1 bg-[#0e606e] hover:bg-[#0b5058] text-white py-2 text-sm rounded-md font-medium text-center"
@@ -176,7 +185,7 @@ const PatientRegistrationForm = () => {
                 onClick={sendOTP}
                 disabled={isMobileVerified} // ✅ Disable Send OTP button on success
               >
-               {isOtpVerified ? "Verified ✅" : "Send OTP"}
+                {isOtpVerified ? "Verified ✅" : "Send OTP"}
               </button>
             </div>
           </div>

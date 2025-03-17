@@ -13,29 +13,31 @@ module.exports.registerPatient = async (req, res, next) => {
             });
         }
 
-        const { fullname, mobile, email, password } = req.body;
+        const { fullname, mobile, email, password, userType } = req.body;
+
         const hashedPassword = await patientModel.hashPassword(password);
 
         const patient = await patientService.createPatient({
             fullname,
             mobile,
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            userType    // 🔹 Store userType in database
         });
 
         const token = patient.generateAuthToken();
 
         res.cookie('token', token, {
-            httpOnly: true,      // Prevents client-side JavaScript from accessing the cookie
-            secure: true,        // Ensures the cookie is only sent over HTTPS (important for production)
-            sameSite: 'Lax',     // Controls cross-site request behavior
-            maxAge: 24 * 60 * 60 * 1000  // 1 day expiry
+            httpOnly: true,
+            secure: true,
+            sameSite: 'Lax',
+            maxAge: 24 * 60 * 60 * 1000
         });
 
         res.status(201).json({
-            success: true,   // ✅ Must include this for frontend logic
+            success: true,
             message: 'Registration successful',
-            data: { patient, token }  // Ensure 'data' structure matches frontend logic
+            data: { patient, token }  
         });
 
     } catch (error) {
@@ -45,6 +47,7 @@ module.exports.registerPatient = async (req, res, next) => {
         });
     }
 }
+
 
 module.exports.loginPatient = async (req, res, next) => {
     try {
