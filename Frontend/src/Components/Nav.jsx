@@ -9,7 +9,6 @@ const Navbar = () => (
             <Link to="/">
                 <img src={logo} alt="Swasthya Sanjivani" className="h-15" />
             </Link>
-            <button>Meet</button>
         </div>
         <Link to="/registration" className="text-[#0e606e] hover:underline text-md font-bold flex items-center">
             <RiLoginBoxLine
