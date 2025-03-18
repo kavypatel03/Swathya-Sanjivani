@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 const formatDate = (date) => {
     if (!date) return 'N/A';  // Handles null/undefined dates
     const dateObj = new Date(date);
     return `${dateObj.getDate().toString().padStart(2, '0')}-${(dateObj.getMonth() + 1)
-      .toString()
-      .padStart(2, '0')}-${dateObj.getFullYear()}`;
+        .toString()
+        .padStart(2, '0')}-${dateObj.getFullYear()}`;
 };
 
 const FamilyMembers = () => {
@@ -36,7 +37,12 @@ const FamilyMembers = () => {
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-[#0e606e] mb-4">Family Members</h2>
+            <Link to={'/PatientAddMemPage'} className="text-blue-500 hover:text-blue-700  mb-4">
+                Add New
+            </Link>
+            </div>
             {familyMembers.length > 0 ? (
                 <div className="space-y-4">
                     {familyMembers.map((member, index) => (
