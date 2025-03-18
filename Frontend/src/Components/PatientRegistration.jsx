@@ -50,7 +50,7 @@ const PatientRegistrationForm = () => {
       );
 
       if (response?.data?.success) {
-        toast.success("✅ OTP verified successfully!");
+        toast.success("OTP verified successfully!");
         setIsOtpVerified(true); // ✅ OTP verified status set to true
         setisMobileVerified(true);
       } else {

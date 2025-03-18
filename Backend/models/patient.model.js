@@ -51,26 +51,28 @@ const patientSchema = new mongoose.Schema({
         enum: ['Male', 'Female', 'Other'],
         default : "Male"
     },    
-    family : [
+    family: [
         {
-          fullName: String,
-          birthDate: Date,
-          age: Number,
-          relationWithMainPerson: String,
-          gender: String
+            _id: { type: mongoose.Schema.Types.ObjectId, auto: true }, // ✅ Ensures unique `familyId`
+            fullName: String,
+            birthDate: Date,
+            age: Number,
+            relationWithMainPerson: String,
+            gender: String,
+            documents: [
+                {
+                    documentId: {
+                        type: mongoose.Schema.Types.ObjectId,
+                        ref: 'Document'
+                    },
+                    documentName: String,
+                    uploadDate: { type: Date, default: Date.now }
+                }
+            ]   
         }
-    ],
+    ]
     
-    documents: [
-        {
-            documentId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Document'
-            },
-            documentName: String,
-            uploadDate: { type: Date, default: Date.now }
-        }
-    ]    
+     
 });
 
 patientSchema.virtual('calculatedAge').get(function () {
@@ -93,12 +95,13 @@ patientSchema.pre('save', function (next) {
             fullName: this.fullname,
             birthDate: this.dob || null,
             age: this.age || null,
-            relationWithMainPerson: "Self",
+            relationWithMainPerson: "Self",  // ✅ Ensures Self relation is added
             gender: this.gender || null
         });
     }
     next();
 });
+
 
 // 🔒 JWT and Password Methods
 patientSchema.methods.generateAuthToken = function () {
