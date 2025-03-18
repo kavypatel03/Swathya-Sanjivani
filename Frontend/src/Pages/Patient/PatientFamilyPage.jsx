@@ -5,8 +5,10 @@ import PatientUserProfile from '../../Components/Patient/PatientUserProfile';
 import PatientModification from '../../Components/Patient/PatientModification';
 import FamilyMembers from '../../Components/Patient/PatientFamilyMem';
 import TotalFamilyMembers from '../../Components/Patient/PatientTotalFamily';
+import { useNavigate } from "react-router-dom";
 
 const PatientFamilyPage = () => {
+  const navigate = useNavigate();
   const [patientData, setPatientData] = useState(null); // Initialize with null
   const [loading, setLoading] = useState(true); // Loading state
 
@@ -30,7 +32,8 @@ const PatientFamilyPage = () => {
   }
 
   if (!patientData) {
-    return <div className="text-center mt-10 text-red-500">❌ Failed to load patient data</div>;
+      navigate("/PatientLogin");
+      <div className="text-center mt-10 text-red-500">❌ Failed to load patient data</div>;
   }
 
   return (

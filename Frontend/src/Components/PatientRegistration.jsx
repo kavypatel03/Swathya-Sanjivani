@@ -246,10 +246,10 @@ const PatientRegistrationForm = () => {
                 className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                <i className={showPassword ? "ri-eye-off-line text-gray-400" : "ri-eye-line text-gray-400"}></i>
+                <i className={showPassword ? "ri-eye-off-line text-gray-500" : "ri-eye-line text-gray-500"}></i>
               </div>
             </div>
-          </div>
+          </div> 
 
           <div className="mb-4">
             <div className="flex items-start">

@@ -58,6 +58,25 @@ const { updatePatientDetails } = require('../controllers/patient.controller');
 
 router.put('/update-patient-details', authMiddleware, patientController.updatePatientDetails);
 
+router.get('/family/:mobile', async (req, res) => {
+    const { mobile } = req.params;
+
+    try {
+        const patient = await patientModel.findOne({ mobile });
+        if (!patient) {
+            return res.status(404).json({ message: "Patient not found" });
+        }
+
+        res.status(200).json({
+            message: "✅ Family members fetched successfully",
+            familyMembers: patient.family
+        });
+    } catch (error) {
+        res.status(500).json({ message: "❌ Error fetching family members", error });
+    }
+});
+
+
 router.get('/logout', authMiddleware, patientController.logout);
 
 module.exports = router
