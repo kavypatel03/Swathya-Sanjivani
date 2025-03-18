@@ -45,16 +45,16 @@ function Navigation() {
                     {/* Desktop Navigation */}
                     <div className="flex items-center">
                         <div className="flex space-x-4 lg:space-x-8">
-                            <Link to="/" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/PatientDashboard")}`}>
+                            <Link to="/AssistantDashbord" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/AssistantDashbord")}`}>
                                 Home
                             </Link>
-                            <Link to="/" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/PatientFamilyPage")}`}>
+                            <Link to="/" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/")}`}>
                                 Family
                             </Link>
-                            <Link to="/" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/PatientDoctorPage")}`}>
+                            <Link to="/" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/")}`}>
                                 Doctor
                             </Link>
-                            <Link to="/" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/PatientGuide")}`}>
+                            <Link to="/" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/")}`}>
                                 Guide
                             </Link>
                         </div>
@@ -95,16 +95,16 @@ function Navigation() {
             {isMenuOpen && (
                 <div className="md:hidden">
                     <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                        <Link to="/" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/PatientDashboard")} hover:bg-gray-50`}>
+                        <Link to="/AssistantDashbord" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/AssistantDashbord")} hover:bg-gray-50`}>
                             Home
                         </Link>
-                        <Link to="/" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/PatientFamilyPage")} hover:bg-gray-50`}>
+                        <Link to="/" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/")} hover:bg-gray-50`}>
                             Family
                         </Link>
-                        <Link to="/" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/DoctorPage")} hover:bg-gray-50`}>
+                        <Link to="/" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/")} hover:bg-gray-50`}>
                             Doctor
                         </Link>
-                        <Link to="/" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/PatientGuide")} hover:bg-gray-50`}>
+                        <Link to="/" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/")} hover:bg-gray-50`}>
                             Guide
                         </Link>
                         <Link to="/PatientLogin" className="block px-3 py-2 rounded-md text-base font-Bold text-[#0e606e] hover:text-[#0e606e] hover:bg-gray-50">

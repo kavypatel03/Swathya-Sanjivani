@@ -1,6 +1,30 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import logo from "../../assets/logo.png";
 
 const PrescriptionEditor = () => {
+  const [prescriptionText, setPrescriptionText] = useState('');
+  const textareaRef = useRef(null);
+  
+  // Auto-expand textarea function
+  const autoResizeTextarea = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      // Reset height to auto to get the correct scrollHeight
+      textarea.style.height = 'auto';
+      // Set the height to scrollHeight to expand based on content
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
+  
+  // Call auto-resize when text changes
+  useEffect(() => {
+    autoResizeTextarea();
+  }, [prescriptionText]);
+  
+  const handleTextChange = (e) => {
+    setPrescriptionText(e.target.value);
+  };
+
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm">
       <div className="flex justify-between items-center mb-4">
@@ -59,7 +83,13 @@ const PrescriptionEditor = () => {
           </div>
         </div>
         <div className="min-h-64 border-b border-gray-200 mb-8">
-          <p className="text-gray-400">Start typing prescription here...</p>
+          <textarea 
+            ref={textareaRef}
+            value={prescriptionText}
+            onChange={handleTextChange}
+            placeholder="Start typing prescription here..." 
+            className="w-full resize-none overflow-hidden min-h-[100px] focus:outline-none"
+          />
         </div>
         <div className="flex justify-between items-center">
           <div className="flex items-center">
@@ -69,8 +99,9 @@ const PrescriptionEditor = () => {
               </svg>
             </div>
             <div>
-              <p className="text-[#0e606e] font-medium">Swasthya Sanjivani</p>
-              <p className="text-gray-500 text-xs">Health Data Management System</p>
+              <div className="flex items-center text-xs text-gray-500">
+                            <img src={logo} alt="Logo" className="mr-1 size-1/2" />
+              </div>
             </div>
           </div>
           <div>

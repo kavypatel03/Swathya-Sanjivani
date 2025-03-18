@@ -21,10 +21,10 @@ import PatientFamilyPage from './Pages/Patient/PatientFamilyPage'
 import PatientDoctorPage from './Pages/Patient/PatientDoctorPage';
 import PatientGuide from './Pages/Patient/PatientGuide';
 import DoctorDashbord from './Pages/Doctor/DoctorDashbord';
-import DocNavigation from './Components/DoctorNavigation';
 import PatientFamily from './Pages/Doctor/PatientFamily';
 import DoctorGuide from './Pages/Doctor/DoctorGuide';
 import PatientAddMemPage from './Pages/Patient/PatientAddMemPage';
+import AssistantDashbord from './Pages/Assistant/AssistantDashbord';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -150,7 +150,7 @@ function App() {
       )
     },
     {
-      path: "/DoctorDashboard",
+      path: "/DoctorDashbord",
       element: (
         <>
           <DocNavigation/>
@@ -176,7 +176,14 @@ function App() {
         </>
       )
     },
-
+    {
+      path: "/AssistantDashbord",
+      element: (
+        <>
+          <AssistantDashbord />
+        </>
+      )
+    },
   ])
   
   return (
