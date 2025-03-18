@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 function FamilyMembers() {
   const members = [
@@ -12,9 +13,9 @@ function FamilyMembers() {
     <div className="bg-white rounded-lg shadow p-3">
       <div className="flex justify-between items-center mb-3">
         <h2 className="text-xl font-medium text-[#0e606e]">Family Members</h2>
-        <button className="text-blue-500 hover:text-blue-700">
+        <Link to={'/PatientAddMemPage'} className="text-blue-500 hover:text-blue-700">
           Add New
-        </button>
+        </Link>
       </div>
       
       <div className="space-y-4">
