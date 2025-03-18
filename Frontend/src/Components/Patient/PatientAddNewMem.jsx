@@ -14,17 +14,7 @@ const PatientAddNewFamilyMember = () => {
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
-              placeholder="First Name"
-              className="border rounded-md p-2 flex-1"
-            />
-            <input
-              type="text"
-              placeholder="Your Name"
-              className="border rounded-md p-2 flex-1"
-            />
-            <input
-              type="text"
-              placeholder="Father/Husband Name"
+              placeholder="First Name     Your Name     Father/Husband Name"
               className="border rounded-md p-2 flex-1"
             />
           </div>
