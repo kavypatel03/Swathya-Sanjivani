@@ -1,17 +1,22 @@
 import React from 'react'
-import Login from './Pages/Login'
-import Registration from './Pages/Registration'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+
 import Nav from './Components/Nav'
 import RegistrationNav from './Components/RegistrationNav'
+import Navigation from './Components/PatientNavigation'
+import DocNavigation from './Components/DoctorNavigation'
+
+import Login from './Pages/Login'
+import Registration from './Pages/Registration'
 import PatientRegistrationForm from './Components/PatientRegistration'
 import DoctorRegistrationForm from './Components/Registration/DoctorRegistration'
 import AssistantRegistrationForm from './Components/Registration/AssistantRegistration'
-import DoctorLogin from'./Components/Login/DoctorLogin'
-import PatientLogin from'./Components/Login/PatientLogin'
+
+import PatientLogin from './Components/Login/PatientLogin'
+import DoctorLogin from './Components/Login/DoctorLogin'
 import AssistantLogin from './Components/Login/AssistantLogin'
-import Navigation from './Components/PatientNavigation';
-import PatientDashboard from './Pages/Patient/PatientDashboard';
+
+import PatientDashboard from './Pages/Patient/PatientDashboard'
 import PatientFamilyPage from './Pages/Patient/PatientFamilyPage'
 import PatientDoctorPage from './Pages/Patient/PatientDoctorPage';
 import PatientGuide from './Pages/Patient/PatientGuide';
@@ -19,9 +24,7 @@ import DoctorDashbord from './Pages/Doctor/DoctorDashbord';
 import DocNavigation from './Components/DoctorNavigation';
 import PatientFamily from './Pages/Doctor/PatientFamily';
 import DoctorGuide from './Pages/Doctor/DoctorGuide';
-import PatientAddMem from './Components/Patient/PatientAddNewMem';
 import PatientAddMemPage from './Pages/Patient/PatientAddMemPage';
-import AssistantDashbord from './Pages/Assitant/AssistantDashbord'
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -147,16 +150,7 @@ function App() {
       )
     },
     {
-      path: "/DoctorDashbord",
-      element: (
-        <>
-          <DocNavigation/>
-          <DoctorDashbord />
-        </>
-      )
-    },
-    {
-      path: "/DoctorDashbord",
+      path: "/DoctorDashboard",
       element: (
         <>
           <DocNavigation/>
@@ -201,8 +195,7 @@ function App() {
       />
       <RouterProvider router={router} />
     </>
-);
-
+  );
 }
 
-export default App
+export default App;

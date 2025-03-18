@@ -1,6 +1,8 @@
 const patientModel = require('../models/patient.model');
 const patientService = require('../services/patient.service')
 const { validationResult } = require('express-validator');
+const path = require('path');
+const documentModel = require('../models/documents.model');
 
 module.exports.registerPatient = async (req, res, next) => {
     try {
@@ -48,7 +50,6 @@ module.exports.registerPatient = async (req, res, next) => {
     }
 }
 
-
 module.exports.loginPatient = async (req, res, next) => {
     try {
         const { mobile, email, password } = req.body;
@@ -82,7 +83,7 @@ module.exports.loginPatient = async (req, res, next) => {
     }
 }
 
-    module.exports.getPatientDetails = async (req, res) => {
+module.exports.getPatientDetails = async (req, res) => {
         try {       
             const patient = await patientModel.findById(req.user._id).select("-password");
 
@@ -108,7 +109,7 @@ module.exports.loginPatient = async (req, res, next) => {
                 message: "Server error",
             });
         }
-    };
+};
 
 module.exports.updatePatientDetails = async (req, res) => {
     const { fullname, mobile, email, dob, relation, gender } = req.body;
@@ -162,7 +163,145 @@ module.exports.updatePatientDetails = async (req, res) => {
     }
 };
 
+module.exports.addFamilyMember = async (req, res) => {
+    const { fullName, birthDate, age, relation, gender } = req.body;
 
+    try {
+        const patient = await patientModel.findById(req.user._id); // Ensure user is authenticated
+
+        if (!patient) {
+            return res.status(404).json({ message: 'Patient not found' });
+        }
+
+        const newFamilyMember = {
+            fullName,
+            birthDate: birthDate ? new Date(birthDate).toISOString() : null,
+            age: age || null,
+            relationWithMainPerson: relation,
+            gender: gender || null
+        };
+
+        patient.family.push(newFamilyMember);
+        await patient.save();
+
+        res.status(201).json({ message: '✅ Family member added successfully', data: patient });
+    } catch (error) {
+        console.error('❌ Error adding family member:', error);
+        res.status(500).json({ message: '❌ Failed to add family member', error });
+    }
+};
+
+exports.uploadFamilyDocument = async (req, res) => {
+    const { patientId, familyId } = req.params;
+    
+    // Validate IDs before attempting database operations
+    if (!patientId || patientId === 'undefined' || !mongoose.Types.ObjectId.isValid(patientId)) {
+      return res.status(400).json({ error: 'Invalid patient ID' });
+    }
+    
+    if (!familyId || familyId === 'undefined' || !mongoose.Types.ObjectId.isValid(familyId)) {
+      return res.status(400).json({ error: 'Invalid family member ID' });
+    }
+    
+    try {
+      // Your existing code to process the upload
+      // ...
+    } catch (error) {
+      console.error('❌ Error uploading document:', error);
+      res.status(500).json({ error: error.message });
+    }
+  };
+
+module.exports.getDocument = async (req, res) => {
+    const { documentId } = req.params;
+
+    try {
+        const document = await documentModel.findById(documentId);
+
+        if (!document) {
+            return res.status(404).json({ message: '❌ Document not found' });
+        }
+
+        res.setHeader('Content-Type', document.file.contentType); // Display correct file type
+        res.send(document.file.data); // Send file data
+    } catch (error) {
+        res.status(500).json({ message: '❌ Error fetching document', error });
+    }
+};
+
+module.exports.getFamilyMembers = async (req, res) => {
+    try {
+        // 1. Validate request user first
+        if (!req.user?._id) {
+            return res.status(401).json({
+                success: false,
+                message: '❌ Unauthorized: Invalid authentication'
+            });
+        }
+
+        // 2. Use lean() for better performance
+        const patient = await patientModel.findById(req.user._id)
+            .select('family')
+            .lean();
+
+        if (!patient) {
+            return res.status(404).json({
+                success: false,
+                message: '❌ Patient not found'
+            });
+        }
+
+        // 3. Handle null/undefined family array
+        const familyMembers = patient.family || [];
+
+        // 4. Safer response structure
+        return res.status(200).json({
+            success: true,
+            count: familyMembers.length,
+            data: familyMembers
+        });
+
+    } catch (error) {
+        // 5. Security: Don't send error details in production
+        console.error('Error fetching family members:', error);
+        return res.status(500).json({
+            success: false,
+            message: process.env.NODE_ENV === 'development' 
+                ? `❌ Server error: ${error.message}`
+                : '❌ Internal server error'
+        });
+    }
+};
+
+module.exports.getPatientDetails = async (req, res) => {
+    try {
+        const patient = await patientModel.findById(req.user._id);
+
+        if (!patient) {
+            return res.status(404).json({
+                success: false,
+                message: "Patient not found",
+            });
+        }
+
+        // ✅ Add calculatedAge to response
+        const patientData = {
+            ...patient._doc,
+            calculatedAge: patient.calculatedAge  // Virtual property for accurate age
+        };
+
+        res.status(200).json({
+            success: true,
+            data: patientData
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+};
 
 
 module.exports.logout = (req, res) => {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 function FamilyMembers() {
@@ -8,7 +8,7 @@ function FamilyMembers() {
     { id: 3, name: 'Babubhai M. Gohil', age: 88, color: 'bg-blue-200' },
     { id: 4, name: 'Shardaben B. Gohil', age: 80, color: 'bg-green-200' },
   ];
-  
+
   return (
     <div className="bg-white rounded-lg shadow p-3">
       <div className="flex justify-between items-center mb-3 ">
@@ -17,25 +17,35 @@ function FamilyMembers() {
           Add New
         </Link>
       </div>
-      
-      <div className="space-y-4">
-        {members.map(member => (
-          <div key={member.id} className="flex justify-between items-center">
-            <div className="flex items-center">
-              <div className={`h-10 w-10 rounded-full ${member.color} flex items-center justify-center`}>
-                <i className="ri-user-line text-gray-600"></i>
-              </div>
-              <div className="ml-3">
-                <div className="font-medium">{member.name}</div>
-                <div className="text-sm text-gray-500">Age: {member.age}</div>
+
+      {loading ? (
+        <p className="text-center text-gray-500">⏳ Loading...</p>
+      ) : error ? (
+        <p className="text-center text-red-500">{error}</p>
+      ) : (
+        <div className="space-y-4">
+          {members.map((member) => (
+            <div
+              key={member._id}
+              className="flex justify-between items-center cursor-pointer"
+              onClick={() => handleMemberSelect(member)}  // ✅ Pass selected member directly
+            >
+              <div className="flex items-center">
+                <div className="h-10 w-10 rounded-full bg-[#e0f7fa] flex items-center justify-center overflow-hidden">
+                  <i className="ri-user-3-line text-gray-600"></i>
+                </div>
+
+                <div className="ml-3">
+                  <div className="font-medium">{member.fullName}</div>
+                  <div className="text-sm text-gray-500">
+                    Age: {member.calculatedAge || member.age || 'N/A'}
+                  </div>
+                </div>
               </div>
             </div>
-            <button className="text-red-500 hover:text-red-700">
-              <i className="ri-close-line"></i>
-            </button>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

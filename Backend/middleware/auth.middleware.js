@@ -2,23 +2,24 @@ const jwt = require('jsonwebtoken');
 const patientModel = require('../models/patient.model');
 
 module.exports = async (req, res, next) => {
-    const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
+    const token = req.cookies.token; // ✅ Ensure this matches your cookie name
 
     if (!token) {
-        return res.status(401).json({ message: 'Unauthorized - No token provided' });
+        return res.status(401).json({ message: "Unauthorized. Please log in." });
     }
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await patientModel.findById(decoded._id).select('-password');
+        const patient = await patientModel.findById(decoded._id);
 
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+        if (!patient) {
+            return res.status(404).json({ message: "Patient not found." });
         }
-        console.log('🔒 Token received:', token);
-        req.user = user;
+
+        req.user = patient;  // ✅ Assign user to req for further use
         next();
     } catch (error) {
-        res.status(401).json({ message: 'Invalid Token or Expired Session' });
+        console.error("❌ Token Verification Failed:", error.message);
+        return res.status(401).json({ message: "Invalid token." });
     }
 };
