@@ -39,7 +39,7 @@ const FamilyMembers = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm">
             <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-[#0e606e] mb-4">Family Members</h2>
-            <Link to={'/PatientAddMemPage'} className="text-blue-500 hover:text-blue-700  mb-4">
+            <Link to={'/PatientAddNewMem'} className="text-blue-500 hover:text-blue-700  mb-4">
                 Add New
             </Link>
             </div>

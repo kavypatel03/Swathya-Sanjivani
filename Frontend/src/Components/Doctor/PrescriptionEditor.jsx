@@ -59,7 +59,7 @@ const PrescriptionEditor = () => {
           </div>
           
           <div className="text-gray-400 mb-64">
-            Start typing prescription here...
+           <input type="text" name=" Start typing prescription here..." id="" />
           </div>
           
           <div className="flex justify-between items-end">

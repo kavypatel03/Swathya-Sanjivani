@@ -48,7 +48,7 @@ function Login() {
           <a href="#" className="text-blue-500">Forgot Password?</a>
         </div>
         
-        <button style={{ backgroundColor: "#0e606e" }} className="w-full text-white py-2 rounded">Login</button>
+        <Link to={'/DoctorDashbord'} style={{ backgroundColor: "#0e606e" }} className="w-full flex justify-center text-white py-2 rounded">Login</Link>
       </div>
     </div>
   );
