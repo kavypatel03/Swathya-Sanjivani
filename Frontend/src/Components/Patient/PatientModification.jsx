@@ -135,7 +135,7 @@
 
           <div>
             <label className="block mb-2">
-              Enter Password <span className="text-red-500">*</span>
+              Change Password <span className="text-red-500">*</span>
             </label>
             <input
               type="password"
@@ -148,7 +148,7 @@
 
           <div>
             <label className="block mb-2">
-              Enter Birth Date <span className="text-red-500">*</span>
+              Change Birth Date <span className="text-red-500">*</span>
             </label>
             <input
               type="date"
@@ -161,7 +161,7 @@
 
           <div>
             <label className="block mb-2">
-              Enter Age <span className="text-red-500">*</span>
+              Change Age <span className="text-red-500">*</span>
             </label>
             <input
               type="text"

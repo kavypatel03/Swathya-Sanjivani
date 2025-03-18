@@ -15,7 +15,7 @@ module.exports = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-
+        console.log('🔒 Token received:', token);
         req.user = user;
         next();
     } catch (error) {

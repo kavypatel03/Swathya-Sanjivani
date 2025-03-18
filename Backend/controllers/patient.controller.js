@@ -82,33 +82,33 @@ module.exports.loginPatient = async (req, res, next) => {
     }
 }
 
-module.exports.getPatientDetails = async (req, res) => {
-    try {       
-        const patient = await patientModel.findById(req.user._id).select("-password");
+    module.exports.getPatientDetails = async (req, res) => {
+        try {       
+            const patient = await patientModel.findById(req.user._id).select("-password");
 
-        if (!patient) {
-            return res.status(404).json({
+            if (!patient) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Patient not found",
+                });
+            }
+
+            // Add last login timestamp (Example)
+            const lastLogin = new Date().toLocaleString('en-IN', { 
+                weekday: 'long', hour: '2-digit', minute: '2-digit' 
+            });
+
+            res.status(200).json({
+                success: true,
+                data: { ...patient._doc, lastLogin } // Merge data with lastLogin
+            });
+        } catch (error) {
+            res.status(500).json({
                 success: false,
-                message: "Patient not found",
+                message: "Server error",
             });
         }
-
-        // Add last login timestamp (Example)
-        const lastLogin = new Date().toLocaleString('en-IN', { 
-            weekday: 'long', hour: '2-digit', minute: '2-digit' 
-        });
-
-        res.status(200).json({
-            success: true,
-            data: { ...patient._doc, lastLogin } // Merge data with lastLogin
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Server error",
-        });
-    }
-};
+    };
 
 module.exports.updatePatientDetails = async (req, res) => {
     const { fullname, mobile, email, dob, relation, gender } = req.body;
@@ -132,15 +132,24 @@ module.exports.updatePatientDetails = async (req, res) => {
                 fullname,
                 email,
                 dob: dob ? new Date(dob).toISOString() : null,
-                age: dob ? calculateAge(dob) : null,  // ✅ Auto-calculate Age
+                age: dob ? calculateAge(dob) : null, // ✅ Auto-calculate Age
                 relation,
-                gender
+                gender,
+                $set: {
+                    'family.$[elem].fullName': fullname,
+                    'family.$[elem].birthDate': dob ? new Date(dob).toISOString() : null,
+                    'family.$[elem].age': dob ? calculateAge(dob) : null,
+                    'family.$[elem].gender': gender
+                }
             },
-            { new: true }
+            {
+                new: true,
+                arrayFilters: [{ 'elem.relationWithMainPerson': 'Self' }], // ✅ Filters 'Self' entry in family
+            }
         );
 
         if (!updatedPatient) {
-            return res.status(404).json({ message: 'Patient not found' });
+            return res.status(404).json({ message: '❌ Patient not found' });
         }
 
         res.status(200).json({
