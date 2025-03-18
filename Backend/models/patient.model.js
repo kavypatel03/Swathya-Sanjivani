@@ -34,18 +34,22 @@ const patientSchema = new mongoose.Schema({
         select: false 
     },
     dob: { 
-        type: Date 
+        type: Date,
+        default: new Date('2000-01-01')  // Default Date of Birth (e.g., 1st Jan 2000)
     },
     age: { 
-        type: Number 
+        type: Number,
+        default: null
     },
     relation: {
         type: String,
-        enum: ['Self', 'Father', 'Mother', 'Sibling', 'Spouse', 'Child']
+        enum: ['Self', 'Father', 'Mother', 'Sibling', 'Spouse', 'Child'],
+        default: "Self"
     },
     gender: {
         type: String,
-        enum: ['Male', 'Female', 'Other']
+        enum: ['Male', 'Female', 'Other'],
+        default : "Male"
     },    
     family : [
         {
@@ -68,6 +72,19 @@ const patientSchema = new mongoose.Schema({
         }
     ]    
 });
+
+patientSchema.virtual('calculatedAge').get(function () {
+    if (!this.dob) return null;
+    const today = new Date();
+    const birthDate = new Date(this.dob);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+});
+
 
 // Automatically add 'Self' relation during registration
 patientSchema.pre('save', function (next) {

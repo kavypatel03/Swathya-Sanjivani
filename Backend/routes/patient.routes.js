@@ -14,7 +14,6 @@ router.post('/register', [
     patientController.registerPatient
 )
 
-
 router.post('/send-otp', async (req, res) => {
     const { mobile } = req.body;
     if (!mobile) {
@@ -29,7 +28,6 @@ router.post('/send-otp', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
-
 
 router.post('/verify-otp', async (req, res) => {
     const { mobile, otp } = req.body;
@@ -53,6 +51,12 @@ router.post('/login', [
 )
 
 router.get('/dashboard', authMiddleware, patientController.getPatientDetails);
+
+router.get('/get-patient-details', authMiddleware, patientController.getPatientDetails);
+
+const { updatePatientDetails } = require('../controllers/patient.controller'); 
+
+router.put('/update-patient-details', authMiddleware, patientController.updatePatientDetails);
 
 router.get('/logout', authMiddleware, patientController.logout);
 

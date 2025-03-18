@@ -110,6 +110,52 @@ module.exports.getPatientDetails = async (req, res) => {
     }
 };
 
+module.exports.updatePatientDetails = async (req, res) => {
+    const { fullname, mobile, email, dob, relation, gender } = req.body;
+
+    // ✅ Calculate Age from DOB
+    const calculateAge = (dob) => {
+        const birthDate = new Date(dob);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    };
+
+    try {
+        const updatedPatient = await patientModel.findOneAndUpdate(
+            { mobile },
+            {
+                fullname,
+                email,
+                dob: dob ? new Date(dob).toISOString() : null,
+                age: dob ? calculateAge(dob) : null,  // ✅ Auto-calculate Age
+                relation,
+                gender
+            },
+            { new: true }
+        );
+
+        if (!updatedPatient) {
+            return res.status(404).json({ message: 'Patient not found' });
+        }
+
+        res.status(200).json({
+            message: '✅ Details updated successfully',
+            data: updatedPatient
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: '❌ Error updating patient data', error });
+    }
+};
+
+
+
+
 module.exports.logout = (req, res) => {
     res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "Strict" });
     res.status(200).json({ success: true, message: "Logged out successfully" });
