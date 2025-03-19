@@ -10,35 +10,30 @@ const documentSchema = new Schema({
         type: String, 
         required: true 
     },
-    documentCategory: { 
-        type: String, 
-        required: true 
+    file: {
+        data: Buffer,
+        contentType: String
     },
-    uploadDateTime: { 
-        type: Date, 
-        default: Date.now 
+    patient: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Patient',
+        required: true
     },
-
-    // 🩺 Reference to Different Models
+    familyMember: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true
+    },
     uploadedBy: {
-        userId: {
-            type: mongoose.Schema.Types.ObjectId,
-            required: true,
-            refPath: 'uploadedBy.userType'  // Dynamic reference based on `userType`
-        },
-        userType: {
-            type: String,
-            enum: ['Patient', 'Doctor', 'Admin'],
-            required: true
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'Patient'
     },
-    
-    createdAt: { 
+    uploadedAt: { 
         type: Date, 
         default: Date.now 
     }
 });
 
-const documentModel = mongoose.model('Document', documentSchema);
+const Document = mongoose.model('Document', documentSchema);
 
-module.exports = documentModel;
+module.exports = Document;

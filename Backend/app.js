@@ -12,8 +12,10 @@ app.use(cookieParser());
 connectToDb();
 
 app.use(cors({
-    origin: 'http://localhost:5173',  // React App URL
-    credentials: true  // Allows cookies to be sent
+    origin: 'http://localhost:5173', // Frontend origin
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());

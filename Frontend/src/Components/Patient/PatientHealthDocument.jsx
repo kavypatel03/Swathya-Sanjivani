@@ -1,54 +1,58 @@
 import React, { useEffect, useState } from "react";
 import UploadPopup from "./UploadPopup";
 
-function HealthDocuments({ selectedMember }) {
+function HealthDocuments({ selectedMember, currentPatient }) {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showUploadPopup, setShowUploadPopup] = useState(false);
 
   useEffect(() => {
-    if (!selectedMember) return;  // ✅ Only fetch data when a member is selected
+    if (!selectedMember || !currentPatient) return;
 
     const fetchDocuments = async () => {
       try {
         const response = await fetch(
           `http://localhost:4000/patient/get-family-member-documents/${selectedMember._id}`,
-          { method: 'GET', credentials: 'include' }
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
         );
 
         const data = await response.json();
         if (data.success) {
-          setDocuments(data.data); 
+          setDocuments(data.data);
         } else {
-          setError("❌ No documents found for this member.");
+          setError("❌ No documents found");
         }
       } catch (error) {
-        console.error("❌ Error fetching documents:", error);
-        setError("❌ Unable to fetch data. Please try again.");
+        setError("❌ Failed to load documents");
       } finally {
         setLoading(false);
       }
     };
 
     fetchDocuments();
-  }, [selectedMember]);
+  }, [selectedMember, currentPatient]);
 
   return (
     <div className="bg-white rounded-lg shadow p-3">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-medium text-[#0e606e]">
-          {selectedMember ? `${selectedMember.fullName}'s Health Documents` : 'Health Documents'}
+          {selectedMember
+            ? `${selectedMember.fullName}'s Documents`
+            : "Documents"}
         </h2>
-        <div className="flex space-x-2">
         <button
-    onClick={() => setShowUploadPopup(true)}  // ✅ Correctly updates state
-    className="bg-[#0e606e] text-white px-4 py-2 rounded-md flex items-center"
->
-    <i className="ri-upload-2-line mr-1"></i>
-    Upload New
-</button>
-        </div>
+          onClick={() => setShowUploadPopup(true)}
+          className="bg-[#0e606e] text-white px-4 py-2 rounded-md flex items-center"
+          disabled={!selectedMember}
+        >
+          <i className="ri-upload-2-line mr-1"></i>
+          Upload New
+        </button>
       </div>
 
       {loading ? (
@@ -60,18 +64,19 @@ function HealthDocuments({ selectedMember }) {
           {documents.map((doc) => (
             <div key={doc._id} className="border rounded-md p-4">
               <h3 className="font-medium">{doc.documentName}</h3>
+              <p className="text-sm text-gray-500">{doc.documentType}</p>
             </div>
           ))}
         </div>
       )}
 
-<UploadPopup
-    isOpen={showUploadPopup}
-    onClose={() => setShowUploadPopup(false)}
-    patientId={selectedMember ? selectedMember._id : ""}  // ✅ Correctly passing patientId
-    familyId={selectedMember ? selectedMember._id : ""}   // ✅ Use `_id` for `familyId` instead of `selectedMember.familyId`
-/>
-
+      {selectedMember && (
+        <UploadPopup
+          isOpen={showUploadPopup}
+          onClose={() => setShowUploadPopup(false)}
+          familyId={selectedMember._id} // Pass the familyId instead of patientId
+        />
+      )}
     </div>
   );
 }

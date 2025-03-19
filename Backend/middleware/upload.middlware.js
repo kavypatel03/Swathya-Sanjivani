@@ -1,9 +1,9 @@
+// middleware/upload.middleware.js
 const multer = require('multer');
 
-const storage = multer.memoryStorage();
-const upload = multer({ 
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+// Set up multer
+const upload = multer({
+    storage: multer.memoryStorage(),  // Or any other storage options
 });
 
-module.exports = upload;
+module.exports = upload.single('file');  // The field name should match the one in the form
