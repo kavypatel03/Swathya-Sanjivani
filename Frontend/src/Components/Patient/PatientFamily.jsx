@@ -5,6 +5,7 @@ function FamilyMembers({ setSelectedMember }) {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedId, setSelectedId] = useState(localStorage.getItem('selectedFamilyId') || '');
 
   useEffect(() => {
     const fetchFamilyMembers = async () => {
@@ -13,10 +14,19 @@ function FamilyMembers({ setSelectedMember }) {
           method: 'GET',
           credentials: 'include'
         });
-
+        
         const data = await response.json();
         if (data.success) {
           setMembers(data.data);
+          
+          // If there's a selected ID in localStorage but no member is selected yet
+          const storedId = localStorage.getItem('selectedFamilyId');
+          if (storedId && data.data.length > 0) {
+            const foundMember = data.data.find(m => m._id === storedId);
+            if (foundMember) {
+              setSelectedMember(foundMember);
+            }
+          }
         } else {
           setError('❌ Failed to load family members.');
         }
@@ -27,16 +37,16 @@ function FamilyMembers({ setSelectedMember }) {
         setLoading(false);
       }
     };
-
+    
     fetchFamilyMembers();
-  }, []);
+  }, [setSelectedMember]);
 
   const handleMemberSelect = (member) => {
-    setSelectedMember(member);     // ✅ Set selected member data
-    localStorage.setItem('selectedFamilyId', member._id);  // ✅ Store familyId for access in other components
-};
-
-
+    setSelectedMember(member);
+    setSelectedId(member._id);
+    localStorage.setItem('selectedFamilyId', member._id);
+  };
+  
   return (
     <div className="bg-white rounded-lg shadow p-3">
       <div className="flex justify-between items-center mb-3">
@@ -45,7 +55,7 @@ function FamilyMembers({ setSelectedMember }) {
           Add New
         </Link>
       </div>
-
+      
       {loading ? (
         <p className="text-center text-gray-500">⏳ Loading...</p>
       ) : error ? (
@@ -55,21 +65,35 @@ function FamilyMembers({ setSelectedMember }) {
           {members.map((member) => (
             <div
               key={member._id}
-              className="flex justify-between items-center cursor-pointer"
-              onClick={() => handleMemberSelect(member)}  // ✅ Pass selected member directly
+              className={`flex justify-between items-center cursor-pointer p-2 rounded-md transition-colors duration-200 ${
+                selectedId === member._id 
+                  ? 'bg-[#e0f7fa] border border-[#0e606e]' 
+                  : 'hover:bg-gray-50'
+              }`}
+              onClick={() => handleMemberSelect(member)}
             >
               <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full bg-[#e0f7fa] flex items-center justify-center overflow-hidden">
-                  <i className="ri-user-3-line text-gray-600"></i>
+                <div className={`h-10 w-10 rounded-full ${
+                  selectedId === member._id ? 'bg-[#0e606e] text-white' : 'bg-[#e0f7fa] text-gray-600'
+                } flex items-center justify-center overflow-hidden`}>
+                  <i className="ri-user-3-line"></i>
                 </div>
-
+                
                 <div className="ml-3">
-                  <div className="font-medium">{member.fullName}</div>
+                  <div className={`font-medium ${selectedId === member._id ? 'text-[#0e606e]' : ''}`}>
+                    {member.fullName}
+                  </div>
                   <div className="text-sm text-gray-500">
                     Age: {member.calculatedAge || member.age || 'N/A'}
                   </div>
                 </div>
               </div>
+              
+              {selectedId === member._id && (
+                <div className="text-[#0e606e]">
+                  <i className="ri-check-line"></i>
+                </div>
+              )}
             </div>
           ))}
         </div>

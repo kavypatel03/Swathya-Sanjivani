@@ -9,6 +9,7 @@ const documentModel = require('../models/documents.model');
 const uploadMiddleware = require('../middleware/upload.middlware');
 const authMiddleware = require('../middleware/auth.middleware');
 
+
 // Register patient route
 router.post('/register', [
     body('mobile').isLength({ min: 10, max: 10 }).withMessage("Mobile Number Must Be Exactly 10 characters"),
@@ -131,44 +132,61 @@ router.put('/update-family-member/:id', async (req, res) => {
 
 // Get documents of a family member
 router.get('/get-family-member-documents/:familyId', authMiddleware, async (req, res) => {
+    console.log("📥 Received Request for Family ID:", req.params.familyId);
+
     const { familyId } = req.params;
 
     try {
         const patient = await patientModel.findById(req.user._id)
+            .populate({
+                path: 'family.documents.document', 
+                model: 'Document'
+            })
             .select('family')
             .lean();
 
-        const familyMember = patient.family.id(familyId);
+        console.log("🔍 Patient Data:", patient);  // ✅ Confirm fetched data
+
+        const familyMember = patient?.family?.find(member => member._id.toString() === familyId);
+
+        console.log("✅ Found Family Member:", familyMember);
 
         if (!familyMember) {
-            return res.status(404).json({ message: "Family member not found" });
+            return res.status(404).json({ message: "❌ Family member not found" });
         }
-
+        
         res.status(200).json({
             success: true,
             data: familyMember.documents
         });
     } catch (error) {
-        console.error("Error fetching documents:", error);
-        res.status(500).json({ success: false, message: "Server error." });
+        console.error("❌ Error fetching documents:", error);
+        res.status(500).json({ success: false, message: "❌ Server error." });
     }
 });
 
 // Upload document for family member
-router.post('/patient/upload/:familyId', uploadMiddleware, async (req, res) => {
-    console.log("Family ID from URL:", req.params.familyId);  // This should log the familyId properly
+router.post('/upload/:familyId', authMiddleware, uploadMiddleware, async (req, res) => {
+    console.log("Family ID from URL:", req.params.familyId);  
     const familyId = req.params.familyId;
     const { documentName, documentType } = req.body;
     const file = req.file;
 
     if (!file) {
-        return res.status(400).json({ message: 'No file uploaded' });
+        return res.status(400).json({ message: '❌ No file uploaded' });
     }
 
     try {
         console.log("Received document details:", documentName, documentType);
-        
-        // Create and save the document
+
+        const uploadedBy = req.user?._id;
+        const patientId = req.user?.patientId;
+
+        if (!uploadedBy || !patientId) {
+            return res.status(400).json({ message: '❌ Missing user information in request' });
+        }
+
+        // Step 1: Create and Save New Document
         const newDocument = new documentModel({
             documentName,
             documentType,
@@ -176,24 +194,49 @@ router.post('/patient/upload/:familyId', uploadMiddleware, async (req, res) => {
                 data: file.buffer,
                 contentType: file.mimetype
             },
-            familyMember: familyId  // Store document with familyId
+            familyMember: familyId,
+            uploadedBy,
+            patient: patientId
         });
 
         await newDocument.save();
+
+        // Step 2: Add Document Reference to Family Member's `documents` Array
+        const updatedPatient = await patientModel.findOneAndUpdate(
+            { 'family._id': familyId },
+            { 
+                $push: {
+                    'family.$.documents': {
+                        document: newDocument._id,  // Store document reference
+                        uploadedAt: new Date()      // Add uploaded date
+                    }
+                }
+            },
+            { new: true } // Return updated data
+        );
+
+        if (!updatedPatient) {
+            return res.status(404).json({ message: "❌ Family member not found" });
+        }
+
         res.status(201).json({
             success: true,
-            message: 'Document uploaded successfully',
-            documentId: newDocument._id
+            message: '✅ Document uploaded and linked successfully',
+            documentId: newDocument._id,
+            updatedPatient
         });
     } catch (error) {
-        console.error("Error uploading document:", error);
+        console.error("❌ Error uploading document:", error);
         res.status(500).json({
             success: false,
-            message: 'Document upload failed',
+            message: '❌ Document upload failed',
             error: process.env.NODE_ENV === 'development' ? error.message : null
         });
     }
 });
+
+
+
 
 
 // Logout route
