@@ -132,7 +132,8 @@ router.put('/update-family-member/:id', async (req, res) => {
 
 // Get documents of a family member
 router.get('/get-family-member-documents/:familyId', authMiddleware, async (req, res) => {
-    console.log("📥 Received Request for Family ID:", req.params.familyId);
+
+    // console.log("📥 Received Request for Family ID:", req.params.familyId);
 
     const { familyId } = req.params;
 
@@ -145,11 +146,11 @@ router.get('/get-family-member-documents/:familyId', authMiddleware, async (req,
             .select('family')
             .lean();
 
-        console.log("🔍 Patient Data:", patient);  // ✅ Confirm fetched data
+        // console.log("🔍 Patient Data:", patient);  // ✅ Confirm fetched data
 
         const familyMember = patient?.family?.find(member => member._id.toString() === familyId);
 
-        console.log("✅ Found Family Member:", familyMember);
+        // console.log("✅ Found Family Member:", familyMember);
 
         if (!familyMember) {
             return res.status(404).json({ message: "❌ Family member not found" });
@@ -234,9 +235,6 @@ router.post('/upload/:familyId', authMiddleware, uploadMiddleware, async (req, r
         });
     }
 });
-
-
-
 
 
 // Logout route

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 import UserProfile from "../../Components/Patient/PatientUserProfile";
 import HealthDocuments from "../../Components/Patient/PatientHealthDocument";
 import FamilyMembers from "../../Components/Patient/PatientFamily";
@@ -13,6 +14,7 @@ function PatientDashboard() {
   const [selectedMember, setSelectedMember] = useState(null); // ✅ Added state for selected member
   const [showUploadPopup, setShowUploadPopup] = useState(false); // ✅ Added popup state
   const [currentPatient, setCurrentPatient] = useState(null); // ✅ Added state for current patient
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPatientData = async () => {
@@ -30,8 +32,9 @@ function PatientDashboard() {
           toast.error("Failed to fetch patient details.");
         }
       } catch (error) {
+        navigate('/PatientLogin');
         console.error("Error fetching patient data:", error);
-        toast.error("Error fetching data. Please try again.");
+        toast.error("You Need To Login First");
       }
     };
 

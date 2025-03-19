@@ -18,17 +18,22 @@ function Navigation() {
 
     const handleLogout = async () => {
         try {
-          // Call the logout endpoint to clear the cookie on the server
-          await axios.get("http://localhost:4000/patient/logout", {
-            withCredentials: true, // Ensures cookies are included in the request
-          });
-      
-          // Redirect to login page after successful logout
-          navigate("/PatientLogin");
+            // 1️⃣ Call logout API to clear server-side session (important for security)
+            await axios.get("http://localhost:4000/patient/logout", {
+                withCredentials: true, // Ensures cookies are included in the request
+            });
+    
+            // 2️⃣ Clear localStorage to remove token and user data
+            localStorage.clear();// Clear any additional user data if stored
+    
+            // 3️⃣ Redirect to the login page after successful logout
+            navigate("/PatientLogin");
+    
         } catch (error) {
-          console.error("Logout failed:", error);
+            console.error("❌ Logout failed:", error);
         }
-      };
+    };
+    
       
 
     return (

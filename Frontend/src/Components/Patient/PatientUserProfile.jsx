@@ -29,6 +29,7 @@ function UserProfile() {
           toast.error("Access denied! Please log in first.");
           navigate('/PatientLogin');
         } else {
+          navigate('/PatientLogin');
           toast.error("Error fetching data. Please try again.");
         }
       }

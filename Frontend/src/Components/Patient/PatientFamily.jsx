@@ -65,18 +65,18 @@ function FamilyMembers({ setSelectedMember }) {
           {members.map((member) => (
             <div
               key={member._id}
-              className={`flex justify-between items-center cursor-pointer p-2 rounded-md transition-colors duration-200 ${
+              className={`flex justify-between items-center cursor-pointer p-2 rounded-md transition-colors duration-200 border-l-4 ${
                 selectedId === member._id 
-                  ? 'bg-[#e0f7fa] border border-[#0e606e]' 
-                  : 'hover:bg-gray-50'
+                  ? 'bg-[#e0f7fa] border-l-[#0e606e] shadow' 
+                  : 'border-l-transparent hover:bg-gray-50'
               }`}
               onClick={() => handleMemberSelect(member)}
             >
               <div className="flex items-center">
-                <div className={`h-10 w-10 rounded-full ${
+                <div className={`h-10 w-10 rounded-full text-xl ${
                   selectedId === member._id ? 'bg-[#0e606e] text-white' : 'bg-[#e0f7fa] text-gray-600'
-                } flex items-center justify-center overflow-hidden`}>
-                  <i className="ri-user-3-line"></i>
+                } flex items-center justify-center`}>
+                  {member.avatar || "👨"}
                 </div>
                 
                 <div className="ml-3">
