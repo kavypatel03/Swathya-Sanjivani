@@ -27,7 +27,7 @@ function Login() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        localStorage.setItem("token",data.data.token);
+        localStorage.setItem("token", data.data.token);
         document.cookie = `token=${data.token}; path=/`;
         toast.success("✅ Login successful!");
         navigate("/PatientDashboard");
