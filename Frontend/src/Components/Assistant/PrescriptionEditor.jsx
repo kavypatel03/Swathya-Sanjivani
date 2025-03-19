@@ -74,7 +74,7 @@ const PrescriptionEditor = () => {
       <div className="border border-gray-300 rounded-md p-6 mb-4">
         <div className="flex justify-between mb-8">
           <div>
-            <h3 className="font-bold">Dr. Manoj Shah</h3>
+            <h3 className="font-bold">Dr. Name</h3>
             <p className="text-gray-500 text-sm">Cardiologist</p>
             <p className="text-gray-500 text-sm">License No: 12345</p>
           </div>
