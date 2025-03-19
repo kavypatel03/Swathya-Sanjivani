@@ -2,12 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 function FamilyMembers() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const members = [
     { id: 1, name: 'Rashmiben S. Gohil', age: 32, color: 'bg-purple-200' },
     { id: 2, name: 'Param S. Gohil', age: 8, color: 'bg-pink-200' },
     { id: 3, name: 'Babubhai M. Gohil', age: 88, color: 'bg-blue-200' },
     { id: 4, name: 'Shardaben B. Gohil', age: 80, color: 'bg-green-200' },
   ];
+
+  const fetchFamilyMembers = async () => {
+    setLoading(true);
+    try {
+      // Your API call code here
+    } catch (error) {
+      // Error handling
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow p-3">

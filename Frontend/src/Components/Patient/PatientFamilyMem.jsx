@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // 🚨 Add this for navigation
+import { useNavigate, Link } from "react-router-dom"; // 🚨 Add this for navigation
 import axios from "axios";
 
 const formatDate = (date) => {
