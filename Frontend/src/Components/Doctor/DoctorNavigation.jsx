@@ -30,7 +30,7 @@ function Navigation() {
                             <Link to="/DoctorDashbord" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/DoctorDashbord")}`}>
                                 Home
                             </Link>
-                            <Link to="/patientFamily" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/patientFamily")}`}>
+                            <Link to="/PatientFamily" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/PatientFamily")}`}>
                                 Family
                             </Link>
                             <Link to="/PatientDoctorPage" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/PatientDoctorPage")}`}>
@@ -78,7 +78,7 @@ function Navigation() {
                         <Link to="/DoctorDashboard" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/DoctorDashbord")} hover:bg-gray-50`}>
                             Home
                         </Link>
-                        <Link to="/patientFamilyPage" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/patientFamilyPage")} hover:bg-gray-50`}>
+                        <Link to="/PatientFamily" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/PatientFamily")} hover:bg-gray-50`}>
                             Family
                         </Link>
                         <Link to="/DoctorPage" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/DoctorPage")} hover:bg-gray-50`}>

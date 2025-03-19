@@ -21,7 +21,7 @@ import PatientFamilyPage from './Pages/Patient/PatientFamilyPage'
 import PatientDoctorPage from './Pages/Patient/PatientDoctorPage';
 import PatientGuide from './Pages/Patient/PatientGuide';
 import DoctorDashbord from './Pages/Doctor/DoctorDashbord';
-import PatientFamily from './Pages/Doctor/patientFamily';
+import PatientFamily from './Pages/Doctor/PatientFamily';
 import DoctorGuide from './Pages/Doctor/DoctorGuide';
 import PatientAddMemPage from './Pages/Patient/PatientAddMemPage';
 import AssistantDashbord from './Pages/Assistant/AssistantDashbord';
@@ -162,7 +162,7 @@ function App() {
       )
     },
     {
-      path: "/patientFamily",
+      path: "/PatientFamily",
       element: (
         <>
           <DocNavigation/>

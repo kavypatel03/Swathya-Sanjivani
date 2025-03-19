@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import UserProfile from '../../Components/Patient/PatientUserProfile';
 import HealthDocuments from '../../Components/Patient/PatientHealthDocument';
-import FamilyMembers from '../../Components/Patient/PatientFamilyMem';
+import FamilyMembers from '../../Components/Patient/PatientFamily';
 import DoctorAccess from '../../Components/Patient/PatientDoctorAccess';
 import UploadPopup from '../../Components/Patient/UploadPopup';  // ✅ Import UploadPopup
 import { ToastContainer, toast } from 'react-toastify';
