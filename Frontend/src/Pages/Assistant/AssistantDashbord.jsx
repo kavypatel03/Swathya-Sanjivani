@@ -1,5 +1,5 @@
 import React from 'react';
-import Navigation from '../../Components/AssistantNav';
+import Navigation from '../../Components/Assistant/AssistantNav';
 import UserProfile from '../../Components/Assistant/userProfile';
 import PatientList from '../../Components/Assistant/PatientList';
 import UploadFile from '../../Components/Assistant/UploadFile';
@@ -9,7 +9,7 @@ import PrescriptionEditor from '../../Components/Assistant/PrescriptionEditor';
 
 const Dashboard = () => {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-200">
       <Navigation />
       <div className="container mx-auto py-6 px-4">
         <UserProfile />

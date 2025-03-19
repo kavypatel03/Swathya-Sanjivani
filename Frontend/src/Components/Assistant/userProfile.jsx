@@ -1,7 +1,9 @@
 // UserProfile.jsx
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const UserProfile = () => {
+  const isActive = (path) => location.pathname === path ? "border-[#0e606e] text-[#0e606e]" : "border-transparent text-gray-500 hover:text-gray-700";
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm flex justify-between items-center mb-6">
       <div className="flex items-center">
@@ -18,12 +20,9 @@ const UserProfile = () => {
           <p className="text-gray-500 text-xs">Last login: Today at 09:00 AM</p>
         </div>
       </div>
-      <button className="flex items-center text-[#0e606e]">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 24 24">
-          <path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-        </svg>
+      <Link to="/modifyDetailPage" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/modifyDetailPage")}`}>
         Profile
-      </button>
+      </Link>
     </div>
   );
 };

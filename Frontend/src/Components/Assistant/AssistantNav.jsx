@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import logo from "../assets/logo.png";
+import logo from "../../assets/logo.png"
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -48,13 +48,10 @@ function Navigation() {
                             <Link to="/AssistantDashbord" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/AssistantDashbord")}`}>
                                 Home
                             </Link>
-                            <Link to="/" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/")}`}>
-                                Family
+                            <Link to="/assistantReportPage" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/assistantReportPage")}`}>
+                                Reports
                             </Link>
-                            <Link to="/" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/")}`}>
-                                Doctor
-                            </Link>
-                            <Link to="/" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/")}`}>
+                            <Link to="/Guide" className={`border-b-2 px-1 inline-flex items-center text-md font-medium ${isActive("/Guide")}`}>
                                 Guide
                             </Link>
                         </div>
@@ -98,13 +95,10 @@ function Navigation() {
                         <Link to="/AssistantDashbord" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/AssistantDashbord")} hover:bg-gray-50`}>
                             Home
                         </Link>
-                        <Link to="/" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/")} hover:bg-gray-50`}>
-                            Family
+                        <Link to="/assistantReportPage" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/assistantReportPage")} hover:bg-gray-50`}>
+                           Reports
                         </Link>
-                        <Link to="/" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/")} hover:bg-gray-50`}>
-                            Doctor
-                        </Link>
-                        <Link to="/" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/")} hover:bg-gray-50`}>
+                        <Link to="/Guide" className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/Guide")} hover:bg-gray-50`}>
                             Guide
                         </Link>
                         <Link to="/PatientLogin" className="block px-3 py-2 rounded-md text-base font-Bold text-[#0e606e] hover:text-[#0e606e] hover:bg-gray-50">

@@ -3,8 +3,8 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
 import Nav from './Components/Nav'
 import RegistrationNav from './Components/RegistrationNav'
-import Navigation from './Components/PatientNavigation'
-import DocNavigation from './Components/DoctorNavigation'
+import Navigation from './Components/Patient/PatientNavigation'
+import DocNavigation from './Components/Doctor/DoctorNavigation'
 
 import Login from './Pages/Login'
 import Registration from './Pages/Registration'
@@ -25,6 +25,9 @@ import PatientFamily from './Pages/Doctor/PatientFamily';
 import DoctorGuide from './Pages/Doctor/DoctorGuide';
 import PatientAddMemPage from './Pages/Patient/PatientAddMemPage';
 import AssistantDashbord from './Pages/Assistant/AssistantDashbord';
+import AssistantReportPage from './Pages/Assistant/assistantReportPage';
+import Guide from './Pages/Assistant/GuidePage';
+import Modify from './Pages/Assistant/modifyDetailPage'
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -181,6 +184,30 @@ function App() {
       element: (
         <>
           <AssistantDashbord />
+        </>
+      )
+    },
+    {
+      path: "/AssistantReportPage",
+      element: (
+        <>
+          <AssistantReportPage />
+        </>
+      )
+    },
+    {
+      path: "/Guide",
+      element: (
+        <>
+          <Guide />
+        </>
+      )
+    },
+    {
+      path: "/modifyDetailPage",
+      element: (
+        <>
+          <Modify />
         </>
       )
     },

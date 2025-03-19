@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import logo from "../assets/logo.png";
+import logo from "../../assets/logo.png"
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
