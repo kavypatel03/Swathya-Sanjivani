@@ -3,16 +3,16 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const patientSchema = new mongoose.Schema({
-    fullname: { 
-        type: String, 
-        required: true 
+    fullname: {
+        type: String,
+        required: true
     },
     userType: {
         type: String,
         default: 'Patient',
-        enum: ['Patient']  
+        enum: ['Patient']
     },
-    profilePic: { 
+    profilePic: {
         type: String,
         default: "https://example.com/default.jpg"
     },
@@ -27,17 +27,17 @@ const patientSchema = new mongoose.Schema({
         required: true,
         unique: true,
         match: [/^\S+@\S+\.\S+$/, "Please Enter a Valid Email Address"]
-    },    
-    password: { 
-        type: String, 
-        required: true, 
-        select: false 
     },
-    dob: { 
+    password: {
+        type: String,
+        required: true,
+        select: false
+    },
+    dob: {
         type: Date,
         default: new Date('2000-01-01')  // Default Date of Birth (e.g., 1st Jan 2000)
     },
-    age: { 
+    age: {
         type: Number,
         default: null
     },
@@ -49,8 +49,8 @@ const patientSchema = new mongoose.Schema({
     gender: {
         type: String,
         enum: ['Male', 'Female', 'Other'],
-        default : "Male"
-    },    
+        default: "Male"
+    },
     family: [
         {
             _id: { type: mongoose.Schema.Types.ObjectId, auto: true }, // ✅ Ensures unique `familyId`
@@ -59,20 +59,23 @@ const patientSchema = new mongoose.Schema({
             age: Number,
             relationWithMainPerson: String,
             gender: String,
+            // Add to family member's documents array definition:
             documents: [
                 {
-                    documentId: {
+                    document: {
                         type: mongoose.Schema.Types.ObjectId,
                         ref: 'Document'
                     },
-                    documentName: String,
-                    uploadDate: { type: Date, default: Date.now }
+                    uploadedAt: {
+                        type: Date,
+                        default: Date.now
+                    }
                 }
-            ]   
+            ]
         }
     ]
-    
-     
+
+
 });
 
 patientSchema.virtual('calculatedAge').get(function () {
@@ -106,7 +109,7 @@ patientSchema.pre('save', function (next) {
 // 🔒 JWT and Password Methods
 patientSchema.methods.generateAuthToken = function () {
     const token = jwt.sign(
-        { _id: this._id, userType: this.userType },  
+        { _id: this._id, userType: this.userType },
         process.env.JWT_SECRET,
         { expiresIn: '1d' }
     );

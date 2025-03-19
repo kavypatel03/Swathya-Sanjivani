@@ -1,7 +1,7 @@
+const mongoose = require('mongoose');
 const patientModel = require('../models/patient.model');
-const patientService = require('../services/patient.service')
+const patientService = require('../services/patient.service');
 const { validationResult } = require('express-validator');
-const path = require('path');
 const documentModel = require('../models/documents.model');
 
 module.exports.registerPatient = async (req, res, next) => {
@@ -24,7 +24,7 @@ module.exports.registerPatient = async (req, res, next) => {
             mobile,
             email,
             password: hashedPassword,
-            userType    // 🔹 Store userType in database
+            userType
         });
 
         const token = patient.generateAuthToken();
@@ -48,7 +48,7 @@ module.exports.registerPatient = async (req, res, next) => {
             message: error.message
         });
     }
-}
+};
 
 module.exports.loginPatient = async (req, res, next) => {
     try {
@@ -63,10 +63,10 @@ module.exports.loginPatient = async (req, res, next) => {
         const token = patient.generateAuthToken();
 
         res.cookie('token', token, {
-            httpOnly: true,      // Prevents client-side JavaScript from accessing the cookie
-            secure: true,        // Ensures the cookie is only sent over HTTPS (important for production)
-            sameSite: 'Lax',     // Controls cross-site request behavior
-            maxAge: 24 * 60 * 60 * 1000  // 1 day expiry
+            httpOnly: true,
+            secure: true,
+            sameSite: 'Lax',
+            maxAge: 24 * 60 * 60 * 1000
         });
 
         res.status(200).json({
@@ -76,45 +76,41 @@ module.exports.loginPatient = async (req, res, next) => {
         });
 
     } catch (error) {
-        res.status(400).json({
+        res.status(401).json({
             success: false,
             message: error.message,
         });
     }
-}
+};
 
 module.exports.getPatientDetails = async (req, res) => {
-        try {       
-            const patient = await patientModel.findById(req.user._id).select("-password");
+    try {       
+        const patient = await patientModel.findById(req.user._id)
+            .select("-password")
+            .lean();
 
-            if (!patient) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Patient not found",
-                });
-            }
-
-            // Add last login timestamp (Example)
-            const lastLogin = new Date().toLocaleString('en-IN', { 
-                weekday: 'long', hour: '2-digit', minute: '2-digit' 
-            });
-
-            res.status(200).json({
-                success: true,
-                data: { ...patient._doc, lastLogin } // Merge data with lastLogin
-            });
-        } catch (error) {
-            res.status(500).json({
+        if (!patient) {
+            return res.status(404).json({
                 success: false,
-                message: "Server error",
+                message: "Patient not found",
             });
         }
+
+        res.status(200).json({
+            success: true,
+            data: patient
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
 };
 
 module.exports.updatePatientDetails = async (req, res) => {
     const { fullname, mobile, email, dob, relation, gender } = req.body;
 
-    // ✅ Calculate Age from DOB
     const calculateAge = (dob) => {
         const birthDate = new Date(dob);
         const today = new Date();
@@ -133,7 +129,7 @@ module.exports.updatePatientDetails = async (req, res) => {
                 fullname,
                 email,
                 dob: dob ? new Date(dob).toISOString() : null,
-                age: dob ? calculateAge(dob) : null, // ✅ Auto-calculate Age
+                age: dob ? calculateAge(dob) : null,
                 relation,
                 gender,
                 $set: {
@@ -145,101 +141,77 @@ module.exports.updatePatientDetails = async (req, res) => {
             },
             {
                 new: true,
-                arrayFilters: [{ 'elem.relationWithMainPerson': 'Self' }], // ✅ Filters 'Self' entry in family
+                arrayFilters: [{ 'elem.relationWithMainPerson': 'Self' }],
             }
         );
 
         if (!updatedPatient) {
-            return res.status(404).json({ message: '❌ Patient not found' });
+            return res.status(404).json({ message: 'Patient not found' });
         }
 
         res.status(200).json({
-            message: '✅ Details updated successfully',
+            message: 'Details updated successfully',
             data: updatedPatient
         });
 
     } catch (error) {
-        res.status(500).json({ message: '❌ Error updating patient data', error });
+        res.status(500).json({ 
+            message: 'Error updating patient data',
+            error: process.env.NODE_ENV === 'development' ? error.message : null
+        });
     }
 };
 
 module.exports.addFamilyMember = async (req, res) => {
-    const { fullName, birthDate, age, relation, gender } = req.body;
+    const { fullName, birthDate, relation, gender } = req.body;
 
     try {
-        const patient = await patientModel.findById(req.user._id); // Ensure user is authenticated
-
+        const patient = await patientModel.findById(req.user._id);
         if (!patient) {
             return res.status(404).json({ message: 'Patient not found' });
         }
 
         const newFamilyMember = {
             fullName,
-            birthDate: birthDate ? new Date(birthDate).toISOString() : null,
-            age: age || null,
+            birthDate: birthDate ? new Date(birthDate) : null,
             relationWithMainPerson: relation,
-            gender: gender || null
+            gender
         };
 
         patient.family.push(newFamilyMember);
         await patient.save();
 
-        res.status(201).json({ message: '✅ Family member added successfully', data: patient });
+        res.status(201).json({ 
+            message: 'Family member added successfully', 
+            data: patient.family.slice(-1)[0] 
+        });
     } catch (error) {
-        console.error('❌ Error adding family member:', error);
-        res.status(500).json({ message: '❌ Failed to add family member', error });
+        res.status(500).json({ 
+            message: 'Failed to add family member',
+            error: process.env.NODE_ENV === 'development' ? error.message : null
+        });
     }
 };
 
-exports.uploadFamilyDocument = async (req, res) => {
-    const { patientId, familyId } = req.params;
-    
-    // Validate IDs before attempting database operations
-    if (!patientId || patientId === 'undefined' || !mongoose.Types.ObjectId.isValid(patientId)) {
-      return res.status(400).json({ error: 'Invalid patient ID' });
-    }
-    
-    if (!familyId || familyId === 'undefined' || !mongoose.Types.ObjectId.isValid(familyId)) {
-      return res.status(400).json({ error: 'Invalid family member ID' });
-    }
-    
-    try {
-      // Your existing code to process the upload
-      // ...
-    } catch (error) {
-      console.error('❌ Error uploading document:', error);
-      res.status(500).json({ error: error.message });
-    }
-  };
-
 module.exports.getDocument = async (req, res) => {
-    const { documentId } = req.params;
-
     try {
-        const document = await documentModel.findById(documentId);
-
+        const document = await documentModel.findById(req.params.documentId);
         if (!document) {
-            return res.status(404).json({ message: '❌ Document not found' });
+            return res.status(404).json({ message: 'Document not found' });
         }
 
-        res.setHeader('Content-Type', document.file.contentType); // Display correct file type
-        res.send(document.file.data); // Send file data
+        res.setHeader('Content-Type', document.file.contentType);
+        res.send(document.file.data);
     } catch (error) {
-        res.status(500).json({ message: '❌ Error fetching document', error });
+        res.status(500).json({ 
+            message: 'Error fetching document',
+            error: process.env.NODE_ENV === 'development' ? error.message : null
+        });
     }
 };
 
 module.exports.getFamilyMembers = async (req, res) => {
     try {
-        // 1. Validate request user first
-        if (!req.user?._id) {
-            return res.status(401).json({
-                success: false,
-                message: '❌ Unauthorized: Invalid authentication'
-            });
-        }
-
-        // 2. Use lean() for better performance
         const patient = await patientModel.findById(req.user._id)
             .select('family')
             .lean();
@@ -247,64 +219,41 @@ module.exports.getFamilyMembers = async (req, res) => {
         if (!patient) {
             return res.status(404).json({
                 success: false,
-                message: '❌ Patient not found'
+                message: 'Patient not found'
             });
         }
 
-        // 3. Handle null/undefined family array
-        const familyMembers = patient.family || [];
+        const familyMembers = patient.family?.map(member => ({
+            _id: member._id,
+            fullName: member.fullName,
+            age: member.age,
+            relation: member.relationWithMainPerson,
+            gender: member.gender
+        })) || [];
 
-        // 4. Safer response structure
-        return res.status(200).json({
+        res.status(200).json({
             success: true,
             count: familyMembers.length,
             data: familyMembers
         });
 
     } catch (error) {
-        // 5. Security: Don't send error details in production
-        console.error('Error fetching family members:', error);
-        return res.status(500).json({
-            success: false,
-            message: process.env.NODE_ENV === 'development' 
-                ? `❌ Server error: ${error.message}`
-                : '❌ Internal server error'
-        });
-    }
-};
-
-module.exports.getPatientDetails = async (req, res) => {
-    try {
-        const patient = await patientModel.findById(req.user._id);
-
-        if (!patient) {
-            return res.status(404).json({
-                success: false,
-                message: "Patient not found",
-            });
-        }
-
-        // ✅ Add calculatedAge to response
-        const patientData = {
-            ...patient._doc,
-            calculatedAge: patient.calculatedAge  // Virtual property for accurate age
-        };
-
-        res.status(200).json({
-            success: true,
-            data: patientData
-        });
-
-    } catch (error) {
         res.status(500).json({
             success: false,
-            message: "Server error",
+            message: 'Internal server error',
+            error: process.env.NODE_ENV === 'development' ? error.message : null
         });
     }
 };
 
-
 module.exports.logout = (req, res) => {
-    res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "Strict" });
-    res.status(200).json({ success: true, message: "Logged out successfully" });
-}
+    res.clearCookie("token", { 
+        httpOnly: true, 
+        secure: true, 
+        sameSite: "Strict" 
+    });
+    res.status(200).json({ 
+        success: true, 
+        message: "Logged out successfully" 
+    });
+};
