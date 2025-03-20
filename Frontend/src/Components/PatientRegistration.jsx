@@ -84,7 +84,7 @@ const PatientRegistrationForm = () => {
         toast.success("Registration successful!");
         setTimeout(() => {
           navigate("/PatientLogin");
-        }, 3000);
+        }, 4000);
       } else {
         toast.error(response?.data?.message || "Registration failed");
       }
@@ -109,7 +109,7 @@ const PatientRegistrationForm = () => {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center pt-24">
       <ToastContainer
         position="top-right"
-        autoClose={3000}
+        autoClose={4000}
         hideProgressBar={false}
         newestOnTop={true}
         closeOnClick

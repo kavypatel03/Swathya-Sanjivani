@@ -51,6 +51,9 @@ const patientSchema = new mongoose.Schema({
         enum: ['Male', 'Female', 'Other'],
         default: "Male"
     },
+    lastLogin: { 
+        type: Date, 
+    } ,
     family: [
         {
             _id: { type: mongoose.Schema.Types.ObjectId, auto: true }, // ✅ Ensures unique `familyId`

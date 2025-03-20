@@ -45,7 +45,7 @@ function Login() {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <ToastContainer
         position="top-right"
-        autoClose={3000}
+        autoClose={4000}
         hideProgressBar={false}
         newestOnTop
         closeOnClick

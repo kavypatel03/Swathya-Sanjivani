@@ -119,7 +119,7 @@ const PatientModification = () => {
 
       toast.success("Details updated successfully!", {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 4000,
         hideProgressBar: false,
         newestOnTop: true,
         closeOnClick: true,
@@ -141,7 +141,7 @@ const PatientModification = () => {
 
       toast.error("❌ Failed to update details.", {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 4000,
         hideProgressBar: false,
         newestOnTop: true,
         closeOnClick: true,

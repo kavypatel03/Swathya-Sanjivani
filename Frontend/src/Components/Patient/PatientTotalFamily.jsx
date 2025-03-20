@@ -50,7 +50,7 @@ const TotalFamilyMembers = () => {
         console.error('❌ Error fetching patient data:', error);
         toast.error('❌ Failed to load family data.', {
           position: 'top-right',
-          autoClose: 3000,
+          autoClose: 4000,
           theme: 'colored',
         });
         setLoading(false);

@@ -95,11 +95,19 @@ module.exports.getPatientDetails = async (req, res) => {
                 message: "Patient not found",
             });
         }
+        const lastLogin = new Date().toLocaleString('en-IN', { 
+            weekday: 'long', hour: '2-digit', minute: '2-digit' 
+        });
 
         res.status(200).json({
             success: true,
-            data: patient
+            data: {
+                ...patient,    // ✅ Spread patient data directly
+                lastLogin      // ✅ Add lastLogin separately
+            }
         });
+        
+
     } catch (error) {
         res.status(500).json({
             success: false,

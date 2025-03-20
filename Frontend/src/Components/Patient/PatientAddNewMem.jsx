@@ -74,7 +74,7 @@ const PatientAddNewFamilyMember = () => {
 
       toast.success(response.data.message || 'Family member updated successfully!', {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 4000,
         hideProgressBar: false,
         newestOnTop: true,
         closeOnClick: true,
@@ -95,7 +95,7 @@ const PatientAddNewFamilyMember = () => {
 
       toast.error('❌ Failed to update family member.', {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 4000,
         hideProgressBar: false,
         newestOnTop: true,
         closeOnClick: true,
