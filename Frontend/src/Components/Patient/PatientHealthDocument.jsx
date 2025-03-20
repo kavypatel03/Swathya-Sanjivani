@@ -96,24 +96,37 @@ function HealthDocuments({ selectedMember, currentPatient, setSelectedMember }) 
             <p className="text-center text-gray-500">📄 No documents uploaded yet.</p>
           ) : (
             documents.map((doc) => (
-              <div key={doc._id} className="border rounded-md p-4">
-              <h3 className="font-medium">{doc.document?.documentName || "Untitled"}</h3>
-              <p className="text-sm text-gray-500">Type: {doc.document?.documentType || "Unknown"}</p>
-              {doc.document?.uploadedAt && (
-                <p className="text-sm text-gray-500">
-                  Uploaded: {new Date(doc.document.uploadedAt).toLocaleString()}
-                </p>
-              )}
-              <button
-                className="text-blue-500 hover:underline"
-                onClick={() => {
-                  // You'll need to implement proper document viewing logic here
-                  console.log("View document:", doc.document?._id);
-                }}
-              >
-                View Document
-              </button>
-            </div>
+              <div key={doc._id} className="border rounded-md p-4 flex justify-between items-center">
+                <div>
+                  <h3 className="font-medium">{doc.document?.documentName || "Untitled"}</h3>
+                  <p className="text-sm text-gray-500">Type: {doc.document?.documentType || "Unknown"}</p>
+                  {doc.document?.uploadedAt && (
+                    <p className="text-sm text-gray-500">
+                      Uploaded: {new Date(doc.document.uploadedAt).toLocaleString()}
+                    </p>
+                  )}
+                </div>
+                <div className="flex space-x-4">
+                  <button
+                    className="text-blue-500 hover:text-blue-700"
+                    onClick={() => {
+                      // Implement document viewing logic here
+                      console.log("View document:", doc.document?._id);
+                    }}
+                  >
+                    <i className="ri-eye-line text-2xl"></i>
+                  </button>
+                  <button
+                    className="text-red-500 hover:text-red-700"
+                    onClick={() => {
+                      // Implement document deletion logic here
+                      console.log("Delete document:", doc.document?._id);
+                    }}
+                  >
+                    <i className="ri-delete-bin-line text-2xl"></i>
+                  </button>
+                </div>
+              </div>
             ))
           )}
         </div>
