@@ -28,7 +28,7 @@ const PatientRegistrationForm = () => {
   const sendOTP = async () => {
     try {
       const response = await axios.post(
-        "https://swathya-sanjivani-admin.vercel.app/send-otp",
+        "https://swathya-sanjivani-admin.vercel.app/patient/send-otp",
         { mobile } // Ensure mobile is correctly passed
       );
 
