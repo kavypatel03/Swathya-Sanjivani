@@ -10,7 +10,7 @@ const cookieParser = require('cookie-parser');
 app.use(cookieParser());   
 
 app.use(cors({
-    origin: ['http://localhost:5173', 'https://swathya-sanjivani-fqjhn6vge-kavya-patels-projects.vercel.app/'], // Frontend origin
+    origin: ['http://localhost:5173', 'https://swathya-sanjivani-fqjhn6vge-kavya-patels-projects.vercel.app/', 'https://swathya-sanjivani.vercel.app/registration'], // Frontend origin
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']

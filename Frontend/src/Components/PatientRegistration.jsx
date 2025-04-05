@@ -28,7 +28,7 @@ const PatientRegistrationForm = () => {
   const sendOTP = async () => {
     try {
       const response = await axios.post(
-        "https://swathya-sanjivani-backend-8yyhsavys-kavya-patels-projects.vercel.app/send-otp",
+        "https://swathya-sanjivani-admin.vercel.app/send-otp",
         { mobile } // Ensure mobile is correctly passed
       );
 
@@ -45,7 +45,7 @@ const PatientRegistrationForm = () => {
   const verifyOTP = async () => {
     try {
       const response = await axios.post(
-        "https://swathya-sanjivani-backend-8yyhsavys-kavya-patels-projects.vercel.app/patient/verify-otp",
+        "https://swathya-sanjivani-admin.vercel.app/patient/verify-otp",
         { mobile, otp }
       );
 
@@ -75,7 +75,7 @@ const PatientRegistrationForm = () => {
 
     try {
       const response = await axios.post(
-        "https://swathya-sanjivani-backend-8yyhsavys-kavya-patels-projects.vercel.app/patient/register",
+        "https://swathya-sanjivani-admin.vercel.app/patient/register",
         { fullname, mobile, email, password, userType }, // Add `userType` here
         { withCredentials: true }
       );
