@@ -36,17 +36,25 @@ router.post('/send-otp', async (req, res) => {
 // Verify OTP route
 router.post('/verify-otp', async (req, res) => {
     const { mobile, otp } = req.body;
+
     if (!mobile || !otp) {
         return res.status(400).json({ success: false, message: "Mobile number and OTP are required" });
     }
 
-    const isVerified = otpService.verifyOTP(mobile, otp);
-    if (isVerified) {
-        res.status(200).json({ success: true, message: "OTP verified successfully" });
-    } else {
-        res.status(400).json({ success: false, message: "Invalid OTP. Please try again." });
+    try {
+        const isVerified = otpService.verifyOTP(mobile, otp);
+
+        if (isVerified) {
+            res.status(200).json({ success: true, message: "OTP verified successfully" });
+        } else {
+            res.status(400).json({ success: false, message: "Invalid OTP. Please try again." });
+        }
+    } catch (error) {
+        console.error("❌ Error in verify-otp route:", error.message);
+        res.status(500).json({ success: false, message: "Server error during OTP verification" });
     }
 });
+
 
 // Login patient route
 router.post('/login', [
