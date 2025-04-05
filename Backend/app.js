@@ -9,8 +9,6 @@ const cookieParser = require('cookie-parser');
 
 app.use(cookieParser());   
 
-connectToDb();
-
 app.use(cors({
     origin: ['http://localhost:5173', 'https://swathya-sanjivani.vercel.app'], // Frontend origin
     credentials: true,
