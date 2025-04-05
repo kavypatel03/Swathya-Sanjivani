@@ -12,7 +12,7 @@ app.use(cookieParser());
 connectToDb();
 
 app.use(cors({
-    origin: 'http://localhost:5173', // Frontend origin
+    origin: ['http://localhost:5173', 'https://swathyasanjivani.vercel.app'], // Frontend origin
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
