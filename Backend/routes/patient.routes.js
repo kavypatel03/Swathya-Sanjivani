@@ -37,6 +37,8 @@ router.post('/send-otp', async (req, res) => {
 router.post('/verify-otp', async (req, res) => {
     const { mobile, otp } = req.body;
 
+    console.log("📨 Received verify-otp request:", { mobile, otp });
+
     if (!mobile || !otp) {
         return res.status(400).json({ success: false, message: "Mobile number and OTP are required" });
     }
@@ -54,6 +56,7 @@ router.post('/verify-otp', async (req, res) => {
         res.status(500).json({ success: false, message: "Server error during OTP verification" });
     }
 });
+
 
 
 // Login patient route
