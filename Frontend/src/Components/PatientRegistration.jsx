@@ -29,6 +29,7 @@ const PatientRegistrationForm = () => {
     try {
       const response = await axios.post(
         "https://swathya-sanjivani-admin.vercel.app/patient/send-otp",
+        "https://localhost:4000/patient/send-otp",
         { mobile } // Ensure mobile is correctly passed
       );
 
@@ -46,6 +47,7 @@ const PatientRegistrationForm = () => {
     try {
       const response = await axios.post(
         "https://swathya-sanjivani-admin.vercel.app/patient/verify-otp",
+        "https://localhost:4000/patient/verify-otp",
         { mobile, otp }
       );
 
@@ -75,7 +77,7 @@ const PatientRegistrationForm = () => {
 
     try {
       const response = await axios.post(
-        "https://swathya-sanjivani-admin.vercel.app/patient/register",
+        "http://localhost:4000/patient/register",
         { fullname, mobile, email, password, userType }, // Add `userType` here
         { withCredentials: true }
       );
