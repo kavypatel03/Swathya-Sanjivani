@@ -134,13 +134,13 @@ module.exports.updatePatientDetails = async (req, res) => {
         const updatedPatient = await patientModel.findOneAndUpdate(
             { mobile },
             {
-                fullname,
-                email,
-                dob: dob ? new Date(dob).toISOString() : null,
-                age: dob ? calculateAge(dob) : null,
-                relation,
-                gender,
                 $set: {
+                    fullname,
+                    email,
+                    dob: dob ? new Date(dob).toISOString() : null,
+                    age: dob ? calculateAge(dob) : null,
+                    relation,
+                    gender,
                     'family.$[elem].fullName': fullname,
                     'family.$[elem].birthDate': dob ? new Date(dob).toISOString() : null,
                     'family.$[elem].age': dob ? calculateAge(dob) : null,
@@ -152,6 +152,7 @@ module.exports.updatePatientDetails = async (req, res) => {
                 arrayFilters: [{ 'elem.relationWithMainPerson': 'Self' }],
             }
         );
+        
 
         if (!updatedPatient) {
             return res.status(404).json({ message: 'Patient not found' });
@@ -173,26 +174,44 @@ module.exports.updatePatientDetails = async (req, res) => {
 module.exports.addFamilyMember = async (req, res) => {
     const { fullName, birthDate, relation, gender } = req.body;
 
+    // Function to calculate age from birth date
+    const calculateAge = (dob) => {
+        const birthDate = new Date(dob);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    };
+
     try {
+        // Find patient using ID from token (decoded from middleware)
         const patient = await patientModel.findById(req.user._id);
         if (!patient) {
             return res.status(404).json({ message: 'Patient not found' });
         }
 
+        // Create new family member object with calculated age
         const newFamilyMember = {
             fullName,
             birthDate: birthDate ? new Date(birthDate) : null,
+            age: birthDate ? calculateAge(birthDate) : null,
             relationWithMainPerson: relation,
             gender
         };
 
+        // Push to family array and save
         patient.family.push(newFamilyMember);
         await patient.save();
 
+        // Send newly added member (last item in the array)
         res.status(201).json({ 
             message: 'Family member added successfully', 
-            data: patient.family.slice(-1)[0] 
+            data: patient.family.slice(-1)[0]  // Safely return only the new member
         });
+
     } catch (error) {
         res.status(500).json({ 
             message: 'Failed to add family member',
@@ -200,6 +219,7 @@ module.exports.addFamilyMember = async (req, res) => {
         });
     }
 };
+
 
 module.exports.getDocument = async (req, res) => {
     try {

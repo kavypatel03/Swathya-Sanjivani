@@ -44,12 +44,16 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
       setUploadStatus("❌ Please select a PDF file to upload");
       return;
     }
-
+    if (!documentName || !documentType) {
+      setUploadStatus("❌ Please enter document name and select type");
+      return;
+    }
+  
     const formData = new FormData();
     formData.append("file", selectedFile);
     formData.append("documentName", documentName);
     formData.append("documentType", documentType);
-
+  
     try {
       const response = await axios.post(
         `http://localhost:4000/patient/upload/${familyId}`,
@@ -61,19 +65,23 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
           },
         }
       );
-
+  
       if (response.status === 201) {
         setUploadStatus("✅ Document uploaded successfully!");
-        resetFields();
         setTimeout(() => {
+          resetFields();
           onClose();
         }, 1500);
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || "Failed to upload document";
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to upload document";
       setUploadStatus(`❌ ${errorMessage}`);
     }
   };
+  
 
   const handleClose = () => {
     onClose();
@@ -84,7 +92,9 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-[450px]">
-        <h2 className="text-xl font-semibold text-[#0e606e] mb-4">Upload PDF Document</h2>
+        <h2 className="text-xl font-semibold text-[#0e606e] mb-4">
+          Upload PDF Document
+        </h2>
 
         {/* Document Info Inputs */}
         <div className="space-y-3">
@@ -96,17 +106,21 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
             className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#0e606e]"
           />
 
-          <input
-            type="text"
-            placeholder="Document Type (e.g., Prescription, Report)"
+          <select
             value={documentType}
             onChange={(e) => setDocumentType(e.target.value)}
             className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#0e606e]"
-          />
+          >
+            <option value="">Select Document Type</option>
+            <option value="Prescription">Prescription</option>
+            <option value="Lab Reports">Lab Reports</option>
+            <option value="X-Rays">X-Rays</option>
+            <option value="Others">Others</option>
+          </select>
         </div>
 
         {/* File Upload Section */}
-        <div className="border-dashed border-2 border-gray-300 p-6 text-center rounded-lg mt-4 mb-4">
+        <div className="border-dashed border-2 border-gray-300 p-6 text-center rounded-lg mt-4">
           <input
             type="file"
             accept=".pdf"
@@ -123,11 +137,11 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
           </label>
         </div>
 
-        {/* Status Messages */}
+        {/* Status Messages BELOW Upload Section */}
         {uploadStatus && (
           <div
-            className={`p-2 rounded text-sm ${
-              uploadStatus.startsWith("✅") 
+            className={`p-2 mt-3 rounded text-sm ${
+              uploadStatus.startsWith("✅")
                 ? "bg-green-100 text-green-700"
                 : "bg-red-100 text-red-700"
             }`}

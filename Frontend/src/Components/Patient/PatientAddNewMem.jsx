@@ -62,7 +62,6 @@ const PatientAddNewFamilyMember = () => {
   // 🚀 Handle Form Submission (Add or Update Logic)
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const apiUrl = state?.memberData
       ? `http://localhost:4000/patient/update-family-member/${state.memberData._id}`
       : 'http://localhost:4000/patient/add-family-member';
@@ -185,6 +184,8 @@ const PatientAddNewFamilyMember = () => {
             <option value="Daughter">Daughter</option>
             <option value="Father">Father</option>
             <option value="Mother">Mother</option>
+            <option value="Sister">Sister</option>
+            <option value="Brother">Brother</option>
           </select>
         </div>
 
