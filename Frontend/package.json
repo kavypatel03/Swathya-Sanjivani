@@ -9,19 +9,25 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "proxy": "http://localhost:4000",
-     "start": "vite"
+    "start": "vite"
   },
   "dependencies": {
     "@remixicon/react": "^4.6.0",
-    "axios": "^1.8.3",
+    "axios": "^1.8.4",
     "cors": "^2.8.5",
+    "file-saver": "^2.0.5",
+    "framer-motion": "^12.6.3",
+    "lucide-react": "^0.487.0",
     "react": "^19.0.0",
+    "react-doc-viewer": "^0.1.14",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
+    "react-modal": "^3.16.3",
     "react-router": "^7.3.0",
     "react-router-dom": "^7.3.0",
     "react-toastify": "^11.0.5",
     "remixicon": "^4.6.0",
+    "sweetalert2": "^11.6.13",
     "twilio": "^5.5.0"
   },
   "devDependencies": {

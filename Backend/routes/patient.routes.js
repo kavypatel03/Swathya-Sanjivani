@@ -36,17 +36,27 @@ router.post('/send-otp', async (req, res) => {
 // Verify OTP route
 router.post('/verify-otp', async (req, res) => {
     const { mobile, otp } = req.body;
+
+    console.log("📨 Received verify-otp request:", { mobile, otp });
+
     if (!mobile || !otp) {
         return res.status(400).json({ success: false, message: "Mobile number and OTP are required" });
     }
 
-    const isVerified = otpService.verifyOTP(mobile, otp);
-    if (isVerified) {
-        res.status(200).json({ success: true, message: "OTP verified successfully" });
-    } else {
-        res.status(400).json({ success: false, message: "Invalid OTP. Please try again." });
+    try {
+        const isVerified = otpService.verifyOTP(mobile, otp);
+
+        if (isVerified) {
+            res.status(200).json({ success: true, message: "OTP verified successfully" });
+        } else {
+            res.status(400).json({ success: false, message: "Invalid OTP. Please try again." });
+        }
+    } catch (error) {
+        console.error("❌ Error in verify-otp route:", error.message);
+        res.status(500).json({ success: false, message: "Server error during OTP verification" });
     }
 });
+
 
 // Login patient route
 router.post('/login', [
@@ -131,40 +141,52 @@ router.put('/update-family-member/:id', async (req, res) => {
 });
 
 // Get documents of a family member
+// Get documents of a family member (with file URLs)
 router.get('/get-family-member-documents/:familyId', authMiddleware, async (req, res) => {
-
-    // console.log("📥 Received Request for Family ID:", req.params.familyId);
-
     const { familyId } = req.params;
 
     try {
         const patient = await patientModel.findById(req.user._id)
             .populate({
-                path: 'family.documents.document', 
+                path: 'family.documents.document',
                 model: 'Document'
             })
             .select('family')
             .lean();
 
-        // console.log("🔍 Patient Data:", patient);  // ✅ Confirm fetched data
-
         const familyMember = patient?.family?.find(member => member._id.toString() === familyId);
-
-        // console.log("✅ Found Family Member:", familyMember);
 
         if (!familyMember) {
             return res.status(404).json({ message: "❌ Family member not found" });
         }
-        
+
+        // Map each document and append fileUrl
+        const documentsWithUrl = familyMember.documents.map(docEntry => {
+            const document = docEntry.document;
+
+            // Construct a file viewing route
+            const fileUrl = `http://localhost:4000/patient/view-document/${document._id}`;  // 🔥 This is a route you already have
+
+            return {
+                ...docEntry,
+                document: {
+                    ...document,
+                    fileUrl // 🔗 Add the URL for frontend
+                }
+            };
+        });
+
         res.status(200).json({
             success: true,
-            data: familyMember.documents
+            data: documentsWithUrl
         });
+
     } catch (error) {
         console.error("❌ Error fetching documents:", error);
         res.status(500).json({ success: false, message: "❌ Server error." });
     }
 });
+
 
 // Upload document for family member
 router.post('/upload/:familyId', authMiddleware, uploadMiddleware, async (req, res) => {
@@ -233,6 +255,52 @@ router.post('/upload/:familyId', authMiddleware, uploadMiddleware, async (req, r
             message: '❌ Document upload failed',
             error: process.env.NODE_ENV === 'development' ? error.message : null
         });
+    }
+});
+
+router.delete('/delete-document/:documentId', authMiddleware, async (req, res) => {
+    const { documentId } = req.params;
+
+    try {
+        const deletedDocument = await documentModel.findByIdAndDelete(documentId);
+
+        if (!deletedDocument) {
+            return res.status(404).json({ message: "❌ Document not found" });
+        }
+
+        await patientModel.updateOne(
+            { 'family.documents.document': documentId },
+            { $pull: { 'family.$.documents': { document: documentId } } }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: '✅ Document deleted successfully',
+            deletedDocument
+        });
+    } catch (error) {
+        console.error("❌ Error deleting document:", error);
+        res.status(500).json({ success: false, message: "❌ Server error." });
+    }
+});
+
+// 📄 Get a specific document file for viewing
+router.get('/view-document/:documentId', authMiddleware, async (req, res) => {
+    const { documentId } = req.params;
+
+    try {
+        const document = await documentModel.findById(documentId);
+
+        if (!document || !document.file || !document.file.data) {
+            return res.status(404).json({ success: false, message: '❌ Document not found' });
+        }
+
+        // Set correct content-type so browser knows how to display it (PDF, image, etc.)
+        res.set('Content-Type', document.file.contentType);
+        res.send(document.file.data);  // 🔥 Stream binary data to frontend
+    } catch (error) {
+        console.error('❌ Error fetching document:', error);
+        res.status(500).json({ success: false, message: '❌ Server error while fetching document' });
     }
 });
 

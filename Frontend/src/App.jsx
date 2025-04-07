@@ -21,205 +21,54 @@ import PatientFamilyPage from './Pages/Patient/PatientFamilyPage'
 import PatientDoctorPage from './Pages/Patient/PatientDoctorPage';
 import PatientGuide from './Pages/Patient/PatientGuide';
 import DoctorDashbord from './Pages/Doctor/DoctorDashbord';
-import PatientFamily from './Pages/Doctor/PatientFamily';
+import PatientFamily from './Pages/Doctor/patientFamily';
 import DoctorGuide from './Pages/Doctor/DoctorGuide';
 import PatientAddMemPage from './Pages/Patient/PatientAddMemPage';
 import AssistantDashbord from './Pages/Assistant/AssistantDashbord';
 import AssistantReportPage from './Pages/Assistant/assistantReportPage';
 import Guide from './Pages/Assistant/GuidePage';
 import Modify from './Pages/Assistant/modifyDetailPage'
+
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-
-
 function App() {
   const router = createBrowserRouter([
-    {
-      path: "/",
-      element: (
-        <>
-          <Nav />
-          <Login />
-        </>
-      )
-    },
-    {
-      path: "/registration",
-      element: (
-        <>
-          <RegistrationNav />
-          <Registration />
-        </>
-      )
-    },
-    {
-      path: "/PatientRegistration",
-      element: (
-        <>
-          <RegistrationNav />
-          <PatientRegistrationForm />
-        </>
-      )
-    },
-    {
-      path: "/DoctorRegistration",
-      element: (
-        <>
-          <RegistrationNav />
-          <DoctorRegistrationForm />
-        </>
-      )
-    },
-    {
-      path: "/AssistantRegistration",
-      element: (
-        <>
-          <RegistrationNav />
-          <AssistantRegistrationForm />
-        </>
-      )
-    },
-    {
-      path: "/PatientFamilyPage",
-      element: (
-        <>
-          <Navigation />
-          <PatientFamilyPage />
-        </>
-      )
-    },
-    {
-      path: "/PatientAddMemPage",
-      element: (
-        <>
-          <Navigation />
-          <PatientAddMemPage />
-        </>
-      )
-    },
-    {
-      path: "/PatientDoctorPage",
-      element: (
-        <>
-          <Navigation />
-          <PatientDoctorPage />
-        </>
-      )
-    },
-    {
-      path: "/DoctorLogin",
-      element: (
-        <>
-          <Nav />
-          <DoctorLogin />
-        </>
-      )
-    },
-    {
-      path: "/PatientLogin",
-      element: (
-        <>
-          <Nav />
-          <PatientLogin />
-        </>
-      )
-    },
-    {
-      path: "/AssistantLogin",
-      element: (
-        <>
-          <Nav />
-          <AssistantLogin />
-        </>
-      )
-    },
-    {
-      path: "/PatientDashboard",
-      element: (
-        <>
-          <Navigation/>
-          <PatientDashboard />
-        </>
-      )
-    },
-    {
-      path: "/PatientGuide",
-      element: (
-        <>
-          <Navigation/>
-          <PatientGuide />
-        </>
-      )
-    },
-    {
-      path: "/DoctorDashbord",
-      element: (
-        <>
-          <DocNavigation/>
-          <DoctorDashbord />
-        </>
-      )
-    },
-    {
-      path: "/PatientFamily",
-      element: (
-        <>
-          <DocNavigation/>
-          <PatientFamily />
-        </>
-      )
-    },
-    {
-      path: "/DoctorGuide",
-      element: (
-        <>
-          <DocNavigation/>
-          <DoctorGuide />
-        </>
-      )
-    },
-    {
-      path: "/AssistantDashbord",
-      element: (
-        <>
-          <AssistantDashbord />
-        </>
-      )
-    },
-    {
-      path: "/AssistantReportPage",
-      element: (
-        <>
-          <AssistantReportPage />
-        </>
-      )
-    },
-    {
-      path: "/Guide",
-      element: (
-        <>
-          <Guide />
-        </>
-      )
-    },
-    {
-      path: "/modifyDetailPage",
-      element: (
-        <>
-          <Modify />
-        </>
-      )
-    },
-  ])
-  
+    { path: "/", element: <><Nav /><Login /></> },
+    { path: "/registration", element: <><RegistrationNav /><Registration /></> },
+    { path: "/PatientRegistration", element: <><RegistrationNav /><PatientRegistrationForm /></> },
+    { path: "/DoctorRegistration", element: <><RegistrationNav /><DoctorRegistrationForm /></> },
+    { path: "/AssistantRegistration", element: <><RegistrationNav /><AssistantRegistrationForm /></> },
+    { path: "/PatientLogin", element: <><Nav /><PatientLogin /></> },
+    { path: "/DoctorLogin", element: <><Nav /><DoctorLogin /></> },
+    { path: "/AssistantLogin", element: <><Nav /><AssistantLogin /></> },
+
+    // Patient
+    { path: "/PatientDashboard", element: <><Navigation /><PatientDashboard /></> },
+    { path: "/PatientFamilyPage", element: <><Navigation /><PatientFamilyPage /></> },
+    { path: "/PatientDoctorPage", element: <><Navigation /><PatientDoctorPage /></> },
+    { path: "/PatientAddMemPage", element: <><Navigation /><PatientAddMemPage /></> },
+    { path: "/PatientGuide", element: <><Navigation /><PatientGuide /></> },
+
+    // Doctor
+    { path: "/DoctorDashbord", element: <><DocNavigation /><DoctorDashbord /></> },
+    { path: "/PatientFamily", element: <><DocNavigation /><PatientFamily /></> },
+    { path: "/DoctorGuide", element: <><DocNavigation /><DoctorGuide /></> },
+
+    // Assistant
+    { path: "/AssistantDashbord", element: <AssistantDashbord /> },
+    { path: "/AssistantReportPage", element: <AssistantReportPage /> },
+    { path: "/Guide", element: <Guide /> },
+    { path: "/modifyDetailPage", element: <Modify /> },
+  ]);
+
   return (
     <>
       <ToastContainer
         position="top-right"
         autoClose={4000}
         hideProgressBar={false}
-        newestOnTop={true}
+        newestOnTop
         closeOnClick
         rtl={false}
         pauseOnFocusLoss
