@@ -7,14 +7,12 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
   const [documentType, setDocumentType] = useState("");
   const [uploadStatus, setUploadStatus] = useState("");
 
-  // Reset all fields when popup opens
   useEffect(() => {
     if (isOpen) {
       resetFields();
     }
   }, [isOpen]);
 
-  // Function to reset all fields
   const resetFields = () => {
     setSelectedFile(null);
     setDocumentName("");
@@ -24,10 +22,10 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    const allowedTypes = ["application/pdf", "image/png", "image/jpeg"];
+    const allowedType = "application/pdf";
     const maxSize = 5 * 1024 * 1024; // 5MB
 
-    if (file && allowedTypes.includes(file.type)) {
+    if (file && file.type === allowedType) {
       if (file.size > maxSize) {
         setUploadStatus("❌ File size exceeds 5MB limit.");
         setSelectedFile(null);
@@ -36,18 +34,16 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
         setUploadStatus("");
       }
     } else {
-      setUploadStatus("❌ Only PDF, PNG, or JPG files are allowed.");
+      setUploadStatus("❌ Only PDF files are allowed.");
       setSelectedFile(null);
     }
   };
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      setUploadStatus("❌ Please select a file to upload");
+      setUploadStatus("❌ Please select a PDF file to upload");
       return;
     }
-
-    console.log("familyId in handleUpload:", familyId);
 
     const formData = new FormData();
     formData.append("file", selectedFile);
@@ -68,13 +64,7 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
 
       if (response.status === 201) {
         setUploadStatus("✅ Document uploaded successfully!");
-        
-        // Reset fields after successful upload
         resetFields();
-        
-        // Keep only the success message
-        setUploadStatus("✅ Document uploaded successfully!");
-        
         setTimeout(() => {
           onClose();
         }, 1500);
@@ -85,7 +75,6 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
     }
   };
 
-  // Custom close handler
   const handleClose = () => {
     onClose();
   };
@@ -95,7 +84,7 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-[450px]">
-        <h2 className="text-xl font-semibold text-[#0e606e] mb-4">Upload Document</h2>
+        <h2 className="text-xl font-semibold text-[#0e606e] mb-4">Upload PDF Document</h2>
 
         {/* Document Info Inputs */}
         <div className="space-y-3">
@@ -120,7 +109,7 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
         <div className="border-dashed border-2 border-gray-300 p-6 text-center rounded-lg mt-4 mb-4">
           <input
             type="file"
-            accept=".pdf,.png,.jpg,.jpeg"
+            accept=".pdf"
             onChange={handleFileChange}
             className="hidden"
             id="fileInput"
@@ -128,9 +117,9 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
           <label htmlFor="fileInput" className="cursor-pointer">
             <i className="ri-upload-cloud-line text-4xl text-gray-400 mb-2" />
             <p className="text-gray-600 font-medium">
-              {selectedFile ? selectedFile.name : "Click to upload document"}
+              {selectedFile ? selectedFile.name : "Click to upload PDF"}
             </p>
-            <p className="text-xs text-gray-400 mt-1">(PDF, PNG, JPG up to 5MB)</p>
+            <p className="text-xs text-gray-400 mt-1">(Only PDF up to 5MB)</p>
           </label>
         </div>
 
@@ -160,7 +149,7 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
             className="px-4 py-2 bg-[#0e606e] text-white rounded hover:bg-[#0b4853] disabled:opacity-50"
             disabled={!selectedFile}
           >
-            Upload Document
+            Upload PDF
           </button>
         </div>
       </div>
