@@ -16,6 +16,7 @@
     "axios": "^1.8.4",
     "cors": "^2.8.5",
     "file-saver": "^2.0.5",
+    "file-server": "^2.2.1",
     "framer-motion": "^12.6.3",
     "lucide-react": "^0.487.0",
     "react": "^19.0.0",
