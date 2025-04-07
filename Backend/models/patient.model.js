@@ -76,8 +76,13 @@ const patientSchema = new mongoose.Schema({
                 }
             ]
         }
-    ]
-
+    ],
+    doctors: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Doctor'
+        }
+    ],
 
 });
 

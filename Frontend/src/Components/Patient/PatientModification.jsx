@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css"; // Toastify Styles
-import { useNavigate } from "react-router-dom"; // 🚨 For Redirect
+import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 
 const PatientModification = () => {
   const [isMobileVerified, setisMobileVerified] = useState(true);
-  const navigate = useNavigate(); // 🚨 Add Navigation
+  const navigate = useNavigate();
   const [patientData, setPatientData] = useState({
     fullname: "",
     mobile: "",
@@ -18,7 +18,19 @@ const PatientModification = () => {
     gender: "Male",
   });
 
-  // 🔄 Fetch Data on Component Load
+  // Convert YYYY-MM-DD to DD-MM-YYYY for display
+  const formatToIndianDate = (dateStr) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-GB"); // DD-MM-YYYY format
+  };
+
+  const formatToISODate = (dateStr) => {
+    if (!dateStr) return "";
+    const [day, month, year] = dateStr.split("-");
+    return `${year}-${month}-${day}`;
+  };
+
   useEffect(() => {
     const fetchPatientData = async () => {
       try {
@@ -28,14 +40,11 @@ const PatientModification = () => {
         );
         const data = response.data.data;
 
-        // ✅ Calculate Age from DOB
         const calculateAge = (dob) => {
           if (!dob) return "";
           const birthDate = new Date(dob);
           const today = new Date();
           let age = today.getFullYear() - birthDate.getFullYear();
-
-          // Adjust if birthdate hasn't occurred yet this year
           const monthDiff = today.getMonth() - birthDate.getMonth();
           if (
             monthDiff < 0 ||
@@ -54,7 +63,7 @@ const PatientModification = () => {
           birthDate: data.dob
             ? new Date(data.dob).toISOString().split("T")[0]
             : "",
-          age: calculateAge(data.dob), // ✅ Auto-calculate Age
+          age: calculateAge(data.dob),
           relation: data.relation || "",
           gender: data.gender || "Male",
         });
@@ -67,19 +76,15 @@ const PatientModification = () => {
     fetchPatientData();
   }, []);
 
-  // 📝 Handle Input Changes
-  // 🟠 Inside handleChange function
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // 🧮 Live Age Calculation Logic
     if (name === "birthDate") {
       const calculateAge = (dob) => {
         if (!dob) return "";
         const birthDate = new Date(dob);
         const today = new Date();
         let age = today.getFullYear() - birthDate.getFullYear();
-
         const monthDiff = today.getMonth() - birthDate.getMonth();
         if (
           monthDiff < 0 ||
@@ -93,14 +98,13 @@ const PatientModification = () => {
       setPatientData({
         ...patientData,
         [name]: value,
-        age: calculateAge(value), // 🔥 Auto-calculate Age
+        age: calculateAge(value),
       });
     } else {
       setPatientData({ ...patientData, [name]: value });
     }
   };
 
-  // 🚀 Handle Save Changes
   const handleSubmit = async (e) => {
     e.preventDefault();
     const updatedData = {
@@ -120,35 +124,18 @@ const PatientModification = () => {
       toast.success("Details updated successfully!", {
         position: "top-right",
         autoClose: 4000,
-        hideProgressBar: false,
-        newestOnTop: true,
-        closeOnClick: true,
-        rtl: false,
-        pauseOnFocusLoss: true,
-        draggable: true,
-        pauseOnHover: true,
         theme: "colored",
       });
 
       setTimeout(() => {
-        navigate("/PatientDashboard"); // ✅ Redirect to Dashboard
+        navigate("/PatientDashboard");
       }, 3500);
     } catch (error) {
-      console.error(
-        "❌ Error updating patient data:",
-        error.response?.data || error.message
-      );
+      console.error("❌ Error updating patient data:", error);
 
       toast.error("❌ Failed to update details.", {
         position: "top-right",
         autoClose: 4000,
-        hideProgressBar: false,
-        newestOnTop: true,
-        closeOnClick: true,
-        rtl: false,
-        pauseOnFocusLoss: true,
-        draggable: true,
-        pauseOnHover: true,
         theme: "colored",
       });
     }
@@ -225,6 +212,9 @@ const PatientModification = () => {
             value={patientData.birthDate}
             onChange={handleChange}
           />
+          <p className="text-sm text-gray-500 mt-1">
+            Selected Date: {formatToIndianDate(patientData.birthDate)}
+          </p>
         </div>
 
         <div>
@@ -236,7 +226,7 @@ const PatientModification = () => {
             name="age"
             className="w-full border bg-slate-200 border-gray-300 rounded p-2"
             value={patientData.age}
-            readOnly // 🚫 Prevent Manual Editing
+            readOnly
           />
         </div>
 
@@ -309,6 +299,8 @@ const PatientModification = () => {
           </button>
         </div>
       </form>
+
+      <ToastContainer />
     </div>
   );
 };

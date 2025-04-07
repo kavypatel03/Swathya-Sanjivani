@@ -20,7 +20,7 @@ function PatientDashboard() {
     const fetchPatientData = async () => {
       try {
         const response = await axios.get(
-          "/patient/dashboard",
+          "http://localhost:4000/patient/dashboard",
           {
             withCredentials: true,
           }

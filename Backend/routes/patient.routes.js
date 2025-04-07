@@ -190,7 +190,6 @@ router.get('/get-family-member-documents/:familyId', authMiddleware, async (req,
 
 // Upload document for family member
 router.post('/upload/:familyId', authMiddleware, uploadMiddleware, async (req, res) => {
-    console.log("Family ID from URL:", req.params.familyId);  
     const familyId = req.params.familyId;
     const { documentName, documentType } = req.body;
     const file = req.file;
@@ -200,8 +199,7 @@ router.post('/upload/:familyId', authMiddleware, uploadMiddleware, async (req, r
     }
 
     try {
-        console.log("Received document details:", documentName, documentType);
-
+        
         const uploadedBy = req.user?._id;
         const patientId = req.user?.patientId;
 
