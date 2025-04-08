@@ -12,10 +12,21 @@ const authMiddleware = require('../middleware/auth.middleware');
 
 // Register patient route
 router.post('/register', [
-    body('mobile').isLength({ min: 10, max: 10 }).withMessage("Mobile Number Must Be Exactly 10 characters"),
+    body('mobile')
+        .custom((value) => {
+            const cleaned = value.replace(/^\+91/, '');
+            return /^[0-9]{10}$/.test(cleaned);
+        })
+        .withMessage("Mobile Number must be 10 digits only"),
     body('email').isEmail().withMessage("Please Enter a Valid Email Address"),
-    body('password').isLength({ min: 6, max: 20 }).withMessage("Password Must Be Between 6 and 20 characters")
-], patientController.registerPatient);
+    body('password').isLength({ min: 6, max: 20 }).withMessage("Password must be between 6 and 20 characters")
+], async (req, res, next) => {
+    if (req.body.mobile.startsWith('+91')) {
+        req.body.mobile = req.body.mobile.replace(/^\+91/, '');
+    }
+    next(); // pass to controller
+}, patientController.registerPatient);
+
 
 // Send OTP route
 router.post('/send-otp', async (req, res) => {
@@ -301,7 +312,6 @@ router.get('/view-document/:documentId', authMiddleware, async (req, res) => {
         res.status(500).json({ success: false, message: '❌ Server error while fetching document' });
     }
 });
-
 
 // Logout route
 router.get('/logout', authMiddleware, patientController.logout);

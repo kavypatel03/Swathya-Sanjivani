@@ -24,46 +24,76 @@ const PatientRegistrationForm = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const [userType, setUserType] = useState(params.get("userType") || "Patient");
+  
+  const normalizeMobile = (mobile) => {
+    if (!mobile) return "";
+    let formatted = mobile.trim();
+    if (formatted.startsWith('+')) return formatted;
+    if (formatted.startsWith('91')) return `+${formatted}`;
+    return `+91${formatted}`;
+  };
 
   const sendOTP = async () => {
+    if (!mobile) {
+      toast.error("Please enter a mobile number");
+      return;
+    }
+
     try {
+      const cleanMobile = mobile.replace(/^\+91|^91/, '').trim();
+      
       const response = await axios.post(
         "http://localhost:4000/patient/send-otp",
-        { mobile } // Ensure mobile is correctly passed
+        { 
+          mobile: cleanMobile,
+          userType: "Patient"
+        }
       );
 
       if (response?.data?.success) {
-        toast.success("📲 OTP sent successfully!");
+        if (response.data.fallback) {
+          toast.info("Development mode: Check console for OTP");
+        } else {
+          toast.success("OTP sent successfully!");
+        }
       } else {
-        toast.error(response?.data?.message || "Failed to send OTP.");
+        toast.error(response?.data?.message || "Failed to send OTP");
       }
     } catch (error) {
-      toast.error("Error sending OTP. Try again.");
+      console.error("OTP Error:", error?.response?.data || error);
+      toast.error(error?.response?.data?.message || "Error sending OTP");
     }
   };
-
+  
   const verifyOTP = async () => {
+    if (!mobile || !otp) {
+      toast.error("Please enter both Mobile Number and OTP.");
+      return;
+    }
+  
+    const formattedMobile = normalizeMobile(mobile);
+  
     try {
       const response = await axios.post(
         "http://localhost:4000/patient/verify-otp",
-        { mobile, otp }
+        { mobile: formattedMobile, otp }
       );
-
       if (response?.data?.success) {
         toast.success("OTP verified successfully!");
-        setIsOtpVerified(true); // ✅ OTP verified status set to true
+        setIsOtpVerified(true);
         setisMobileVerified(true);
       } else {
         toast.error(response?.data?.message || "OTP verification failed.");
-        setIsOtpVerified(false); // ❌ Ensure verification is false if it fails
-        setisMobileVerified(false); // �� Ensure mobile verification is false if it fails
+        setIsOtpVerified(false);
+        setisMobileVerified(false);
       }
     } catch (error) {
       toast.error("Error verifying OTP.");
-      setIsOtpVerified(false); // ❌ Ensure verification is false if it errors
-      setisMobileVerified(false); // �� Ensure mobile verification is false if it errors
+      setIsOtpVerified(false);
+      setisMobileVerified(false);
     }
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();

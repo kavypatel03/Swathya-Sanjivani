@@ -6,10 +6,20 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import Toast CSS
 
 function Login() {
+
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
+  const normalizeMobile = (mobile) => {
+    if (!mobile) return "";
+    let formatted = mobile.trim();
+    if (formatted.startsWith("+")) return formatted;
+    if (formatted.startsWith("91")) return `+${formatted}`;
+    return `+91${formatted}`;
+  };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
