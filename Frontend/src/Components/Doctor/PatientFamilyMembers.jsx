@@ -13,7 +13,7 @@ function FamilyMembers() {
       <div className="flex justify-between items-center mb-3">
         <h2 className="text-xl font-medium text-[#0e606e]">Family Members</h2>
         <button className="text-blue-500 hover:text-blue-700">
-          Add New
+          See All
         </button>
       </div>
       
@@ -29,8 +29,8 @@ function FamilyMembers() {
                 <div className="text-sm text-gray-500">Age: {member.age}</div>
               </div>
             </div>
-            <button className="text-red-500 hover:text-red-700">
-              <i className="ri-close-line"></i>
+            <button className="text-blue-500 hover:underline">
+              View All
             </button>
           </div>
         ))}

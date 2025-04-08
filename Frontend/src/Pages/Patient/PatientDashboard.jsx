@@ -58,7 +58,7 @@ function PatientDashboard() {
               />
             </div>
             <div className="space-y-8">
-              <FamilyMembers setSelectedMember={setSelectedMember} />
+              <FamilyMembers className="max-h-[200px] overflow-y-auto" setSelectedMember={setSelectedMember} />
               <DoctorAccess />
             </div>
           </div>

@@ -61,9 +61,12 @@ function HealthDocuments({ selectedMember, currentPatient, setSelectedMember }) 
           text: "This will permanently delete the document.",
           icon: "warning",
           showCancelButton: true,
-          confirmButtonColor: "#d33",
-          cancelButtonColor: "#3085d6",
+          confirmButtonColor: "#0e606e", 
+          cancelButtonColor: "#ef4444",
           confirmButtonText: "Yes, delete it!",
+          background: "#ffffff",
+          iconColor: "#ff9700",
+          Color: "#4b5563"
         })
         .then((result) => {
           if (result.isConfirmed) {
@@ -74,7 +77,14 @@ function HealthDocuments({ selectedMember, currentPatient, setSelectedMember }) 
               .then((res) => {
                 if (res.data.success) {
                   setDocuments((prev) => prev.filter((d) => d.document?._id !== docId));
-                  Swal.default.fire("Deleted!", "The document has been deleted.", "success");
+                  Swal.default.fire({
+                    title: "Deleted!",
+                    text: "The document has been deleted.",
+                    icon: "success",
+                    confirmButtonText: "Done",
+                    confirmButtonColor:"#0e606e",
+                    iconColor: "#0e606e"
+                  });
                 } else {
                   Swal.default.fire("Failed!", res.data.message, "error");
                 }
@@ -109,7 +119,7 @@ function HealthDocuments({ selectedMember, currentPatient, setSelectedMember }) 
   };
 
   return (
-    <div className="relative bg-white rounded-lg shadow p-3">
+    <div className="relative bg-white rounded-lg shadow p-3 ">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-medium text-[#0e606e]">
           {selectedMember?.fullName
@@ -131,7 +141,7 @@ function HealthDocuments({ selectedMember, currentPatient, setSelectedMember }) 
       ) : error ? (
         <p className="text-center text-red-500">{error}</p>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-6 overflow-y-auto max-h-[440px]">
           {(!documents || documents.length === 0) ? (
             <p className="text-center text-gray-500">📄 No documents uploaded yet.</p>
           ) : (
@@ -141,7 +151,7 @@ function HealthDocuments({ selectedMember, currentPatient, setSelectedMember }) 
               const name = doc.document?.documentName || "Untitled";
 
               return (
-                <div key={docId} className="border rounded-md p-4 flex justify-between items-center">
+                <div key={docId} className="border rounded-md p-5 flex justify-between items-center">
                   <div>
                     <h3 className="font-medium">{name}</h3>
                     {doc.document?.uploadedAt && (
@@ -150,7 +160,7 @@ function HealthDocuments({ selectedMember, currentPatient, setSelectedMember }) 
                       </p>
                     )}
                   </div>
-                  <div className="flex space-x-4 items-center">
+                  <div className="flex space-x-5 items-center">
                     <button className="text-blue-500 hover:text-blue-700" onClick={() => openPreview(doc)}>
                       <i className="ri-eye-line text-2xl" />
                     </button>

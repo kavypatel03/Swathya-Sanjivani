@@ -8,7 +8,6 @@
     "client": "npm start --prefix frontend"
   },
   "dependencies": {
-    "dotenv": "^16.4.7",
-    "multer": "^1.4.5-lts.2"
+    "dotenv": "^16.4.7"
   }
 }

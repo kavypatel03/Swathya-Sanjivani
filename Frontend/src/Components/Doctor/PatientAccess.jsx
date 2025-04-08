@@ -1,6 +1,8 @@
+import React from 'react';
+
 const AccessPatientRecords = () => {
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm my-4">
+    <div className="bg-white p-10 rounded-lg shadow-sm my-4">
       <h3 className="text-lg font-semibold text-[#0e606e] mb-4">Access Patient Records</h3>
       
       <div className="mb-4">

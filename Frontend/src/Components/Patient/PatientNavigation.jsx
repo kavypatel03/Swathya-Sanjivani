@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 function Navigation() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const location = useLocation(); // Get current route
-     const navigate = useNavigate();
+    const navigate = useNavigate();
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -34,7 +34,7 @@ function Navigation() {
         }
     };
     
-      
+    
 
     return (
         <nav className="bg-white shadow z-50 relative py-2 ">

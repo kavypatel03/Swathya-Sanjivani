@@ -8,7 +8,7 @@ function DoctorAccess() {
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 mt-5">
+    <div className="bg-white rounded-lg shadow py-11 px-5 mt-5">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-medium text-[#0e606e]">Doctor Access</h2>
         <button className="text-blue-500 hover:text-blue-700">
@@ -28,8 +28,8 @@ function DoctorAccess() {
                 <div className="text-sm text-gray-500">{doctor.specialty}</div>
               </div>
             </div>
-            <button className="px-3 py-1 border border-red-500 text-red-500 rounded-md hover:bg-red-50">
-              Revoke
+            <button className="px-3 py-1 border-blue-500 text-blue-500 hover:underline">
+              View All
             </button>
           </div>
         ))}

@@ -121,22 +121,13 @@ const AssistantRegistrationForm = () => {
                 <label className="block text-gray-700 font-medium mb-1">
                   Enter Full Name <span className="text-red-500">*</span>
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="">
                   <input 
                     type="text" 
-                    className="p-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#0e606e]" 
-                    placeholder="First Name"
+                    className="w-full p-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#0e606e]" 
+                    placeholder="Enter Your Name"
                   />
-                  <input 
-                    type="text" 
-                    className="p-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#0e606e]" 
-                    placeholder="Your Name"
-                  />
-                  <input 
-                    type="text" 
-                    className="p-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#0e606e]" 
-                    placeholder="Father/Husband Name"
-                  />
+                 
                 </div>
               </div>
 

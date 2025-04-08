@@ -4,7 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Nav from './Components/Nav'
 import RegistrationNav from './Components/RegistrationNav'
 import Navigation from './Components/Patient/PatientNavigation'
-import DocNavigation from './Components/Doctor/DoctorNavigation'
+import Dashboard from './Pages/Doctor/Dashbord'
 
 import Login from './Pages/Login'
 import Registration from './Pages/Registration'
@@ -20,13 +20,11 @@ import PatientDashboard from './Pages/Patient/PatientDashboard'
 import PatientFamilyPage from './Pages/Patient/PatientFamilyPage'
 import PatientDoctorPage from './Pages/Patient/PatientDoctorPage';
 import PatientGuide from './Pages/Patient/PatientGuide';
-import DoctorDashbord from './Pages/Doctor/DoctorDashbord';
-import PatientFamily from './Pages/Doctor/patientFamily';
-import DoctorGuide from './Pages/Doctor/DoctorGuide';
 import PatientAddMemPage from './Pages/Patient/PatientAddMemPage';
 import AssistantDashbord from './Pages/Assistant/AssistantDashbord';
 import AssistantReportPage from './Pages/Assistant/assistantReportPage';
 import Guide from './Pages/Assistant/GuidePage';
+import DGuide from './Pages/Doctor/Guide';
 import Modify from './Pages/Assistant/modifyDetailPage'
 
 import { ToastContainer } from "react-toastify";
@@ -51,10 +49,8 @@ function App() {
     { path: "/PatientGuide", element: <><Navigation /><PatientGuide /></> },
 
     // Doctor
-    { path: "/DoctorDashbord", element: <><DocNavigation /><DoctorDashbord /></> },
-    { path: "/PatientFamily", element: <><DocNavigation /><PatientFamily /></> },
-    { path: "/DoctorGuide", element: <><DocNavigation /><DoctorGuide /></> },
-
+    { path: "/Dashbord", element: <><Dashboard /></>},
+    { path: "/Guide", element: <><DGuide /></> },
     // Assistant
     { path: "/AssistantDashbord", element: <AssistantDashbord /> },
     { path: "/AssistantReportPage", element: <AssistantReportPage /> },
