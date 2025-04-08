@@ -141,7 +141,7 @@ function HealthDocuments({ selectedMember, currentPatient, setSelectedMember }) 
       ) : error ? (
         <p className="text-center text-red-500">{error}</p>
       ) : (
-        <div className="space-y-6 overflow-y-auto max-h-[425px]">
+        <div className="space-y-6 overflow-y-auto max-h-[440px]">
           {(!documents || documents.length === 0) ? (
             <p className="text-center text-gray-500">📄 No documents uploaded yet.</p>
           ) : (

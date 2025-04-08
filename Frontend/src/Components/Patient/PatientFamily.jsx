@@ -61,7 +61,7 @@
         ) : error ? (
           <p className="text-center text-red-500">{error}</p>
         ) : (
-          <div className="space-y-4 overflow-y-auto max-h-[225px]">
+          <div className="space-y-4 overflow-y-auto max-h-[228px]">
             {members.map((member) => (
               <div
                 key={member._id}
