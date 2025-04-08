@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 function UserProfile() {
   return (
-    <div className="bg-white rounded-lg shadow px-6 p-6 m-5">
+    <div className="bg-white rounded-lg shadow px-6 p-6 m-1">
       <div className="flex justify-between items-center">
         <div className="flex items-center">
           <div className="h-16 w-16 rounded-full bg-[#ff9700] flex items-center justify-center text-white">
