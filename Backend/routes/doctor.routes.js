@@ -27,4 +27,10 @@ router.post('/login', [
 // Add this route with auth middleware
 router.get('/dashboard', authMiddleware, doctorController.getDoctorDetails);
 
+// Add these new routes before module.exports
+router.post('/send-patient-otp', authMiddleware, doctorController.sendPatientOTP);
+router.post('/verify-patient-otp', authMiddleware, doctorController.verifyPatientOTP);
+router.get('/get-patient-family', authMiddleware, doctorController.getPatientFamily);
+router.get('/check-patient-access', authMiddleware, doctorController.checkPatientAccess);
+
 module.exports = router;

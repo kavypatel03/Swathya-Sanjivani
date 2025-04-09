@@ -2,6 +2,7 @@ const doctorService = require("../services/doctor.service");
 const otpService = require("../services/otp.services");
 const formatMobileNumber = require('../utils/mobileFormatter');
 const doctorModel = require('../models/doctor.model');
+const patientModel = require('../models/patient.model');
 
 exports.register = async (req, res) => {
   try {
@@ -192,4 +193,121 @@ module.exports.getDoctorDetails = async (req, res) => {
             message: "Server error"
         });
     }
+};
+
+exports.sendPatientOTP = async (req, res) => {
+  try {
+    const { mobileNumber } = req.body;
+    const formattedMobile = formatMobileNumber(mobileNumber);
+    
+    const patient = await patientModel.findOne({ mobile: formattedMobile });
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: 'Patient not found with this mobile number'
+      });
+    }
+
+    const doctor = await doctorModel.findById(req.user._id);
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Store OTP temporarily (you can use your existing OTP service)
+    await otpService.sendOTP(formattedMobile, 'patient-access', {
+      otp,
+      doctorId: doctor._id,
+      patientId: patient._id,
+      message: `Your OTP for data access by Dr. ${doctor.fullName} is ${otp}`
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP sent successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+exports.verifyPatientOTP = async (req, res) => {
+  try {
+    const { mobileNumber, otp } = req.body;
+    const formattedMobile = formatMobileNumber(mobileNumber);
+    
+    const isVerified = await otpService.verifyOTP(formattedMobile, otp);
+    if (!isVerified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid OTP'
+      });
+    }
+
+    const patient = await patientModel.findOne({ mobile: formattedMobile });
+    const doctor = await doctorModel.findById(req.user._id);
+
+    // Add mutual references
+    if (!patient.doctors.includes(doctor._id)) {
+      patient.doctors.push(doctor._id);
+      await patient.save();
+    }
+    
+    if (!doctor.patients.includes(patient._id)) {
+      doctor.patients.push(patient._id);
+      await doctor.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Access granted successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+exports.getPatientFamily = async (req, res) => {
+  try {
+    const { patientId } = req.query;
+    const doctor = await doctorModel.findById(req.user._id);
+    
+    if (!doctor.patients.includes(patientId)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+
+    const patient = await patientModel.findById(patientId);
+    res.status(200).json({
+      success: true,
+      data: patient.family || []
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+exports.checkPatientAccess = async (req, res) => {
+  try {
+    const doctor = await doctorModel.findById(req.user._id);
+    const hasPatients = doctor.patients && doctor.patients.length > 0;
+
+    res.status(200).json({
+      success: true,
+      hasPatients
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
 };
