@@ -208,6 +208,31 @@ module.exports.getDoctorDetails = async (req, res) => {
 
 exports.sendPatientOTP = async (req, res) => {
   try {
+    const doctor = await doctorModel.findById(req.user._id);
+    
+    // Check license status first
+    if (doctor.licenseStatus === "Pending") {
+      return res.status(403).json({
+        success: false,
+        message: 'Administrator is Verifying Your Medical Document Once Verified you can Consult Patient',
+       
+      });
+    }
+
+    if (doctor.licenseStatus === "Rejected") {
+      return res.status(403).json({
+        success: false,
+        message: 'Sorry for the inconvenience. For some reason, administration rejected your document. Please contact us on: +91-94260-24009',
+      });
+    }
+
+    if (doctor.licenseStatus !== "Verified") {
+      return res.status(403).json({
+        success: false,
+        message: 'Invalid license status'
+      });
+    }
+
     const { mobileNumber } = req.body;
     const formattedMobile = formatMobileNumber(mobileNumber);
     
@@ -219,10 +244,8 @@ exports.sendPatientOTP = async (req, res) => {
       });
     }
 
-    const doctor = await doctorModel.findById(req.user._id);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     
-    // Store OTP temporarily (you can use your existing OTP service)
     await otpService.sendOTP(formattedMobile, 'patient-access', {
       otp,
       doctorId: doctor._id,
@@ -283,22 +306,27 @@ exports.verifyPatientOTP = async (req, res) => {
 
 exports.getPatients = async (req, res) => {
   try {
-    const doctor = await doctorModel.findById(req.user._id)
-      .populate('patients', 'fullName fullname email mobile')
-      .lean();
-    
+    // Find doctor first
+    const doctor = await doctorModel.findById(req.user._id);
     if (!doctor) {
       return res.status(404).json({
         success: false,
         message: 'Doctor not found'
       });
     }
-    
+
+    // Get patients data using the IDs from doctor.patients array
+    const patientsData = await patientModel
+      .find({ _id: { $in: doctor.patients } })
+      .select('fullname email mobile')
+      .lean();
+
     res.status(200).json({
       success: true,
-      data: doctor.patients || []
+      data: patientsData
     });
   } catch (error) {
+    console.error('Error in getPatients:', error);
     res.status(500).json({
       success: false,
       message: error.message
@@ -581,6 +609,51 @@ exports.uploadDocument = async (req, res) => {
       success: false,
       message: 'Failed to upload document',
       error: process.env.NODE_ENV === 'development' ? error.message : null
+    });
+  }
+};
+
+exports.removePatient = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    const doctorId = req.user._id;
+
+    // Remove patient from doctor's patients array
+    await doctorModel.findByIdAndUpdate(doctorId, {
+      $pull: { patients: patientId }
+    });
+
+    // Remove doctor from patient's doctors array
+    await patientModel.findByIdAndUpdate(patientId, {
+      $pull: { doctors: doctorId }
+    });
+
+    // Delete all documents uploaded by this doctor for this patient
+    await DocumentModel.deleteMany({
+      patient: patientId,
+      uploadedBy: doctorId
+    });
+
+    // Clear any cached data or sessions related to this patient
+    if (req.session) {
+      Object.keys(req.session).forEach(key => {
+        if (key.includes(patientId)) {
+          delete req.session[key];
+        }
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Patient removed successfully'
+    });
+
+  } catch (error) {
+    console.error('Error removing patient:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to remove patient',
+      error: error.message
     });
   }
 };

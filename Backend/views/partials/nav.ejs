@@ -1,0 +1,17 @@
+<nav class="admin-nav bg-white shadow-md py-4 px-6 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center">
+        <a href="/admin/dashboard" class="text-2xl font-bold text-[#0e606e]">
+            <img src="/images/logo.png" alt="Swasthya Sanjivani" class="h-10">
+        </a>
+    </div>
+    <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+        <div class="flex items-center gap-4">
+            <form action="/admin/logout" method="POST">
+                <button type="submit" 
+                        class="flex items-center px-4 py-2 bg-[#0e606e] hover:bg-[#0a4751] text-white rounded-lg transition-colors">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                </button>
+            </form>
+        </div>
+    <% } %>
+</nav>
