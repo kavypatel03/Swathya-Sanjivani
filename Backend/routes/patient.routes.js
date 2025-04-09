@@ -152,40 +152,42 @@ router.put('/update-family-member/:id', async (req, res) => {
 });
 
 // Get documents of a family member
-// Get documents of a family member (with file URLs)
-router.get('/get-family-member-documents/:familyId', authMiddleware, async (req, res) => {
+router.get('/get-family-member-documents/:familyId', async (req, res) => {
     const { familyId } = req.params;
 
     try {
-        const patient = await patientModel.findById(req.user._id)
-            .populate({
-                path: 'family.documents.document',
-                model: 'Document'
-            })
-            .select('family')
-            .lean();
+        // First check if the family member exists
+        const patient = await patientModel.findOne(
+            { 'family._id': familyId },
+            { 'family.$': 1 }
+        ).populate({
+            path: 'family.documents.document',
+            model: 'Document'
+        });
 
-        const familyMember = patient?.family?.find(member => member._id.toString() === familyId);
-
-        if (!familyMember) {
-            return res.status(404).json({ message: "❌ Family member not found" });
+        if (!patient || !patient.family || patient.family.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "❌ Family member not found" 
+            });
         }
 
-        // Map each document and append fileUrl
-        const documentsWithUrl = familyMember.documents.map(docEntry => {
-            const document = docEntry.document;
+        const familyMember = patient.family[0];
+        const documents = familyMember.documents || [];
 
-            // Construct a file viewing route
-            const fileUrl = `http://localhost:4000/patient/view-document/${document._id}`;  // 🔥 This is a route you already have
+        // Map each document and append fileUrl
+        const documentsWithUrl = documents.map(docEntry => {
+            const document = docEntry.document;
+            if (!document) return null;
 
             return {
-                ...docEntry,
+                ...docEntry.toObject(),
                 document: {
-                    ...document,
-                    fileUrl // 🔗 Add the URL for frontend
+                    ...document.toObject(),
+                    fileUrl: `http://localhost:4000/patient/view-document/${document._id}`
                 }
             };
-        });
+        }).filter(Boolean); // Remove null entries
 
         res.status(200).json({
             success: true,
@@ -194,31 +196,28 @@ router.get('/get-family-member-documents/:familyId', authMiddleware, async (req,
 
     } catch (error) {
         console.error("❌ Error fetching documents:", error);
-        res.status(500).json({ success: false, message: "❌ Server error." });
+        res.status(500).json({ 
+            success: false, 
+            message: "❌ Server error.",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 });
 
-
 // Upload document for family member
-router.post('/upload/:familyId', authMiddleware, uploadMiddleware, async (req, res) => {
+router.post('/upload/:familyId', uploadMiddleware, async (req, res) => {
     const familyId = req.params.familyId;
     const { documentName, documentType } = req.body;
     const file = req.file;
+
+    console.log('Received upload request:', { familyId, documentName, documentType, fileExists: !!file });
 
     if (!file) {
         return res.status(400).json({ message: '❌ No file uploaded' });
     }
 
     try {
-        
-        const uploadedBy = req.user?._id;
-        const patientId = req.user?.patientId;
-
-        if (!uploadedBy || !patientId) {
-            return res.status(400).json({ message: '❌ Missing user information in request' });
-        }
-
-        // Step 1: Create and Save New Document
+        // Create document with minimal required fields
         const newDocument = new documentModel({
             documentName,
             documentType,
@@ -227,42 +226,36 @@ router.post('/upload/:familyId', authMiddleware, uploadMiddleware, async (req, r
                 contentType: file.mimetype
             },
             familyMember: familyId,
-            uploadedBy,
-            patient: patientId
+            uploadedAt: new Date()
         });
 
-        await newDocument.save();
+        const savedDocument = await newDocument.save();
 
-        // Step 2: Add Document Reference to Family Member's `documents` Array
-        const updatedPatient = await patientModel.findOneAndUpdate(
+        // Update patient's family member documents
+        await patientModel.findOneAndUpdate(
             { 'family._id': familyId },
             { 
                 $push: {
                     'family.$.documents': {
-                        document: newDocument._id,  // Store document reference
-                        uploadedAt: new Date()      // Add uploaded date
+                        document: savedDocument._id,
+                        uploadedAt: new Date()
                     }
                 }
-            },
-            { new: true } // Return updated data
+            }
         );
-
-        if (!updatedPatient) {
-            return res.status(404).json({ message: "❌ Family member not found" });
-        }
 
         res.status(201).json({
             success: true,
-            message: '✅ Document uploaded and linked successfully',
-            documentId: newDocument._id,
-            updatedPatient
+            message: '✅ Document uploaded successfully',
+            documentId: savedDocument._id
         });
+
     } catch (error) {
         console.error("❌ Error uploading document:", error);
         res.status(500).json({
             success: false,
             message: '❌ Document upload failed',
-            error: process.env.NODE_ENV === 'development' ? error.message : null
+            error: error.toString()
         });
     }
 });

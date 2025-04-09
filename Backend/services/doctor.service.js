@@ -1,6 +1,7 @@
 const doctorModel = require("../models/doctor.model");
 const Doctor = require("../models/doctor.model");
 const bcrypt = require("bcrypt");
+const formatMobileNumber = require('../utils/mobileFormatter');
 
 module.exports.registerDoctor = async (data) => {
   const { fullName, mciNumber, medicalDocument, hospitalName, mobile, email, password, specialization } = data;
@@ -38,6 +39,24 @@ module.exports.registerDoctor = async (data) => {
   return newDoctor;
 };
 
+module.exports.createDoctor = async (doctorData) => {
+    try {
+        // Format mobile number if not already formatted
+        if (doctorData.mobile) {
+            doctorData.mobile = formatMobileNumber(doctorData.mobile);
+        }
+        
+        const doctor = new doctorModel(doctorData);
+        await doctor.save();
+        return doctor;
+    } catch (error) {
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyPattern)[0];
+            throw new Error(`This ${field} is already registered`);
+        }
+        throw error;
+    }
+};
 
 module.exports.loginDoctor = async ({ mobile, email, password }) => {
     if (!mobile || !email || !password) {

@@ -19,8 +19,7 @@ const patientSchema = new mongoose.Schema({
     mobile: {
         type: String,
         required: true,
-        unique: true,
-        match: [/^[6-9]\d{9}$/, "Please Enter a Valid 10-digit Indian Mobile Number"]
+        unique: true
     },
     email: {
         type: String,

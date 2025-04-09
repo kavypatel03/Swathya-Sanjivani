@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const UploadPopup = ({ isOpen, onClose, familyId }) => {
+const UploadPopup = ({ isOpen, onClose, familyId, patientId, isDoctor }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [documentName, setDocumentName] = useState("");
   const [documentType, setDocumentType] = useState("");
@@ -48,24 +48,27 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
       setUploadStatus("❌ Please enter document name and select type");
       return;
     }
-  
+
     const formData = new FormData();
     formData.append("file", selectedFile);
     formData.append("documentName", documentName);
     formData.append("documentType", documentType);
-  
+
     try {
-      console.log('Uploading to familyId:', familyId); // Debug log
-      const response = await axios.post(
-        `http://localhost:4000/patient/upload/${familyId}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data"
-          }
-        }
-      );
-  
+      let endpoint = `http://localhost:4000/patient/upload/${familyId}`;
+      if (isDoctor) {
+        endpoint = `http://localhost:4000/doctor/upload-document`;
+        formData.append("familyMemberId", familyId);
+        formData.append("patientId", patientId);
+      }
+
+      const response = await axios.post(endpoint, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        },
+        withCredentials: true
+      });
+
       if (response.status === 201) {
         setUploadStatus("✅ Document uploaded successfully!");
         setTimeout(() => {
@@ -74,7 +77,7 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
         }, 1500);
       }
     } catch (error) {
-      console.error('Upload error:', error.response?.data || error); // Enhanced error logging
+      console.error('Upload error:', error.response?.data || error);
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
