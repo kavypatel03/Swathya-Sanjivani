@@ -66,7 +66,7 @@ const doctorSchema = new mongoose.Schema({
   },
   licenseStatus: {
     type: String,
-    enum: ['Pending', 'Approved', 'Rejected'],
+    enum: ['Pending', 'Verified', 'Rejected'],
     default: 'Pending'
   },
   assistants: [

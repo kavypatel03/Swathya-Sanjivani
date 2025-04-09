@@ -49,7 +49,7 @@ exports.getDashboardStats = async (req, res) => {
 exports.getDoctorVerifications = async (req, res) => {
   try {
     const doctors = await Doctor.find({ licenseStatus: 'Pending' })
-      .select('fullName mobile medicalDocument licenseStatus');
+      .select('fullName mobile medicalDocuments licenseStatus specialization createdAt');
     res.render('doctor', { doctors });
   } catch (error) {
     res.status(500).send('Error fetching doctors');
@@ -69,12 +69,19 @@ exports.updateDoctorStatus = async (req, res) => {
 exports.viewDoctorDocument = async (req, res) => {
   try {
     const doctor = await Doctor.findById(req.params.doctorId);
-    if (!doctor || !doctor.medicalDocument) {
+    
+    // Check if doctor exists and has at least one medical document
+    if (!doctor || !doctor.medicalDocuments || doctor.medicalDocuments.length === 0) {
       return res.status(404).send('Document not found');
     }
-    res.set('Content-Type', doctor.medicalDocument.contentType);
-    res.send(doctor.medicalDocument.data);
+    
+    // Get the first document (you might want to handle multiple documents differently)
+    const document = doctor.medicalDocuments[0];
+    
+    res.set('Content-Type', document.contentType);
+    res.send(document.data);
   } catch (error) {
+    console.error('Error fetching document:', error);
     res.status(500).send('Error fetching document');
   }
 };
@@ -133,5 +140,31 @@ exports.getAllDoctors = async (req, res) => {
     res.json(doctors);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching doctors' });
+  }
+};
+exports.deleteDoctor = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+
+    // 1. First remove doctor from all patients' doctors array
+    await Patient.updateMany(
+      { doctors: doctorId },
+      { $pull: { doctors: doctorId } }
+    );
+
+    // 2. Then delete the doctor
+    await Doctor.findByIdAndDelete(doctorId);
+
+    // 3. Optional: Delete any documents uploaded by this doctor
+    await Document.deleteMany({ uploadedBy: doctorId });
+
+    res.json({ success: true, message: 'Doctor deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting doctor:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to delete doctor',
+      error: error.message 
+    });
   }
 };

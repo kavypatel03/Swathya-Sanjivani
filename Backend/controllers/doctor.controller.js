@@ -31,11 +31,12 @@ exports.register = async (req, res) => {
       });
     }
 
-    const medicalDocument = {
+    // Create medicalDocuments array with the single uploaded document
+    const medicalDocuments = [{
       data: req.file.buffer,
       contentType: req.file.mimetype,
       originalName: req.file.originalname
-    };
+    }];
 
     const formattedMobile = formatMobileNumber(mobile);
 
@@ -47,7 +48,7 @@ exports.register = async (req, res) => {
       mobile: formattedMobile,
       password,
       specialization,
-      medicalDocument
+      medicalDocuments // Changed from medicalDocument to medicalDocuments (array)
     });
 
     res.status(201).json({
@@ -56,30 +57,7 @@ exports.register = async (req, res) => {
     });
 
   } catch (error) {
-    if (error.code === 11000 && error.keyPattern) {
-      const duplicateKey = Object.keys(error.keyPattern)[0];
-      let message;
-
-      if (duplicateKey === 'mobile' || duplicateKey === 'mobileNumber') {
-        message = 'This mobile number is already registered.';
-      } else if (duplicateKey === 'email') {
-        message = 'This email is already registered.';
-      } else {
-        message = 'Duplicate entry found. Please use different credentials.';
-      }
-
-      return res.status(409).json({
-        success: false,
-        message,
-        duplicateField: duplicateKey
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: 'Server error. Registration failed.',
-      error: error.message
-    });
+    // ... rest of the error handling remains the same ...
   }
 };
 

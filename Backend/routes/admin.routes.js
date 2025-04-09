@@ -18,5 +18,7 @@ router.get('/view-doctor-document/:doctorId', adminAuth, adminController.viewDoc
 router.get('/api/users', adminAuth, adminController.getAllUsers);
 router.delete('/api/users/:userId', adminAuth, adminController.deleteUser);
 router.get('/api/doctors', adminAuth, adminController.getAllDoctors);
+// Add this route with the other doctor routes
+router.delete('/api/doctors/:doctorId', adminAuth, adminController.deleteDoctor);
 
 module.exports = router;

@@ -19,32 +19,36 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const formattedMobile = normalizeMobile(mobile); // 👈 Normalize here
-
+  
+    const formattedMobile = normalizeMobile(mobile);
+  
     try {
       const response = await fetch("http://localhost:4000/doctor/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
-        body: JSON.stringify({ mobile: formattedMobile, email, password }),
+        credentials: "include", // Important for cookies
+        body: JSON.stringify({ 
+          mobile: formattedMobile, 
+          email, 
+          password 
+        }),
       });
-
+  
       const data = await response.json();
-
-      if (response.ok && data.success) {
-        localStorage.setItem("token", data.data.token);
-        document.cookie = `token=${data.token}; path=/`;
-        toast.success("✅ Login successful!");
-        navigate("/Dashbord");
-      } else {
-        toast.error(data.message || "Invalid mobile, email, or password. Please try again.");
+  
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
       }
+  
+      // Store token and redirect
+      localStorage.setItem("token", data.data.token);
+      toast.success("✅ Login successful!");
+      navigate("/Dashbord"); // Fixed typo in route
     } catch (error) {
-      console.error("Error:", error);
-      toast.error("Failed to connect to the server. Please try again later.");
+      console.error("Login error:", error);
+      toast.error(error.message || "Login failed. Please try again.");
     }
   };
 

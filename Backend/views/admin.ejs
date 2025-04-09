@@ -241,33 +241,56 @@
             }
 
             function displayFilteredDoctors(doctors) {
-                const doctorList = doctors.map(doctor => `
-                    <div class="flex items-center justify-between py-3 border-b">
-                        <div>
-                            <p class="font-medium text-gray-800">${doctor.fullName}</p>
-                            <div class="text-sm text-gray-600">
-                                ${doctor.email ? `<p>Email: ${doctor.email}</p>` : ''}
-                                ${doctor.mobile ? `<p>Mobile: ${doctor.mobile}</p>` : ''}
-                                <p class="mt-1">
-                                    <span class="px-2 py-1 rounded-full text-xs ${
-                                        doctor.licenseStatus === 'Verified' ? 'bg-green-100 text-green-800' :
-                                        doctor.licenseStatus === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                                        'bg-red-100 text-red-800'
-                                    }">
-                                        ${doctor.licenseStatus}
-                                    </span>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="flex items-center">
-                            ${getLicenseStatusButtons(doctor)}
-                        </div>
-                    </div>
-                `).join('');
+  const doctorList = doctors.map(doctor => `
+    <div class="flex items-center justify-between py-3 border-b">
+      <div>
+        <p class="font-medium text-gray-800">${doctor.fullName}</p>
+        <div class="text-sm text-gray-600">
+          ${doctor.email ? `<p>Email: ${doctor.email}</p>` : ''}
+          ${doctor.mobile ? `<p>Mobile: ${doctor.mobile}</p>` : ''}
+          <p class="mt-1">
+            <span class="px-2 py-1 rounded-full text-xs ${
+              doctor.licenseStatus === 'Verified' ? 'bg-green-100 text-green-800' :
+              doctor.licenseStatus === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-red-100 text-red-800'
+            }">
+              ${doctor.licenseStatus}
+            </span>
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center">
+        ${getLicenseStatusButtons(doctor)}
+        <button onclick="deleteDoctor('${doctor._id}')" 
+                class="ml-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
 
-                document.getElementById('userDetailsContent').innerHTML = doctorList || 
-                    '<p class="text-center text-gray-500">No doctors found</p>';
-            }
+  document.getElementById('userDetailsContent').innerHTML = doctorList || 
+    '<p class="text-center text-gray-500">No doctors found</p>';
+}
+
+async function deleteDoctor(doctorId) {
+  if (confirm('Are you sure you want to delete this doctor? This will remove them from all patient records.')) {
+    try {
+      const response = await fetch(`/admin/api/doctors/${doctorId}`, {
+        method: 'DELETE'
+      });
+      const result = await response.json();
+      if (result.success) {
+        showDoctorDetails(); // Refresh the list
+      } else {
+        alert('Failed to delete doctor: ' + (result.message || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error deleting doctor:', error);
+      alert('Error deleting doctor');
+    }
+  }
+}
 
             async function updateDoctorStatus(doctorId, status) {
                 try {
