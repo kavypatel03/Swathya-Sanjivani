@@ -30,7 +30,10 @@ router.get('/dashboard', authMiddleware, doctorController.getDoctorDetails);
 // Add these new routes before module.exports
 router.post('/send-patient-otp', authMiddleware, doctorController.sendPatientOTP);
 router.post('/verify-patient-otp', authMiddleware, doctorController.verifyPatientOTP);
-router.get('/get-patient-family', authMiddleware, doctorController.getPatientFamily);
 router.get('/check-patient-access', authMiddleware, doctorController.checkPatientAccess);
+router.get('/get-patient-family', authMiddleware, doctorController.getPatientFamily);
+router.get('/get-family-member-documents', authMiddleware, doctorController.getFamilyMemberDocuments);
+router.delete('/delete-document/:documentId',authMiddleware, doctorController.deleteDocumentByDoctor);
+
 
 module.exports = router;

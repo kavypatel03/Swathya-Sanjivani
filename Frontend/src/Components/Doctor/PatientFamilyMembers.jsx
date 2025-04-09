@@ -1,45 +1,73 @@
 import React, { useState, useEffect } from 'react';
 
-function FamilyMembers() {
+function FamilyMembers({ onMemberSelect }) {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasPatients, setHasPatients] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedId, setSelectedId] = useState(localStorage.getItem('doctorSelectedFamilyId') || '');
+  const [patientId, setPatientId] = useState(null); // ✅ Store patient ID separately
 
   useEffect(() => {
-    const checkPatientAccess = async () => {
+    const fetchFamilyMembers = async () => {
       try {
-        const response = await fetch('http://localhost:4000/doctor/check-patient-access', {
+        const accessResponse = await fetch('http://localhost:4000/doctor/check-patient-access', {
           method: 'GET',
-          credentials: 'include'
+          credentials: 'include',
         });
-        
-        const data = await response.json();
-        if (data.success) {
-          setHasPatients(data.hasPatients);
-          if (data.hasPatients) {
-            const familyResponse = await fetch('http://localhost:4000/doctor/get-patient-family', {
-              method: 'GET',
-              credentials: 'include'
-            });
-            const familyData = await familyResponse.json();
-            if (familyData.success) {
-              setMembers(familyData.data);
+
+        const accessData = await accessResponse.json();
+
+        if (accessData.success && accessData.hasPatients) {
+          setHasPatients(true);
+          const pid = accessData.firstPatientId;
+          setPatientId(pid); // ✅ save patientId in state
+
+          const familyResponse = await fetch(`http://localhost:4000/doctor/get-patient-family?patientId=${pid}`, {
+            method: 'GET',
+            credentials: 'include',
+          });
+
+          const familyData = await familyResponse.json();
+
+          if (familyData.success) {
+            const familyMembers = familyData.data || [];
+            setMembers(familyMembers);
+
+            const storedId = localStorage.getItem('doctorSelectedFamilyId');
+            const foundMember = familyMembers.find((m) => m._id === storedId);
+
+            const defaultMember = foundMember || familyMembers[0];
+            if (defaultMember) {
+              handleMemberSelect({ ...defaultMember, patientId: pid });
             }
+          } else {
+            setError(familyData.message || 'Failed to load family members');
           }
+        } else {
+          setHasPatients(false);
         }
       } catch (error) {
-        console.error('Error checking patient access:', error);
+        console.error('Error:', error);
+        setError('Network error. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
-    
-    checkPatientAccess();
+
+    fetchFamilyMembers();
   }, []);
 
-  if (loading) {
-    return <div className="text-center">Loading...</div>;
-  }
+  const handleMemberSelect = (member) => {
+    const { documents, ...cleanedMember } = member;
+    const selectedWithPatient = { ...cleanedMember, patientId }; // ✅ add patientId
+    setSelectedId(member._id);
+    localStorage.setItem('doctorSelectedFamilyId', member._id);
+    onMemberSelect?.(selectedWithPatient); // ✅ pass cleaned member
+  };
+
+  if (loading) return <div className="text-center">Loading...</div>;
+  if (error) return <div className="text-center text-red-500">{error}</div>;
 
   if (!hasPatients) {
     return (
@@ -47,7 +75,9 @@ function FamilyMembers() {
         <div className="text-center">
           <div className="text-4xl mb-3">👨‍⚕️</div>
           <h2 className="text-xl font-medium text-[#0e606e] mb-2">No Patient Access Yet</h2>
-          <p className="text-gray-600 mb-4">To view patient family members, first add a patient using their mobile number.</p>
+          <p className="text-gray-600 mb-4">
+            To view patient family members, first add a patient using their mobile number.
+          </p>
           <p className="text-sm text-gray-500">Use the form above to request patient access</p>
         </div>
       </div>
@@ -59,27 +89,47 @@ function FamilyMembers() {
       <div className="flex justify-between items-center mb-3">
         <h2 className="text-xl font-medium text-[#0e606e]">Family Members</h2>
       </div>
-      
-      <div className="space-y-4">
-        {members.map(member => (
-          <div
-            key={member._id}
-            className="flex justify-between items-center p-2 rounded-md hover:bg-gray-50"
-          >
-            <div className="flex items-center">
-              <div className="h-10 w-10 rounded-full bg-[#e0f7fa] flex items-center justify-center">
-                {member.avatar || "👨"}
-              </div>
-              <div className="ml-3">
-                <div className="font-medium">{member.fullName}</div>
-                <div className="text-sm text-gray-500">
-                  Age: {member.calculatedAge || member.age || 'N/A'}
+
+      {members.length === 0 ? (
+        <p className="text-center text-gray-500">No family members found</p>
+      ) : (
+        <div className="space-y-4 overflow-y-auto max-h-[228px]">
+          {members.map((member) => {
+            const isSelected = selectedId === member._id;
+
+            return (
+              <div
+                key={member._id}
+                className={`flex justify-between items-center cursor-pointer p-2 rounded-md transition-colors duration-200 border-l-4 ${
+                  isSelected ? 'bg-[#e0f7fa] border-l-[#0e606e] shadow' : 'border-l-transparent hover:bg-gray-50'
+                }`}
+                onClick={() => handleMemberSelect(member)}
+              >
+                <div className="flex items-center">
+                  <div
+                    className={`h-10 w-10 rounded-full text-xl ${
+                      isSelected ? 'bg-[#0e606e] text-white' : 'bg-[#e0f7fa] text-gray-600'
+                    } flex items-center justify-center`}
+                  >
+                    {member.gender === 'Male' ? '👨' : member.gender === 'Female' ? '👩' : '👤'}
+                  </div>
+                  <div className="ml-3">
+                    <div className={`font-medium ${isSelected ? 'text-[#0e606e]' : ''}`}>{member.fullName}</div>
+                    <div className="text-sm text-gray-500">
+                      Age: {member.age || 'N/A'} | Relation: {member.relationWithMainPerson || 'N/A'}
+                    </div>
+                  </div>
                 </div>
+                {isSelected && (
+                  <div className="text-[#0e606e]">
+                    <i className="ri-check-line"></i>
+                  </div>
+                )}
               </div>
-            </div>
-          </div>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

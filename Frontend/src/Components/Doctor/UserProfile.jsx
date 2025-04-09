@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -12,26 +11,26 @@ function UserProfile() {
   useEffect(() => {
     const fetchDoctorData = async () => {
       try {
-        console.log('Fetching doctor data...');
-        const response = await axios.get('http://localhost:4000/doctor/dashboard', {
-          withCredentials: true
+        const response = await fetch('http://localhost:4000/doctor/dashboard', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          }
         });
 
-        if (response.data.success) {
-          const data = response.data.data;
-          setDoctorData({
-            ...data,
-            fullname: data.fullname || data.name || 'Guest'
-          });
-          setLastLogin(data.lastLogin || 'Unknown');
+        const data = await response.json();
+
+        if (data.success) {
+          setDoctorData(data.data);
+          setLastLogin(data.data.lastLogin || 'Just now');
         } else {
-          toast.error("Failed to fetch doctor details.");
-        }
-      } catch (error) {
-        if (error.response?.status === 401) {
+          toast.error("Failed to fetch doctor details");
           navigate('/DoctorLogin');
         }
-        toast.error(error.response?.data?.message || "Error fetching data");
+      } catch (error) {
+        toast.error("Session expired. Please login again");
+        navigate('/DoctorLogin');
       }
     };
 

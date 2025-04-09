@@ -55,14 +55,14 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
     formData.append("documentType", documentType);
   
     try {
+      console.log('Uploading to familyId:', familyId); // Debug log
       const response = await axios.post(
         `http://localhost:4000/patient/upload/${familyId}`,
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+            "Content-Type": "multipart/form-data"
+          }
         }
       );
   
@@ -74,6 +74,7 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
         }, 1500);
       }
     } catch (error) {
+      console.error('Upload error:', error.response?.data || error); // Enhanced error logging
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
@@ -81,7 +82,6 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
       setUploadStatus(`❌ ${errorMessage}`);
     }
   };
-  
 
   const handleClose = () => {
     onClose();
