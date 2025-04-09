@@ -2,11 +2,21 @@ const dotenv = require('dotenv');
 dotenv.config();
 const cors = require('cors');
 const express = require('express');
+const path = require('path');
 const app = express();
 const connectToDb = require('./db/db');
 const cookieParser = require('cookie-parser');
 const otpRoutes = require('./routes/otp.routes');
 const doctorRoutes = require('./routes/doctor.routes');
+const adminRoutes = require('./routes/admin.routes');
+
+// Set up view engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+// Configure static files
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/css', express.static(path.join(__dirname, 'public/css')));
 
 app.use(cookieParser());   
 
@@ -38,5 +48,15 @@ app.use('/otp', otpRoutes); // Now accessible at /otp/send-otp
 // Mount routes
 app.use('/doctor', doctorRoutes);
 app.use('/patient', require('./routes/patient.routes'));
+app.use('/admin', adminRoutes);
+
+// Error handler middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).render('error', { 
+        message: 'Something broke!',
+        error: process.env.NODE_ENV === 'development' ? err : {}
+    });
+});
 
 module.exports = app;

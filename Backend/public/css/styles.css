@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .btn-primary {
+    @apply bg-[#0e606e] text-white px-4 py-2 rounded hover:bg-opacity-90;
+  }
+  
+  .btn-secondary {
+    @apply bg-[#ff9700] text-white px-4 py-2 rounded hover:bg-opacity-90;
+  }
+}

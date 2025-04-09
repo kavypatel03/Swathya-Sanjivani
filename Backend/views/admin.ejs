@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard - Swasthya Sanjivani</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .stats-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <%- include('partials/nav', { isAdmin: true }) %>
+    
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-[#0e606e]">Admin Dashboard</h1>
+                <p class="text-gray-600 mt-2">Welcome back! Here's your overview</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <span class="bg-[#0e606e] text-white px-4 py-2 rounded-full text-sm font-medium">
+                    <i class="fas fa-shield-alt mr-2"></i>Admin Access
+                </span>
+            </div>
+        </div>
+        
+        <!-- Stats Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <!-- Patients Card -->
+            <div class="stats-card bg-white rounded-xl p-6 border-l-4 border-[#0e606e]">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 font-medium">Total Patients</p>
+                        <p class="text-3xl font-bold text-[#0e606e] mt-2"><%= stats.patientCount %></p>
+                    </div>
+                    <div class="bg-[#0e606e]/10 p-3 rounded-full">
+                        <i class="fas fa-user-injured text-[#0e606e] text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-green-600 text-sm mt-4">
+                    <i class="fas fa-arrow-up mr-1"></i> 12% from last month
+                </p>
+            </div>
+            
+            <!-- Doctors Card -->
+            <div class="stats-card bg-white rounded-xl p-6 border-l-4 border-[#0e606e]">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 font-medium">Total Doctors</p>
+                        <p class="text-3xl font-bold text-[#0e606e] mt-2"><%= stats.doctorCount %></p>
+                    </div>
+                    <div class="bg-[#0e606e]/10 p-3 rounded-full">
+                        <i class="fas fa-user-md text-[#0e606e] text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-green-600 text-sm mt-4">
+                    <i class="fas fa-arrow-up mr-1"></i> 8% from last month
+                </p>
+            </div>
+            
+            <!-- Documents Card -->
+            <div class="stats-card bg-white rounded-xl p-6 border-l-4 border-[#0e606e]">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 font-medium">Total Documents</p>
+                        <p class="text-3xl font-bold text-[#0e606e] mt-2"><%= stats.documentCount %></p>
+                    </div>
+                    <div class="bg-[#0e606e]/10 p-3 rounded-full">
+                        <i class="fas fa-file-alt text-[#0e606e] text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-green-600 text-sm mt-4">
+                    <i class="fas fa-arrow-up mr-1"></i> 15% from last month
+                </p>
+            </div>
+            
+            <!-- Pending Verifications Card -->
+            <div class="stats-card bg-white rounded-xl p-6 border-l-4 border-[#ff9700]">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 font-medium">Pending Verifications</p>
+                        <p class="text-3xl font-bold text-[#ff9700] mt-2"><%= stats.pendingDoctors %></p>
+                    </div>
+                    <div class="bg-[#ff9700]/10 p-3 rounded-full">
+                        <i class="fas fa-clock text-[#ff9700] text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-red-600 text-sm mt-4">
+                    <i class="fas fa-exclamation-circle mr-1"></i> Requires attention
+                </p>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-[#0e606e]">Quick Actions</h2>
+                <div class="relative">
+                    <input type="text" 
+                           id="searchInput" 
+                           placeholder="Search..." 
+                           class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e606e]">
+                    <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-4">
+                <a href="/admin/doctor-verifications" 
+                   class="flex items-center justify-center px-6 py-3 bg-[#0e606e] hover:bg-[#0a4751] text-white rounded-lg transition-colors">
+                    <i class="fas fa-user-check mr-2"></i> Doctor Verifications
+                </a>
+                <button onclick="showUserDetails()" 
+                   class="flex items-center justify-center px-6 py-3 bg-white border border-[#0e606e] text-[#0e606e] hover:bg-[#0e606e]/5 rounded-lg transition-colors">
+                    <i class="fas fa-users mr-2"></i> Manage Users
+                </button>
+                <button onclick="showDoctorDetails()" 
+                   class="flex items-center justify-center px-6 py-3 bg-white border border-[#0e606e] text-[#0e606e] hover:bg-[#0e606e]/5 rounded-lg transition-colors">
+                    <i class="fas fa-user-md mr-2"></i> Manage Doctors
+                </button>
+            </div>
+        </div>
+
+        <!-- User Details Section (Previously Recent Activity) -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-xl font-semibold text-[#0e606e] mb-4">User Details</h2>
+            <div id="userDetailsContent">
+                <div class="flex items-center justify-center py-12 text-gray-400">
+                    <i class="fas fa-users text-4xl mr-3"></i>
+                    <p>Click on Manage Users to view user details</p>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            let allUsers = []; // Store all users for filtering
+
+            async function showUserDetails() {
+                try {
+                    const response = await fetch('/admin/api/users');  // Updated path
+                    allUsers = await response.json();
+                    displayFilteredUsers(allUsers);
+                } catch (error) {
+                    console.error('Error fetching users:', error);
+                }
+            }
+
+            function displayFilteredUsers(users) {
+                const userList = users.map(user => `
+                    <div class="flex items-center justify-between py-3 border-b">
+                        <div>
+                            <p class="font-medium text-gray-800">${user.fullName}</p>
+                            <div class="text-sm text-gray-600">
+                                ${user.email ? `<p>Email: ${user.email}</p>` : ''}
+                                ${user.mobile ? `<p>Mobile: ${user.mobile}</p>` : ''}
+                                ${user.relation ? `<p>Relation: ${user.relation}</p>` : ''}
+                                ${user.mainUserMobile ? `<p>Main User Mobile: ${user.mainUserMobile}</p>` : ''}
+                            </div>
+                        </div>
+                        <button onclick="deleteUser('${user._id}')" 
+                                class="px-3 py-1 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `).join('');
+
+                document.getElementById('userDetailsContent').innerHTML = userList || 
+                    '<p class="text-center text-gray-500">No users found</p>';
+            }
+
+            // Add search functionality
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredUsers = allUsers.filter(user => 
+                    (user.fullName && user.fullName.toLowerCase().includes(searchTerm)) ||
+                    (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+                    (user.mobile && user.mobile.includes(searchTerm))
+                );
+                displayFilteredUsers(filteredUsers);
+            });
+
+            async function deleteUser(userId) {
+                if (confirm('Are you sure you want to delete this user?')) {
+                    try {
+                        const response = await fetch(`/admin/api/users/${userId}`, {  // Updated path
+                            method: 'DELETE'
+                        });
+                        if (response.ok) {
+                            showUserDetails(); // Refresh the list
+                        } else {
+                            alert('Failed to delete user');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting user:', error);
+                        alert('Error deleting user');
+                    }
+                }
+            }
+
+            async function showDoctorDetails() {
+                try {
+                    const response = await fetch('/admin/api/doctors');
+                    allUsers = await response.json();
+                    displayFilteredDoctors(allUsers);
+                } catch (error) {
+                    console.error('Error fetching doctors:', error);
+                }
+            }
+
+            function getLicenseStatusButtons(doctor) {
+                if (doctor.licenseStatus === 'Verified') {
+                    return `
+                        <button onclick="updateDoctorStatus('${doctor._id}', 'Pending')" class="px-2 py-1 text-yellow-600 hover:bg-yellow-50 rounded-lg mr-2">
+                            <i class="fas fa-clock"></i> Pending
+                        </button>
+                        <button onclick="updateDoctorStatus('${doctor._id}', 'Rejected')" class="px-2 py-1 text-red-600 hover:bg-red-50 rounded-lg">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    `;
+                } else if (doctor.licenseStatus === 'Pending') {
+                    return `
+                        <button onclick="updateDoctorStatus('${doctor._id}', 'Verified')" class="px-2 py-1 text-green-600 hover:bg-green-50 rounded-lg mr-2">
+                            <i class="fas fa-check"></i> Accept
+                        </button>
+                        <button onclick="updateDoctorStatus('${doctor._id}', 'Rejected')" class="px-2 py-1 text-red-600 hover:bg-red-50 rounded-lg">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    `;
+                }
+                return `
+                    <button onclick="updateDoctorStatus('${doctor._id}', 'Pending')" class="px-2 py-1 text-yellow-600 hover:bg-yellow-50 rounded-lg">
+                        <i class="fas fa-redo"></i> Review Again
+                    </button>
+                `;
+            }
+
+            function displayFilteredDoctors(doctors) {
+                const doctorList = doctors.map(doctor => `
+                    <div class="flex items-center justify-between py-3 border-b">
+                        <div>
+                            <p class="font-medium text-gray-800">${doctor.fullName}</p>
+                            <div class="text-sm text-gray-600">
+                                ${doctor.email ? `<p>Email: ${doctor.email}</p>` : ''}
+                                ${doctor.mobile ? `<p>Mobile: ${doctor.mobile}</p>` : ''}
+                                <p class="mt-1">
+                                    <span class="px-2 py-1 rounded-full text-xs ${
+                                        doctor.licenseStatus === 'Verified' ? 'bg-green-100 text-green-800' :
+                                        doctor.licenseStatus === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-red-100 text-red-800'
+                                    }">
+                                        ${doctor.licenseStatus}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            ${getLicenseStatusButtons(doctor)}
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('userDetailsContent').innerHTML = doctorList || 
+                    '<p class="text-center text-gray-500">No doctors found</p>';
+            }
+
+            async function updateDoctorStatus(doctorId, status) {
+                try {
+                    const response = await fetch(`/admin/update-doctor-status/${doctorId}/${status}`, {
+                        method: 'POST'
+                    });
+                    if (response.ok) {
+                        showDoctorDetails(); // Refresh the list
+                    } else {
+                        alert('Failed to update doctor status');
+                    }
+                } catch (error) {
+                    console.error('Error updating doctor status:', error);
+                    alert('Error updating doctor status');
+                }
+            }
+
+            // Update search functionality to work with both users and doctors
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredItems = allUsers.filter(item => 
+                    (item.fullName && item.fullName.toLowerCase().includes(searchTerm)) ||
+                    (item.email && item.email.toLowerCase().includes(searchTerm)) ||
+                    (item.mobile && item.mobile.includes(searchTerm))
+                );
+                if (allUsers[0]?.licenseStatus !== undefined) {
+                    displayFilteredDoctors(filteredItems);
+                } else {
+                    displayFilteredUsers(filteredItems);
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>

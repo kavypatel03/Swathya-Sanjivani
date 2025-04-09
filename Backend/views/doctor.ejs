@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Doctor Verifications - Swasthya Sanjivani</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .doctor-card {
+            transition: all 0.3s ease;
+        }
+        .doctor-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .action-btn {
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <%- include('partials/nav', { isAdmin: true }) %>
+    
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-[#0e606e]">Doctor Verifications</h1>
+                <p class="text-gray-600 mt-2">Review and verify doctor applications</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <span class="bg-[#0e606e] text-white px-4 py-2 rounded-full text-sm font-medium">
+                    <i class="fas fa-user-shield mr-2"></i>Verification Panel
+                </span>
+            </div>
+        </div>
+
+        <!-- Verification Cards Grid -->
+        <div class="grid grid-cols-1 gap-6">
+            <% doctors.forEach(function(doctor) { %>
+            <div class="doctor-card bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between">
+                        <!-- Doctor Info -->
+                        <div class="mb-4 md:mb-0">
+                            <h3 class="text-xl font-semibold text-[#0e606e]"><%= doctor.fullName %></h3>
+                            <div class="flex items-center mt-2 text-gray-600">
+                                <i class="fas fa-phone-alt mr-2"></i>
+                                <span><%= doctor.mobile %></span>
+                            </div>
+                            <% if (doctor.specialization) { %>
+                            <div class="flex items-center mt-1 text-gray-600">
+                                <i class="fas fa-stethoscope mr-2"></i>
+                                <span><%= doctor.specialization %></span>
+                            </div>
+                            <% } %>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <a href="/admin/view-doctor-document/<%= doctor._id %>" 
+                               target="_blank"
+                               class="action-btn flex items-center justify-center px-4 py-2 bg-[#0e606e] hover:bg-[#0a4751] text-white rounded-lg">
+                                <i class="fas fa-file-alt mr-2"></i> View Documents
+                            </a>
+                            
+                            <form class="flex-1" action="/admin/update-doctor-status/<%= doctor._id %>/Verified" method="POST">
+                                <button type="submit" 
+                                        class="action-btn w-full flex items-center justify-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg">
+                                    <i class="fas fa-check-circle mr-2"></i> Accept
+                                </button>
+                            </form>
+                            
+                            <form class="flex-1" action="/admin/update-doctor-status/<%= doctor._id %>/Rejected" method="POST">
+                                <button type="submit" 
+                                        class="action-btn w-full flex items-center justify-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg">
+                                    <i class="fas fa-times-circle mr-2"></i> Reject
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status Badge -->
+                <div class="px-6 py-3 bg-gray-50 border-t flex justify-between items-center">
+                    <span class="text-sm text-gray-500">
+                        <i class="far fa-clock mr-1"></i> Submitted on: <%= new Date(doctor.createdAt).toLocaleDateString() %>
+                    </span>
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        <i class="fas fa-hourglass-half mr-1"></i> Pending Verification
+                    </span>
+                </div>
+            </div>
+            <% }); %>
+
+            <% if (doctors.length === 0) { %>
+            <div class="bg-white rounded-xl shadow-sm p-8 text-center">
+                <i class="fas fa-check-circle text-4xl text-green-500 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">All caught up!</h3>
+                <p class="text-gray-500">There are no pending doctor verifications at this time.</p>
+            </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Toast Notification Script (if needed) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <% if (typeof toastMessage !== 'undefined') { %>
+        <script>
+            toastr.options = {
+                positionClass: "toast-top-right",
+                progressBar: true,
+                timeOut: 3000
+            };
+            <% if (toastMessage.type === 'success') { %>
+                toastr.success('<%= toastMessage.message %>');
+            <% } else if (toastMessage.type === 'error') { %>
+                toastr.error('<%= toastMessage.message %>');
+            <% } %>
+        </script>
+    <% } %>
+</body>
+</html>

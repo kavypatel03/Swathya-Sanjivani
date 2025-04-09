@@ -61,4 +61,11 @@ router.get('/view-document/:documentId/:familyMemberId/:patientId', authMiddlewa
 
 // Add this route before module.exports
 router.post('/upload-document', authMiddleware, upload.single('file'), doctorController.uploadDocument);
+
+// Add this new route before module.exports
+router.delete('/remove-patient/:patientId', authMiddleware, doctorController.removePatient);
+
+// Add this route before module.exports
+router.get('/get-patients', authMiddleware, doctorController.getPatients);
+
 module.exports = router;
