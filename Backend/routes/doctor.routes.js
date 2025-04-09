@@ -5,6 +5,7 @@ const { body } = require('express-validator');
 const multer = require('multer');
 const doctorController = require('../controllers/doctor.controller');
 const authMiddleware = require('../middleware/auth.middleware');
+const documentModel = require('../models/documents.model');
 
 // Configure multer
 const upload = multer({
@@ -33,7 +34,31 @@ router.post('/verify-patient-otp', authMiddleware, doctorController.verifyPatien
 router.get('/check-patient-access', authMiddleware, doctorController.checkPatientAccess);
 router.get('/get-patient-family', authMiddleware, doctorController.getPatientFamily);
 router.get('/get-family-member-documents', authMiddleware, doctorController.getFamilyMemberDocuments);
-router.delete('/delete-document/:documentId',authMiddleware, doctorController.deleteDocumentByDoctor);
+router.delete('/delete-document/:documentId', authMiddleware, doctorController.deleteDocumentByDoctor);
 
+// Update the view document route
+router.get('/view-document/:documentId/:familyMemberId/:patientId', authMiddleware, async (req, res) => {
+    const { documentId, familyMemberId, patientId } = req.params;
 
+    if (!familyMemberId || !patientId) {
+        return res.status(400).json({ success: false, message: 'Family member ID and patient ID are required' });
+    }
+
+    try {
+        const document = await documentModel.findById(documentId);
+
+        if (!document || !document.file || !document.file.data) {
+            return res.status(404).json({ success: false, message: '❌ Document not found' });
+        }
+
+        res.set('Content-Type', document.file.contentType);
+        res.send(document.file.data);
+    } catch (error) {
+        console.error('❌ Error fetching document:', error);
+        res.status(500).json({ success: false, message: '❌ Server error while fetching document' });
+    }
+});
+
+// Add this route before module.exports
+router.post('/upload-document', authMiddleware, upload.single('file'), doctorController.uploadDocument);
 module.exports = router;

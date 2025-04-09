@@ -1,63 +1,34 @@
-// ✅ Updated: PatientHealthDocuments component for doctors
-
-import React, { useEffect, useState } from "react";
+import React from "react";
 import axios from "axios";
 import { saveAs } from "file-saver";
 
-function PatientHealthDocuments({ selectedMember }) {
-  const [documents, setDocuments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+function PatientHealthDocuments({ selectedMember, documents, refreshDocuments, loading, error }) {
+  const openPreview = (doc) => {
+    if (doc.document?._id) {
+      const fileUrl = `http://localhost:4000/doctor/get-family-member-documents?documentId=${doc.document._id}&familyMemberId=${selectedMember._id}&patientId=${selectedMember.patientId}`;
+      window.open(fileUrl, "_blank", "noopener,noreferrer");
+    } else {
+      alert("❌ Unable to open document. Document ID is missing.");
+    }
+  };
 
-  const fetchDocuments = async () => {
+  const downloadFile = async (doc) => {
     try {
-      if (!selectedMember?._id || !selectedMember?.patientId) return;
-
       const response = await axios.get(
         `http://localhost:4000/doctor/get-family-member-documents`,
         {
           params: {
+            documentId: doc.document._id,
             familyMemberId: selectedMember._id,
             patientId: selectedMember.patientId
           },
+          responseType: 'blob',
           withCredentials: true
         }
       );
 
-      if (response.data.success) {
-        setDocuments(response.data.data);
-      } else {
-        setDocuments([]);
-      }
-    } catch (error) {
-      console.error("❌ Error fetching documents:", error);
-      setError("Error loading documents");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (selectedMember?._id) {
-      setLoading(true);
-      fetchDocuments();
-    }
-  }, [selectedMember]);
-
-  const openPreview = (doc) => {
-    const fileUrl = doc.document?.fileUrl;
-    if (fileUrl) {
-      window.open(fileUrl, "_blank", "noopener,noreferrer");
-    } else {
-      alert("❌ Unable to open document. File URL is missing.");
-    }
-  };
-
-  const downloadFile = async (url, filename) => {
-    try {
-      const response = await fetch(url, { credentials: "include" });
-      const blob = await response.blob();
-      saveAs(blob, filename);
+      const blob = new Blob([response.data], { type: doc.document.file.contentType });
+      saveAs(blob, doc.document.documentName || 'document.pdf');
     } catch (error) {
       console.error("Download error", error);
       alert("❌ Failed to download the document.");
@@ -84,7 +55,7 @@ function PatientHealthDocuments({ selectedMember }) {
             })
             .then((res) => {
               if (res.data.success) {
-                setDocuments((prev) => prev.filter((d) => d.document?._id !== docId));
+                refreshDocuments(); // ✅ Auto refresh after delete
                 Swal.default.fire({
                   title: "Deleted!",
                   text: "The document has been deleted.",
@@ -105,7 +76,6 @@ function PatientHealthDocuments({ selectedMember }) {
       });
     });
   };
-  
 
   return (
     <div className="relative bg-white rounded-lg shadow p-3 mt-4">
@@ -128,7 +98,6 @@ function PatientHealthDocuments({ selectedMember }) {
           ) : (
             documents.map((doc) => {
               const docId = doc.document?._id;
-              const fileUrl = doc.document?.fileUrl;
               const name = doc.document?.documentName || "Untitled";
 
               return (
@@ -146,7 +115,7 @@ function PatientHealthDocuments({ selectedMember }) {
                       <i className="ri-eye-line text-2xl" />
                     </button>
                     <button
-                      onClick={() => downloadFile(fileUrl, name)}
+                      onClick={() => downloadFile(doc)}
                       className="text-green-500 hover:text-green-700"
                       title="Download Document"
                     >
@@ -155,7 +124,6 @@ function PatientHealthDocuments({ selectedMember }) {
                     <button
                       className="text-red-500 hover:text-red-700"
                       onClick={() => handleDelete(docId)}
-                      title="Delete Disabled for Doctors"
                     >
                       <i className="ri-delete-bin-line text-2xl" />
                     </button>

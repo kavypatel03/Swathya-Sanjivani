@@ -372,8 +372,23 @@ exports.getPatientFamily = async (req, res) => {
 
 exports.getFamilyMemberDocuments = async (req, res) => {
   try {
-    const { familyMemberId, patientId } = req.query;
+    const { familyMemberId, patientId, documentId } = req.query;
 
+    // If documentId is provided, serve the file directly
+    if (documentId) {
+      const document = await DocumentModel.findById(documentId);
+      if (!document) {
+        return res.status(404).json({
+          success: false,
+          message: 'Document not found'
+        });
+      }
+
+      res.setHeader('Content-Type', document.file.contentType);
+      return res.send(document.file.data);
+    }
+
+    // Rest of your existing logic for listing documents...
     if (!familyMemberId || !patientId) {
       return res.status(400).json({
         success: false,
@@ -416,9 +431,12 @@ exports.getFamilyMemberDocuments = async (req, res) => {
     const documents = await Promise.all(
       documentRefs.map(async (ref) => {
         const fullDoc = await DocumentModel.findById(ref.document).lean();
-        if (!fullDoc) return null; // handle deleted doc
+        if (!fullDoc) return null;
         return {
-          document: fullDoc,
+          document: {
+            ...fullDoc,
+            fileUrl: `http://localhost:4000/doctor/get-family-member-documents?documentId=${fullDoc._id}`
+          },
           uploadedAt: ref.uploadedAt,
           _id: ref._id
         };
@@ -496,6 +514,73 @@ exports.deleteDocumentByDoctor = async (req, res) => {
       success: false,
       message: 'Internal server error',
       error: error.message,
+    });
+  }
+};
+
+
+exports.uploadDocument = async (req, res) => {
+  try {
+    const { familyMemberId, patientId, documentName, documentType } = req.body;
+    const file = req.file;
+
+    if (!file || !familyMemberId || !patientId || !documentName || !documentType) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required'
+      });
+    }
+
+    // Verify doctor has access to this patient
+    const doctor = await doctorModel.findById(req.user._id);
+    if (!doctor.patients.includes(patientId)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have access to this patient'
+      });
+    }
+
+    // Create new document
+    const newDocument = new DocumentModel({
+      documentName,
+      documentType,
+      file: {
+        data: file.buffer,
+        contentType: file.mimetype
+      },
+      patient: patientId,
+      familyMember: familyMemberId,
+      uploadedBy: req.user._id,
+      uploadedAt: new Date()
+    });
+
+    const savedDocument = await newDocument.save();
+
+    // Add document reference to family member
+    await patientModel.findOneAndUpdate(
+      { _id: patientId, 'family._id': familyMemberId },
+      { 
+        $push: {
+          'family.$.documents': {
+            document: savedDocument._id,
+            uploadedAt: new Date()
+          }
+        }
+      }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Document uploaded successfully',
+      documentId: savedDocument._id
+    });
+
+  } catch (error) {
+    console.error('Error uploading document:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload document',
+      error: process.env.NODE_ENV === 'development' ? error.message : null
     });
   }
 };
