@@ -38,7 +38,7 @@ const PatientFamilyPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <main className="container mx-auto p-1"> {/* Removed side spacing */}
+      <main className="container mx-auto p-2">
         <PatientUserProfile 
           name={patientData.fullname || "Guest User"} 
           lastLogin={patientData.lastLogin || "Unknown"} 
