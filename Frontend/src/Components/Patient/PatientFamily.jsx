@@ -47,8 +47,28 @@ function FamilyMembers({ setSelectedMember }) {
     localStorage.setItem('selectedFamilyId', member._id);
   };
   
+  // Custom scrollbar styles for webkit browsers
+  const scrollbarWebkitStyles = `
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 10px; // Increase this value to make the scrollbar wider
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #0e606e;
+    border-radius: 20px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-button {
+    height: 0;
+    width: 0;
+    background: transparent;
+  }
+`;
+
   return (
     <div className="bg-white rounded-lg shadow p-3">
+      <style>{scrollbarWebkitStyles}</style>
       <div className="flex justify-between items-center mb-3">
         <h2 className="text-xl font-medium text-[#0e606e]">Family Members</h2>
         <Link to={'/PatientAddMemPage'} className="text-blue-500 hover:text-blue-700">
@@ -61,7 +81,14 @@ function FamilyMembers({ setSelectedMember }) {
       ) : error ? (
         <p className="text-center text-red-500">{error}</p>
       ) : (
-        <div className="space-y-4">
+          <div
+          className="space-y-4 custom-scrollbar overflow-y-auto h-[225px]"
+          style={{
+            scrollbarWidth: 'auto', // Changed from 'thin' to 'auto' for wider scrollbar in Firefox
+            scrollbarColor: '#0e606e transparent',
+            paddingRight: '10px', // Increased padding to accommodate wider scrollbar
+          }}
+        >
           {members.map((member) => (
             <div
               key={member._id}

@@ -61,7 +61,7 @@ function HealthDocuments({ selectedMember, currentPatient, setSelectedMember }) 
           text: "This will permanently delete the document.",
           icon: "warning",
           showCancelButton: true,
-          confirmButtonColor: "#0e606e", 
+          confirmButtonColor: "#0e606e",
           cancelButtonColor: "#ef4444",
           confirmButtonText: "Yes, delete it!",
           background: "#ffffff",
@@ -82,7 +82,7 @@ function HealthDocuments({ selectedMember, currentPatient, setSelectedMember }) 
                     text: "The document has been deleted.",
                     icon: "success",
                     confirmButtonText: "Done",
-                    confirmButtonColor:"#0e606e",
+                    confirmButtonColor: "#0e606e",
                     iconColor: "#0e606e"
                   });
                 } else {
@@ -118,8 +118,29 @@ function HealthDocuments({ selectedMember, currentPatient, setSelectedMember }) 
     }
   };
 
+  // Custom scrollbar styles for webkit browsers
+  const scrollbarWebkitStyles = `
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 12px; // Increase this value to make the scrollbar wider
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #0e606e;
+    border-radius: 20px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-button {
+    height: 0;
+    width: 0;
+    background: transparent;
+  }
+`;
+
   return (
-    <div className="relative bg-white rounded-lg shadow p-4 ">
+    <div className="relative bg-white rounded-lg shadow p-4 h-[525px]">
+      <style>{scrollbarWebkitStyles}</style>
+
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-medium text-[#0e606e]">
           {selectedMember?.fullName
@@ -141,7 +162,14 @@ function HealthDocuments({ selectedMember, currentPatient, setSelectedMember }) 
       ) : error ? (
         <p className="text-center text-red-500">{error}</p>
       ) : (
-        <div className="space-y-6 pr-3 overflow-y-auto h-[430px]">
+        <div
+          className="space-y-6 custom-scrollbar pl-1 pr-4 overflow-y-auto h-[430px]"
+          style={{
+            scrollbarWidth: 'auto', // Changed from 'thin' to 'auto' for wider scrollbar in Firefox
+            scrollbarColor: '#0e606e transparent',
+            paddingRight: '16px', // Increased padding to accommodate wider scrollbar
+          }}
+        >
           {(!documents || documents.length === 0) ? (
             <p className="text-center text-gray-500">📄 No documents uploaded yet.</p>
           ) : (
