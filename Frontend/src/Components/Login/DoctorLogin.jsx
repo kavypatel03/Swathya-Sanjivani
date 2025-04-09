@@ -38,7 +38,7 @@ function Login() {
         localStorage.setItem("token", data.data.token);
         document.cookie = `token=${data.token}; path=/`;
         toast.success("✅ Login successful!");
-        navigate("/DoctorDashboard");
+        navigate("/Dashbord");
       } else {
         toast.error(data.message || "Invalid mobile, email, or password. Please try again.");
       }

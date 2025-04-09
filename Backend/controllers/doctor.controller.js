@@ -1,5 +1,7 @@
 const doctorService = require("../services/doctor.service");
 const otpService = require("../services/otp.services");
+const formatMobileNumber = require('../utils/mobileFormatter');
+const doctorModel = require('../models/doctor.model');
 
 exports.register = async (req, res) => {
   try {
@@ -33,7 +35,7 @@ exports.register = async (req, res) => {
       originalName: req.file.originalname
     };
 
-    const formattedMobile = mobile.startsWith('+91') ? mobile : `+91${mobile}`;
+    const formattedMobile = formatMobileNumber(mobile);
 
     const doctor = await doctorService.registerDoctor({
       fullName,
@@ -120,7 +122,7 @@ module.exports.loginDoctor = async (req, res, next) => {
     try {
         const { mobile, email, password } = req.body;
 
-        const formattedMobile = mobile.startsWith('+91') ? mobile : `+91${mobile}`;
+        const formattedMobile = mobile ? formatMobileNumber(mobile) : null;
 
         const doctor = await doctorService.loginDoctor({
             mobile: formattedMobile,
@@ -149,6 +151,45 @@ module.exports.loginDoctor = async (req, res, next) => {
         res.status(401).json({
             success: false,
             message: error.message,
+        });
+    }
+};
+
+module.exports.getDoctorDetails = async (req, res) => {
+    try {
+        const doctor = await doctorModel
+            .findById(req.user._id)
+            .select('fullName email mobile specialization userType')
+            .lean();
+
+        if (!doctor) {
+            return res.status(404).json({
+                success: false,
+                message: "Doctor not found"
+            });
+        }
+
+        const doctorData = {
+            fullname: doctor.fullName, // Handle both name fields
+            email: doctor.email,
+            mobile: doctor.mobile,
+            specialization: doctor.specialization,
+            lastLogin: new Date().toLocaleString('en-IN', {
+                weekday: 'long',
+                hour: '2-digit',
+                minute: '2-digit'
+            })
+        };
+
+        res.status(200).json({
+            success: true,
+            data: doctorData
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server error"
         });
     }
 };

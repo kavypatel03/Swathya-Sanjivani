@@ -4,6 +4,7 @@ const router = express.Router();
 const { body } = require('express-validator');
 const multer = require('multer');
 const doctorController = require('../controllers/doctor.controller');
+const authMiddleware = require('../middleware/auth.middleware');
 
 // Configure multer
 const upload = multer({
@@ -22,5 +23,8 @@ router.post('/login', [
     body('email').isEmail().withMessage("Please Enter a Valid Email Address"),
     body('password').isLength({ min: 6 }).withMessage("Password Must Be At Least 6 characters")
 ], doctorController.loginDoctor);
+
+// Add this route with auth middleware
+router.get('/dashboard', authMiddleware, doctorController.getDoctorDetails);
 
 module.exports = router;
