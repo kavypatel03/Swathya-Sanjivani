@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Assistant Verifications - Swasthya Sanjivani</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .assistant-card {
+            transition: all 0.3s ease;
+        }
+        .assistant-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .action-btn {
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <%- include('partials/nav', { isAdmin: true }) %>
+    
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-[#0e606e]">Assistant Verifications</h1>
+                <p class="text-gray-600 mt-2">Review and verify assistant applications</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <span class="bg-[#0e606e] text-white px-4 py-2 rounded-full text-sm font-medium">
+                    <i class="fas fa-user-shield mr-2"></i>Verification Panel
+                </span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6">
+            <% assistants.forEach(function(assistant) { %>
+            <div class="assistant-card bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between">
+                        <!-- Assistant Info -->
+                        <div class="mb-4 md:mb-0">
+                            <h3 class="text-xl font-semibold text-[#0e606e]"><%= assistant.fullName %></h3>
+                            <div class="flex flex-col mt-2 space-y-1 text-gray-600">
+                                <div class="flex items-center">
+                                    <i class="fas fa-phone-alt w-6"></i>
+                                    <span><%= assistant.mobile %></span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-hospital w-6"></i>
+                                    <span><%= assistant.hospital %></span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-user-md w-6"></i>
+                                    <span>Dr. <%= assistant.doctorName %></span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-briefcase w-6"></i>
+                                    <span><%= assistant.post %></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <a href="/admin/view-assistant-document/<%= assistant._id %>" 
+                               target="_blank"
+                               class="action-btn flex items-center justify-center h-[38px] px-4 bg-[#0e606e] hover:bg-[#0a4751] text-white rounded-lg">
+                                <i class="fas fa-id-card mr-2"></i> View ID Card
+                            </a>
+                            
+                            <form class="flex-1" action="/admin/update-assistant-status/<%= assistant._id %>/Verified" method="POST">
+                                <button type="submit" 
+                                        class="action-btn w-full h-[38px] flex items-center justify-center px-4 bg-green-500 hover:bg-green-600 text-white rounded-lg">
+                                    <i class="fas fa-check-circle mr-2"></i> Accept
+                                </button>
+                            </form>
+                            
+                            <form class="flex-1" action="/admin/update-assistant-status/<%= assistant._id %>/Rejected" method="POST">
+                                <button type="submit" 
+                                        class="action-btn w-full h-[38px] flex items-center justify-center px-4 bg-red-500 hover:bg-red-600 text-white rounded-lg">
+                                    <i class="fas fa-times-circle mr-2"></i> Reject
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status Badge -->
+                <div class="px-6 py-3 bg-gray-50 border-t flex justify-between items-center">
+                    <span class="text-sm text-gray-500">
+                        <i class="far fa-clock mr-1"></i> Submitted on: <%= new Date(assistant.createdAt).toLocaleDateString() %>
+                    </span>
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        <i class="fas fa-hourglass-half mr-1"></i> Pending Verification
+                    </span>
+                </div>
+            </div>
+            <% }); %>
+
+            <% if (assistants.length === 0) { %>
+            <div class="bg-white rounded-xl shadow-sm p-8 text-center">
+                <i class="fas fa-check-circle text-4xl text-green-500 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-700">All caught up!</h3>
+                <p class="text-gray-500 mt-2">No pending assistant verifications</p>
+            </div>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>
