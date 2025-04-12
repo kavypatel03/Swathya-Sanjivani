@@ -14,11 +14,16 @@ router.get('/doctor-verifications', adminAuth, adminController.getDoctorVerifica
 router.post('/update-doctor-status/:doctorId/:status', adminAuth, adminController.updateDoctorStatus);
 router.get('/view-doctor-document/:doctorId', adminAuth, adminController.viewDoctorDocument);
 
-// Update these routes to use absolute paths
+router.get('/assistant-verifications', adminAuth, adminController.getAssistantVerifications);
+router.post('/update-assistant-status/:assistantId/:status', adminAuth, adminController.updateAssistantStatus);
+router.get('/view-assistant-document/:assistantId', adminAuth, adminController.viewAssistantDocument);
+
 router.get('/api/users', adminAuth, adminController.getAllUsers);
 router.delete('/api/users/:userId', adminAuth, adminController.deleteUser);
 router.get('/api/doctors', adminAuth, adminController.getAllDoctors);
-// Add this route with the other doctor routes
 router.delete('/api/doctors/:doctorId', adminAuth, adminController.deleteDoctor);
+
+router.get('/api/assistants', adminAuth, adminController.getAllAssistants);
+router.delete('/api/assistants/:assistantId', adminAuth, adminController.deleteAssistant);
 
 module.exports = router;

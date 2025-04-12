@@ -24,7 +24,7 @@ const PatientRegistrationForm = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const [userType, setUserType] = useState(params.get("userType") || "Patient");
-  
+
   const normalizeMobile = (mobile) => {
     if (!mobile) return "";
     let formatted = mobile.trim();
@@ -41,10 +41,10 @@ const PatientRegistrationForm = () => {
 
     try {
       const cleanMobile = mobile.replace(/^\+91|^91/, '').trim();
-      
+
       const response = await axios.post(
         "http://localhost:4000/patient/send-otp",
-        { 
+        {
           mobile: cleanMobile,
           userType: "Patient"
         }
@@ -64,15 +64,15 @@ const PatientRegistrationForm = () => {
       toast.error(error?.response?.data?.message || "Error sending OTP");
     }
   };
-  
+
   const verifyOTP = async () => {
     if (!mobile || !otp) {
       toast.error("Please enter both Mobile Number and OTP.");
       return;
     }
-  
+
     const formattedMobile = normalizeMobile(mobile);
-  
+
     try {
       const response = await axios.post(
         "http://localhost:4000/patient/verify-otp",
@@ -93,7 +93,7 @@ const PatientRegistrationForm = () => {
       setisMobileVerified(false);
     }
   };
-  
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -175,9 +175,9 @@ const PatientRegistrationForm = () => {
             >
               Doctor
             </Link>
-            <button className="flex-1 bg-[#0e606e] hover:bg-[#0b5058] text-white py-2 text-sm rounded-md font-medium text-center">
+            <Link to="/AssistantRegistration" className="flex-1 bg-[#0e606e] hover:bg-[#0b5058] text-white py-2 text-sm rounded-md font-medium text-center">
               Assistant
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -272,14 +272,14 @@ const PatientRegistrationForm = () => {
                 className="w-full border border-gray-300 p-1 rounded pr-10 text-sm"
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <div 
+              <div
                 className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 <i className={showPassword ? "ri-eye-off-line text-gray-500" : "ri-eye-line text-gray-500"}></i>
               </div>
             </div>
-          </div> 
+          </div>
 
           <div className="mb-4">
             <div className="flex items-start">
@@ -300,11 +300,10 @@ const PatientRegistrationForm = () => {
           <button
             type="submit"
             className={`w-full py-1 rounded-md font-medium text-sm 
-      ${
-        isOtpVerified
-          ? "bg-[#0e606e] hover:bg-[#0b5058] text-white"
-          : "bg-gray-400 cursor-not-allowed"
-      }`}
+      ${isOtpVerified
+                ? "bg-[#0e606e] hover:bg-[#0b5058] text-white"
+                : "bg-gray-400 cursor-not-allowed"
+              }`}
             disabled={!isOtpVerified} // ✅ Disabled until OTP is verified
           >
             Register / Sign Up

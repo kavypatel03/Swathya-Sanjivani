@@ -2,6 +2,7 @@ const Admin = require('../models/admin.model');
 const Doctor = require('../models/doctor.model');
 const Patient = require('../models/patient.model');
 const Document = require('../models/documents.model');
+const Assistant = require('../models/assistant.model');
 const bcrypt = require('bcrypt');
 
 exports.login = async (req, res) => {
@@ -38,7 +39,8 @@ exports.getDashboardStats = async (req, res) => {
       patientCount: await Patient.countDocuments(),
       doctorCount: await Doctor.countDocuments(),
       documentCount: await Document.countDocuments(),
-      pendingDoctors: await Doctor.countDocuments({ licenseStatus: 'Pending' })
+      pendingDoctors: await Doctor.countDocuments({ licenseStatus: 'Pending' }),
+      pendingAssistants: await Assistant.countDocuments({ verificationStatus: 'Pending' })
     };
     res.render('admin', { stats });
   } catch (error) {
@@ -164,6 +166,96 @@ exports.deleteDoctor = async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: 'Failed to delete doctor',
+      error: error.message 
+    });
+  }
+};
+
+exports.getAllAssistants = async (req, res) => {
+  try {
+    const assistants = await Assistant.find()
+      .populate('doctor', 'fullName licenseStatus')
+      .select('fullName email mobile post hospital verificationStatus doctorName')
+      .lean();
+    res.json(assistants);
+  } catch (error) {
+    console.error('Error in getAllAssistants:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error fetching assistants',
+      error: error.message 
+    });
+  }
+};
+
+exports.getAssistantVerifications = async (req, res) => {
+  try {
+    const assistants = await Assistant.find({ verificationStatus: 'Pending' })
+      .populate('doctor', 'fullName licenseStatus')
+      .select('fullName mobile post hospital doctor verificationStatus doctorName idCard createdAt');
+    res.render('assistant', { assistants });
+  } catch (error) {
+    res.status(500).send('Error fetching assistants');
+  }
+};
+
+exports.updateAssistantStatus = async (req, res) => {
+  try {
+    const { assistantId, status } = req.params;
+    const assistant = await Assistant.findById(assistantId).populate('doctor');
+
+    if (!assistant) {
+      return res.status(404).json({ success: false, message: 'Assistant not found' });
+    }
+
+    // Check if associated doctor is verified before allowing assistant verification
+    if (status === 'Verified' && assistant.doctor.licenseStatus !== 'Verified') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot verify assistant. Associated doctor is not verified.'
+      });
+    }
+
+    assistant.verificationStatus = status;
+    await assistant.save();
+
+    if (req.xhr || req.headers.accept.includes('json')) {
+      res.json({ success: true, message: 'Assistant status updated successfully' });
+    } else {
+      res.redirect('/admin/assistant-verifications');
+    }
+  } catch (error) {
+    console.error('Error updating assistant status:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error updating assistant status',
+      error: error.message 
+    });
+  }
+};
+
+exports.viewAssistantDocument = async (req, res) => {
+  try {
+    const assistant = await Assistant.findById(req.params.assistantId);
+    if (!assistant || !assistant.idCard || !assistant.idCard.data) {
+      return res.status(404).send('Document not found');
+    }
+    res.set('Content-Type', assistant.idCard.contentType);
+    res.send(assistant.idCard.data);
+  } catch (error) {
+    res.status(500).send('Error fetching document');
+  }
+};
+
+exports.deleteAssistant = async (req, res) => {
+  try {
+    const { assistantId } = req.params;
+    await Assistant.findByIdAndDelete(assistantId);
+    res.json({ success: true, message: 'Assistant deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to delete assistant',
       error: error.message 
     });
   }

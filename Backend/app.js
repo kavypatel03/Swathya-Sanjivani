@@ -48,6 +48,7 @@ app.use('/otp', otpRoutes); // Now accessible at /otp/send-otp
 // Mount routes
 app.use('/doctor', doctorRoutes);
 app.use('/patient', require('./routes/patient.routes'));
+app.use('/assistant', require('./routes/assistant.routes'));
 app.use('/admin', adminRoutes);
 
 // Error handler middleware
