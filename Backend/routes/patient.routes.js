@@ -287,26 +287,27 @@ router.delete('/delete-document/:documentId', authMiddleware, async (req, res) =
 });
 
 // 📄 Get a specific document file for viewing
-router.get('/view-document/:documentId', authMiddleware, async (req, res) => {
-    const { documentId } = req.params;
+router.get('/view-document/:documentId', patientController.getDocument);
 
-    try {
-        const document = await documentModel.findById(documentId);
+// Doctor relationship routes
+router.get('/doctors', authMiddleware, patientController.getPatientDoctors);
+router.get('/:patientId/doctors', authMiddleware, patientController.getPatientDoctors);
 
-        if (!document || !document.file || !document.file.data) {
-            return res.status(404).json({ success: false, message: '❌ Document not found' });
-        }
+// Get specific doctor details
+router.get('/doctors/:doctorId', authMiddleware, patientController.getDoctorDetails);
+router.get('/:patientId/doctors/:doctorId', authMiddleware, patientController.getDoctorDetails);
 
-        // Set correct content-type so browser knows how to display it (PDF, image, etc.)
-        res.set('Content-Type', document.file.contentType);
-        res.send(document.file.data);  // 🔥 Stream binary data to frontend
-    } catch (error) {
-        console.error('❌ Error fetching document:', error);
-        res.status(500).json({ success: false, message: '❌ Server error while fetching document' });
-    }
-});
+// Revoke doctor access
+router.delete('/:patientId/doctors/:doctorId', authMiddleware, patientController.revokeDoctorAccess);
 
 // Logout route
-router.get('/logout', authMiddleware, patientController.logout);
+router.get('/logout', authMiddleware, (req, res) => {
+    // Simple logout implementation if patientController.logout is not defined
+    res.clearCookie('token');
+    res.status(200).json({
+        success: true,
+        message: "Logged out successfully"
+    });
+});
 
 module.exports = router;

@@ -35,20 +35,30 @@ function Login() {
       });
 
       const data = await response.json();
+      console.log('Login response:', data);
 
       if (response.ok && data.success) {
-        localStorage.setItem("token", data.data.token);
-        document.cookie = `token=${data.token}; path=/`;
+        // Store the token correctly
+        const token = data.data.token;
+        const patientId = data.data.patient._id;
+        
+        console.log('Storing token:', token); // Debug log
+        console.log('Storing patientId:', patientId); // Debug log
+        
+        localStorage.setItem("token", token);
+        localStorage.setItem("patientId", patientId);
+        
+        document.cookie = `token=${token}; path=/; SameSite=Strict`;
         toast.success("✅ Login successful!");
         navigate("/PatientDashboard");
       } else {
-        toast.error(data.message || "Invalid mobile, email, or password. Please try again.");
+        toast.error(data.message || "Invalid credentials");
       }
     } catch (error) {
       console.error("Error:", error);
-      toast.error("Failed to connect to the server. Please try again later.");
+      toast.error("Failed to connect to the server");
     }
-};
+  };
 
 
   return (

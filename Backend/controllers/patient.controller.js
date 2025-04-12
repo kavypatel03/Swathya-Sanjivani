@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const patientModel = require('../models/patient.model');
+const doctorModel = require('../models/doctor.model');
 const patientService = require('../services/patient.service');
 const { validationResult } = require('express-validator');
 const documentModel = require('../models/documents.model');
@@ -281,14 +282,123 @@ module.exports.getFamilyMembers = async (req, res) => {
     }
 };
 
-module.exports.logout = (req, res) => {
-    res.clearCookie("token", { 
-        httpOnly: true, 
-        secure: true, 
-        sameSite: "Strict" 
-    });
-    res.status(200).json({ 
-        success: true, 
-        message: "Logged out successfully" 
-    });
+module.exports.getPatientDoctors = async (req, res) => {
+    try {
+        const patientId = req.params.patientId || req.user._id;
+        
+        console.log('Fetching doctors for patient:', patientId); // Debug log
+
+        if (!mongoose.Types.ObjectId.isValid(patientId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid patient ID'
+            });
+        }
+
+        // Find patient and populate doctors with required fields
+        const patient = await patientModel.findById(patientId)
+            .populate({
+                path: 'doctors',
+                select: 'fullName specialization hospitalName licenseStatus mobile email mciRegistrationNumber profilePic',
+                options: { lean: true }
+            })
+            .lean();
+        
+        if (!patient) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Patient not found' 
+            });
+        }
+
+        const doctors = patient.doctors || [];
+        
+        res.status(200).json({ 
+            success: true,
+            data: doctors.map(doctor => ({
+                ...doctor,
+                _id: doctor._id.toString()
+            }))
+        });
+    } catch (error) {
+        console.error("Error in getPatientDoctors:", error);
+        res.status(500).json({ 
+            success: false,
+            message: "Error fetching doctors",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
 };
+
+module.exports.getDoctorDetails = async (req, res) => {
+    try {
+        const doctorId = req.params.doctorId;
+        
+        // Find doctor by ID
+        const doctor = await doctorModel.findById(doctorId)
+            .select('fullName specialization hospitalName licenseStatus mobile email mciRegistrationNumber');
+        
+        if (!doctor) {
+            return res.status(404).json({ message: 'Doctor not found' });
+        }
+        
+        res.status(200).json(doctor);
+    } catch (error) {
+        console.error("Error in getDoctorDetails:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports.revokeDoctorAccess = async (req, res) => {
+    try {
+        const { patientId, doctorId } = req.params;
+        
+        if (!doctorId || !mongoose.Types.ObjectId.isValid(doctorId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid doctor ID'
+            });
+        }
+
+        if (!patientId || !mongoose.Types.ObjectId.isValid(patientId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid patient ID'
+            });
+        }
+        
+        // Remove doctor from patient's doctors array
+        const patient = await patientModel.findByIdAndUpdate(
+            patientId,
+            { $pull: { doctors: doctorId } },
+            { new: true }
+        );
+        
+        // Remove patient from doctor's patients array
+        const doctor = await doctorModel.findByIdAndUpdate(
+            doctorId,
+            { $pull: { patients: patientId } },
+            { new: true }
+        );
+        
+        if (!patient || !doctor) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Patient or Doctor not found' 
+            });
+        }
+        
+        res.status(200).json({ 
+            success: true,
+            message: 'Access revoked successfully' 
+        });
+    } catch (error) {
+        console.error("Error in revokeDoctorAccess:", error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Server error while revoking access',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+

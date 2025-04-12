@@ -41,17 +41,38 @@ function App() {
     { path: "/DoctorLogin", element: <><Nav /><DoctorLogin /></> },
     { path: "/AssistantLogin", element: <><Nav /><AssistantLogin /></> },
 
-    // Patient
+    // Patient Routes
     { path: "/PatientDashboard", element: <><Navigation /><PatientDashboard /></> },
     { path: "/PatientFamilyPage", element: <><Navigation /><PatientFamilyPage /></> },
-    { path: "/PatientDoctorPage", element: <><Navigation /><PatientDoctorPage /></> },
+    { 
+      path: "/PatientDoctorPage", 
+      element: <><Navigation /><PatientDoctorPage /> </>,
+    },
+    { 
+      path: "/PatientDoctorPage/:patientId/doctors", 
+      element: <><Navigation /><PatientDoctorPage /> </> 
+    },
+    { 
+      path: "/PatientDoctorPage/:patientId/doctors/:doctorId", 
+      element: <><Navigation /><PatientDoctorPage /> </> 
+    },
+    { 
+      path: "/PatientDoctorPage/:patientId/doctors", 
+      element: <><Navigation /><PatientDoctorPage /> </> 
+    },
+    { 
+      path: "/PatientDoctorPage/:patientId/doctors/:doctorId", 
+      element: <><Navigation /><PatientDoctorPage /> </> 
+    },
     { path: "/PatientAddMemPage", element: <><Navigation /><PatientAddMemPage /></> },
     { path: "/PatientGuide", element: <><Navigation /><PatientGuide /></> },
 
-    // Doctor
+
+    // Doctor Routes
     { path: "/Dashbord", element: <><Dashboard /></>},
     { path: "/Guide", element: <><DGuide /></> },
-    // Assistant
+    
+    // Assistant Routes
     { path: "/AssistantDashbord", element: <AssistantDashbord /> },
     { path: "/AssistantReportPage", element: <AssistantReportPage /> },
     { path: "/Guide", element: <Guide /> },

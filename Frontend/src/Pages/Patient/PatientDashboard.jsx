@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import UserProfile from "../../Components/Patient/PatientUserProfile";
 import HealthDocuments from "../../Components/Patient/PatientHealthDocument";
 import FamilyMembers from "../../Components/Patient/PatientFamily";
-import DoctorAccess from "../../Components/Patient/PatientDoctorAccess";
 import UploadPopup from "../../Components/Patient/UploadPopup"; // ✅ Import UploadPopup
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import PatientDoctorAccess from "../../Components/Patient/PatientDoctorAccess";
 
 function PatientDashboard() {
   const [patientData, setPatientData] = useState(null);
@@ -17,29 +17,31 @@ function PatientDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchPatientData = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:4000/patient/dashboard",
-          {
-            withCredentials: true,
-          }
+        // First get patient data
+        const patientResponse = await axios.get(
+          "http://localhost:4000/patient/dashboard", 
+          { withCredentials: true }
         );
 
-        if (response.data.success) {
-          setPatientData(response.data.data);
-        } else {
-          toast.error("Failed to fetch patient details.");
+        if (patientResponse.data.success) {
+          const patientData = patientResponse.data.data;
+          setPatientData(patientData);
         }
       } catch (error) {
-        navigate('/PatientLogin');
-        console.error("Error fetching patient data:", error);
-        toast.error("You Need To Login First");
+        if (!error.response || error.response.status === 401) {
+          navigate('/PatientLogin');
+          toast.error("You Need To Login First");
+        } else {
+          console.error("Error fetching data:", error);
+          toast.error("Error fetching data");
+        }
       }
     };
 
-    fetchPatientData();
-  }, []);
+    fetchData();
+  }, [navigate]);
 
   return (
     <div className="mx-auto px-4 py-6 bg-gray-100">
@@ -47,7 +49,7 @@ function PatientDashboard() {
 
       {patientData ? (
         <>
-          <UserProfile />
+          <UserProfile patientData={patientData} />
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <HealthDocuments
@@ -59,7 +61,7 @@ function PatientDashboard() {
             </div>
             <div className="space-y-8">
               <FamilyMembers className="max-h-[200px] overflow-y-auto" setSelectedMember={setSelectedMember} />
-              <DoctorAccess />
+              <PatientDoctorAccess patientId={patientData?._id} />
             </div>
           </div>
 
