@@ -1,21 +1,248 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
-const DocumentManager = () => {
-  const categories = [
-    { name: 'Prescriptions', files: 15, icon: 'document' },
-    { name: 'Lab Reports', files: 8, icon: 'lab' },
-    { name: 'X-Rays', files: 5, icon: 'xray' },
-    { name: 'Others', files: 12, icon: 'others' }
-  ];
+const DocumentManager = ({ onCategorySelect }) => {
+  const navigate = useNavigate();
+  const [documents, setDocuments] = useState([]);
+  const [categories, setCategories] = useState({
+    'Prescriptions': { count: 0, icon: 'document' },
+    'Lab Reports': { count: 0, icon: 'lab' },
+    'X-Rays': { count: 0, icon: 'xray' },
+    'Others': { count: 0, icon: 'others' }
+  });
 
-  const documents = [
-    { name: 'Blood Test Report.pdf', type: 'pdf', date: 'March 15, 2024' },
-    { name: 'Chest X-Ray.jpg', type: 'image', date: 'March 14, 2024' }
-  ];
+  useEffect(() => {
+    const patientId = localStorage.getItem('selectedPatientId');
+    const familyId = localStorage.getItem('selectedFamilyMemberId');
+    
+    if (patientId && familyId) {
+      fetchDocuments(patientId, familyId);
+    }
+
+    const handleFamilyMemberChange = (event) => {
+      const { patientId, familyMemberId } = event.detail;
+      if (patientId && familyMemberId) {
+        fetchDocuments(patientId, familyMemberId);
+      }
+    };
+
+    window.addEventListener('familyMemberSelected', handleFamilyMemberChange);
+    return () => window.removeEventListener('familyMemberSelected', handleFamilyMemberChange);
+  }, []);
+
+  const fetchDocuments = async (patientId, familyId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4000/assistant/patient-documents/${patientId}/${familyId}`,
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        const docs = response.data.data;
+
+        // Update category counts with case-insensitive comparison
+        const counts = {
+          'Prescriptions': { count: 0, icon: 'document' },
+          'Lab Reports': { count: 0, icon: 'lab' },
+          'X-Rays': { count: 0, icon: 'xray' },
+          'Others': { count: 0, icon: 'others' }
+        };
+
+        docs.forEach(doc => {
+          // Normalize document type for comparison
+          const docType = doc.documentType.trim();
+          if (docType.toLowerCase() === 'prescription') {
+            counts['Prescriptions'].count++;
+          } else if (docType === 'Lab Reports') {
+            counts['Lab Reports'].count++;
+          } else if (docType === 'X-Rays') {
+            counts['X-Rays'].count++;
+          } else {
+            counts['Others'].count++;
+          }
+        });
+
+        setDocuments(docs);
+        setCategories(counts);
+      }
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    }
+  };
+
+  const handleViewDocument = async (documentId, documentType, documentName) => {
+    try {
+      // For prescriptions, use HTML viewer
+      if (documentType.toLowerCase() === 'prescription') {
+        window.open(`http://localhost:4000/assistant/view-prescription/${documentId}`, '_blank');
+        return;
+      }
+
+      const response = await axios.get(
+        `http://localhost:4000/assistant/view-document/${documentId}`,
+        {
+          responseType: 'blob',
+          withCredentials: true
+        }
+      );
+
+      const contentType = response.headers['content-type'] || '';
+      const blob = new Blob([response.data], { type: contentType });
+      const url = window.URL.createObjectURL(blob);
+
+      // For PDFs, open in new window with PDF viewer
+      if (contentType === 'application/pdf' || documentType.toLowerCase().includes('pdf')) {
+        const pdfWindow = window.open('', '_blank');
+        if (pdfWindow) {
+          pdfWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>${documentName}</title>
+                <style>
+                  body, html {
+                    margin: 0;
+                    padding: 0;
+                    height: 100%;
+                    overflow: hidden;
+                  }
+                  embed {
+                    width: 100%;
+                    height: 100vh;
+                  }
+                </style>
+              </head>
+              <body>
+                <embed src="${url}" type="application/pdf" />
+              </body>
+            </html>
+          `);
+        }
+      } else {
+        // For other files, trigger download
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = documentName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+    } catch (error) {
+      console.error('Error viewing document:', error);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to open document",
+        icon: "error",
+        confirmButtonColor: "#ef4444"
+      });
+    }
+  };
+
+  const handleDownloadDocument = async (documentId, documentName, documentType) => {
+    try {
+      if (documentType.toLowerCase() === 'prescription') {
+        // For prescriptions, download as PDF
+        const response = await axios.get(
+          `http://localhost:4000/assistant/download-prescription/${documentId}`,
+          {
+            responseType: 'blob',
+            withCredentials: true
+          }
+        );
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${documentName}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        return;
+      }
+
+      // For other documents
+      const response = await axios.get(
+        `http://localhost:4000/assistant/view-document/${documentId}`,
+        {
+          responseType: 'blob',
+          withCredentials: true
+        }
+      );
+
+      const blob = new Blob([response.data]);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = documentName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to download document",
+        icon: "error",
+        confirmButtonColor: "#ef4444"
+      });
+    }
+  };
+
+  const handleDeleteDocument = async (documentId) => {
+    // Show confirmation dialog
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This will permanently delete the document.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#0e606e",
+      cancelButtonColor: "#ef4444",
+      confirmButtonText: "Yes, delete it!",
+      background: "#ffffff",
+      iconColor: "#ff9700"
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await axios.delete(
+          `http://localhost:4000/assistant/delete-document/${documentId}`,
+          { withCredentials: true }
+        );
+
+        if (response.data.success) {
+          // Refresh documents list
+          const patientId = localStorage.getItem('selectedPatientId');
+          const familyId = localStorage.getItem('selectedFamilyMemberId');
+          fetchDocuments(patientId, familyId);
+
+          // Show success message
+          await Swal.fire({
+            title: "Deleted!",
+            text: "The document has been deleted.",
+            icon: "success",
+            confirmButtonText: "Done",
+            confirmButtonColor: "#0e606e",
+            iconColor: "#0e606e"
+          });
+        }
+      } catch (error) {
+        console.error('Error deleting document:', error);
+        await Swal.fire({
+          title: "Error!",
+          text: error.response?.data?.message || "Failed to delete document",
+          icon: "error",
+          confirmButtonColor: "#ef4444"
+        });
+      }
+    }
+  };
 
   const getIcon = (type) => {
     switch(type) {
       case 'document':
+      case 'Prescriptions':
         return (
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" viewBox="0 0 24 24">
             <path fill="currentColor" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
@@ -30,7 +257,7 @@ const DocumentManager = () => {
       case 'xray':
         return (
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-500" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6c-.55 0-1-.45-1-1V6c0-.55.45-1 1-1h12c.55 0 1 .45 1 1v12c0 .55-.45 1-1 1z"/>
+            <path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-1 16H6c-.55 0-1-.45-1-1V6c0-.55.45-1 1-1h12c.55 0 1 .45 1 1v12c0 .55-.45 1-1 1z"/>
           </svg>
         );
       case 'others':
@@ -56,59 +283,157 @@ const DocumentManager = () => {
     }
   };
 
+  const openPreview = async (doc) => {
+    try {
+      if (doc.documentType.toLowerCase() === 'prescription') {
+        // Change this part to open the prescription view directly
+        const prescriptionUrl = `http://localhost:4000/assistant/view-prescription/${doc._id}`;
+        window.open(prescriptionUrl, '_blank');
+        return;
+      }
+
+      // For other documents
+      const response = await axios.get(
+        `http://localhost:4000/assistant/view-document/${doc._id}`,
+        {
+          responseType: 'blob',
+          withCredentials: true
+        }
+      );
+
+      const blob = new Blob([response.data], { type: response.headers['content-type'] });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    } catch (error) {
+      console.error("Preview error:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to preview document",
+        icon: "error",
+        confirmButtonColor: "#ef4444"
+      });
+    }
+  };
+
+  const downloadFile = async (doc) => {
+    try {
+      if (doc.documentType.toLowerCase() === 'prescription') {
+        const response = await axios.get(
+          `http://localhost:4000/assistant/prescription-pdf/${doc._id}`,
+          {
+            responseType: 'blob',
+            withCredentials: true
+          }
+        );
+        
+        // Create blob with proper MIME type
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        
+        // Create download link
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${doc.documentName || 'prescription'}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } else {
+        // ... existing code for other document types ...
+      }
+    } catch (error) {
+      console.error("Download error:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to download document",
+        icon: "error",
+        confirmButtonColor: "#ef4444"
+      });
+    }
+  };
+
+  const handleCategoryClick = (category) => {
+    navigate('/assistantReportPage');
+    const filteredDocs = documents.filter(doc => 
+      doc.documentType.toLowerCase() === category.toLowerCase() ||
+      (category === 'Others' && !['prescription', 'lab reports', 'x-rays']
+        .includes(doc.documentType.toLowerCase()))
+    );
+    onCategorySelect(category, filteredDocs);
+  };
+
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-[#0e606e] font-medium text-lg">Document Manager</h2>
-        <button className="bg-[#0e606e] text-white px-4 py-2 rounded-md flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-          </svg>
-          Upload New
-        </button>
       </div>
       <div className="grid grid-cols-4 gap-4 mb-6">
-        {categories.map((category, index) => (
-          <div key={index} className="border border-gray-200 rounded-md p-4 flex items-center">
+        {Object.entries(categories).map(([name, { count, icon }]) => (
+          <div 
+            key={name} 
+            className="border border-gray-200 rounded-md p-4 flex items-center cursor-pointer hover:bg-gray-50"
+            onClick={() => handleCategoryClick(name)}
+          >
             <div className="bg-gray-100 p-2 rounded-md mr-3">
-              {getIcon(category.icon)}
+              {getIcon(icon)}
             </div>
             <div>
-              <p className="font-medium">{category.name}</p>
-              <p className="text-gray-500 text-xs">{category.files} Files</p>
+              <p className="font-medium">{name}</p>
+              <p className="text-gray-500 text-xs">{count} Files</p>
             </div>
           </div>
         ))}
       </div>
       <div>
-        {documents.map((doc, index) => (
-          <div key={index} className="border border-gray-200 rounded-md p-3 mb-2 flex justify-between items-center">
-            <div className="flex items-center">
-              {getIcon(doc.type)}
-              <div className="ml-3">
-                <p className="font-medium">{doc.name}</p>
-                <p className="text-gray-500 text-xs">Uploaded on {doc.date}</p>
+        {documents.length === 0 ? (
+          <p className="text-center text-gray-500 py-4">No documents found</p>
+        ) : (
+          documents.map((doc) => (
+            <div key={doc._id} className="border border-gray-200 rounded-md p-3 mb-2 flex justify-between items-center">
+              <div className="flex items-center">
+                {getIcon(doc.documentType.toLowerCase())}
+                <div className="ml-3">
+                  <p className="font-medium">{doc.documentName}</p>
+                  <p className="text-gray-500 text-xs">
+                    Uploaded on {new Date(doc.uploadedAt).toLocaleString('en-US', {
+                      dateStyle: 'medium',
+                      timeStyle: 'short'
+                    })}
+                  </p>
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <button 
+                  className="text-gray-500 hover:text-blue-600"
+                  onClick={() => openPreview(doc)}
+                  title="View"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                  </svg>
+                </button>
+                <button 
+                  className="text-gray-500 hover:text-green-600"
+                  onClick={() => downloadFile(doc)}
+                  title="Download"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                  </svg>
+                </button>
+                <button 
+                  className="text-gray-500 hover:text-red-600"
+                  onClick={() => handleDeleteDocument(doc._id)}
+                  title="Delete"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                  </svg>
+                </button>
               </div>
             </div>
-            <div className="flex space-x-2">
-              <button className="text-gray-500">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-                </svg>
-              </button>
-              <button className="text-gray-500">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-                </svg>
-              </button>
-              <button className="text-gray-500">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,13 @@
+DATE : 11-04-2025	
+RATRE 1:47
+-- Assistant nu register,login and Admin level ae License status nu management done chhe.
+
+DATE : 12-04-2025
+RATRE 1:40
+-- Doctor joi sakse ke ena patient kaya doctor pase treatment ley chhe 
+-- Doctor Prescription lakhi sakse and View,Download,Delete pn kari sakse
+
+DATE : 13-04-2025
+BOPARE 3:30
+-- Assistant have Tena doctor na badha patient nu list joi sakse and tena family member pn joi sakse 
+-- Patient na badha Report view,download,delete kari sakse

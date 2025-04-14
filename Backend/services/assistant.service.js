@@ -131,3 +131,55 @@ module.exports.getDoctors = async () => {
     .select('_id fullName hospitalName')
     .lean();
 };
+
+// Add to assistant.service.js
+
+/**
+ * Update assistant profile
+ * @param {string} assistantId - ID of assistant to update
+ * @param {Object} updateData - Data to update
+ * @returns {Promise<Object>} - Updated assistant object
+ */
+exports.updateAssistantProfile = async (assistantId, updateData) => {
+  try {
+    // Check if assistant exists
+    const assistant = await Assistant.findById(assistantId);
+    if (!assistant) {
+      throw new Error('Assistant not found');
+    }
+
+    // If updating email or mobile, check if they're already in use by another assistant
+    if (updateData.email && updateData.email !== assistant.email) {
+      const existingAssistant = await Assistant.findOne({ email: updateData.email });
+      if (existingAssistant && existingAssistant._id.toString() !== assistantId) {
+        throw new Error('Email is already registered');
+      }
+    }
+
+    if (updateData.mobile && updateData.mobile !== assistant.mobile) {
+      const existingAssistant = await Assistant.findOne({ mobile: updateData.mobile });
+      if (existingAssistant && existingAssistant._id.toString() !== assistantId) {
+        throw new Error('Mobile number is already registered');
+      }
+    }
+
+    // If updating doctor, fetch the doctor name
+    if (updateData.doctor) {
+      const doctor = await Doctor.findById(updateData.doctor);
+      if (doctor) {
+        updateData.doctorName = doctor.fullName;
+      }
+    }
+
+    // Update the assistant
+    const updatedAssistant = await Assistant.findByIdAndUpdate(
+      assistantId,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    return updatedAssistant;
+  } catch (error) {
+    throw error;
+  }
+};

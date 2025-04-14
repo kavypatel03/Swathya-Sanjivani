@@ -1,36 +1,93 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const PatientList = () => {
-  const patients = [
-    { name: 'Sanjaybhai B. Gohil', members: 5 },
-    { name: 'Bipinbhai M. Bhatt', members: 4 }
-  ];
+  const [patients, setPatients] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedPatientId, setSelectedPatientId] = useState(null);
+
+  useEffect(() => {
+    const fetchAndInitialize = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/assistant/patients', {
+          withCredentials: true
+        });
+        
+        if (response.data.success) {
+          setPatients(response.data.data);
+          
+          // Get stored patient ID or use first patient
+          const storedPatientId = localStorage.getItem('selectedPatientId');
+          if (storedPatientId) {
+            handlePatientClick(storedPatientId);
+            setSelectedPatientId(storedPatientId);
+          } else if (response.data.data.length > 0) {
+            handlePatientClick(response.data.data[0]._id);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+      }
+    };
+
+    fetchAndInitialize();
+  }, []);
+
+  const handlePatientClick = async (patientId) => {
+    try {
+      // Store selected patient ID
+      localStorage.setItem('selectedPatientId', patientId);
+      setSelectedPatientId(patientId);
+
+      // Emit event for other components
+      const event = new CustomEvent('patientSelected', {
+        detail: { patientId }
+      });
+      window.dispatchEvent(event);
+    } catch (error) {
+      console.error('Error selecting patient:', error);
+    }
+  };
+
+  const filteredPatients = patients.filter(patient =>
+    patient.fullname?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
-      <h2 className="text-[#0e606e] font-medium text-lg mb-4">Your Patients List</h2>
+      <h2 className="text-[#0e606e] font-medium text-lg mb-4">Doctor's Patients List</h2>
       <div className="flex mb-4">
         <input 
           type="text" 
-          placeholder="Search Your Patient" 
+          placeholder="Search Patient" 
           className="border border-gray-300 rounded-md px-3 py-2 mr-2 flex-grow"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <button className="bg-[#0e606e] text-white px-4 py-2 rounded-md">Search</button>
       </div>
-      {patients.map((patient, index) => (
-        <div key={index} className="border border-gray-200 rounded-md p-3 mb-2">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="font-medium">{patient.name}</p>
-              <p className="text-gray-500 text-xs">With {patient.members} Family Members</p>
+      
+      {filteredPatients.length === 0 ? (
+        <p className="text-center text-gray-500 py-4">No patients found</p>
+      ) : (
+        filteredPatients.map((patient) => (
+          <div 
+            key={patient._id} 
+            className={`border border-gray-200 rounded-md p-3 mb-2 cursor-pointer ${
+              selectedPatientId === patient._id ? 'bg-[#0e606e1a]' : ''
+            }`}
+            onClick={() => handlePatientClick(patient._id)}
+          >
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-medium">{patient.fullname}</p>
+                <p className="text-gray-500 text-sm">
+                  {patient.mobile} | {patient.email}
+                </p>
+              </div>
             </div>
-            <button className="text-[#0e606e] font-medium">Documents</button>
           </div>
-        </div>
-      ))}
-      <div className="text-center mt-2">
-        <button className="text-[#0e606e]">View More</button>
-      </div>
+        ))
+      )}
     </div>
   );
 };

@@ -43,15 +43,15 @@ const PatientList = () => {
   };
 
   const cleanupPatientData = (patientId) => {
-    // Clear local storage data related to this patient
+    // Clear both patient and family member IDs
+    localStorage.removeItem('selectedPatientId');
+    localStorage.removeItem('doctorSelectedFamilyId');
     localStorage.removeItem(`patient_${patientId}_data`);
     localStorage.removeItem(`patient_${patientId}_documents`);
     localStorage.removeItem(`patient_${patientId}_family`);
     
-    // Clear any open windows/tabs related to this patient
-    const patientUrl = `/doctor/patient/${patientId}`;
     if (window.location.pathname.includes(patientId)) {
-      window.location.href = '/doctor/dashboard'; // Redirect if on patient's page
+      window.location.href = '/doctor/dashboard';
     }
   };
 
@@ -149,6 +149,33 @@ const PatientList = () => {
     };
   }, []);
 
+  const handlePatientClick = async (patientId) => {
+    try {
+      // First, get the patient's family members
+      const response = await axios.get(`http://localhost:4000/doctor/get-patient-family`, {
+        params: { patientId },
+        withCredentials: true
+      });
+
+      if (response.data.success && response.data.data.length > 0) {
+        // Store both patient ID and first family member's ID
+        localStorage.setItem('selectedPatientId', patientId);
+        localStorage.setItem('doctorSelectedFamilyId', response.data.data[0]._id);
+
+        // Dispatch custom event with both IDs
+        const event = new CustomEvent('patientSelected', {
+          detail: { 
+            patientId,
+            familyMemberId: response.data.data[0]._id
+          }
+        });
+        window.dispatchEvent(event);
+      }
+    } catch (error) {
+      console.error('Error fetching family members:', error);
+    }
+  };
+
   const filteredPatients = patients.filter(patient =>
     patient.fullname?.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -178,7 +205,11 @@ const PatientList = () => {
         <p className="text-center text-gray-500 py-4">No patients found</p>
       ) : (
         filteredPatients.map((patient) => (
-          <div key={patient._id} className="border border-gray-200 rounded-md p-4 mb-3">
+          <div 
+            key={patient._id} 
+            className="border border-gray-200  rounded-md p-4 mb-3 cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => handlePatientClick(patient._id)}
+          >
             <div className="flex justify-between items-center">
               <div>
                 <h4 className="font-medium">{patient.fullname}</h4>
@@ -189,13 +220,20 @@ const PatientList = () => {
               <div className="flex space-x-4">
                 <button 
                   className="text-[#0e606e] hover:underline text-sm font-medium"
-                  onClick={() => window.location.href = `/doctor/patient/${patient._id}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    localStorage.setItem('selectedPatientId', patient._id);
+                    window.location.href = `/doctor/patient/${patient._id}`;
+                  }}
                 >
                   Details
                 </button>
                 <button 
                   className="text-red-500 hover:underline text-sm font-medium"
-                  onClick={() => handleRemovePatient(patient._id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemovePatient(patient._id);
+                  }}
                 >
                   Remove
                 </button>

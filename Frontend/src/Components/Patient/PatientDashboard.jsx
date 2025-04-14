@@ -2,52 +2,43 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const UserProfile = () => {
-  const [assistantData, setAssistantData] = useState(null);
+const PatientDashboard = () => {
+  const [patientData, setPatientData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchAssistantData = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
+        
         if (!token) {
-          navigate('/AssistantLogin');
+          navigate('/PatientLogin');
           return;
         }
 
-        const response = await axios.get('http://localhost:4000/assistant/dashboard', {
+        const response = await axios.get('http://localhost:4000/patient/dashboard', {
           withCredentials: true,
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           }
         });
-        
+
         if (response.data.success) {
-          const data = response.data.data;
-          // Add dob (birthDate) to assistantData if present
-          setAssistantData({
-            ...data,
-            dob: data.birthDate ? new Date(data.birthDate).toLocaleDateString('en-GB') : ''
-          });
-        } else {
-          throw new Error(response.data.message || 'Failed to fetch data');
+          setPatientData(response.data.data);
         }
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        if (err.response?.status === 401) {
-          localStorage.removeItem('token'); // Clear invalid token
-          navigate('/AssistantLogin');
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        if (error.response?.status === 401) {
+          localStorage.removeItem('token');
+          navigate('/PatientLogin');
         }
-        setError(err.response?.data?.message || 'Failed to fetch data');
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchAssistantData();
+    fetchData();
   }, [navigate]);
 
   const isActive = (path) => location.pathname === path ? "border-[#0e606e] text-[#0e606e]" : "border-transparent text-gray-500 hover:text-gray-700";
@@ -66,10 +57,13 @@ const UserProfile = () => {
         <div>
           <div className="flex items-center">
             <p className="text-[#0e606e] font-medium text-lg">Welcome, </p>
-            <p className="text-[#ff9700] font-medium text-lg ml-1">{assistantData?.fullName}</p>
+            <p className="text-[#ff9700] font-medium text-lg ml-1">{patientData?.fullName}</p>
           </div>
           <div className="text-gray-500 text-sm">
-            <p className="text-xs">Last login: {assistantData?.lastLogin}</p>
+            <p>Post: {patientData?.post}</p>
+            <p>Hospital: {patientData?.hospital}</p>
+            <p>Doctor: {patientData?.doctorName}</p>
+            <p className="text-xs">Last login: {patientData?.lastLogin}</p>
           </div>
         </div>
       </div>
@@ -80,4 +74,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default PatientDashboard;

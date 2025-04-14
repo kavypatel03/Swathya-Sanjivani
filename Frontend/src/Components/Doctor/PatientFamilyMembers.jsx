@@ -6,46 +6,75 @@ function FamilyMembers({ onMemberSelect }) {
   const [hasPatients, setHasPatients] = useState(false);
   const [error, setError] = useState(null);
   const [selectedId, setSelectedId] = useState(localStorage.getItem('doctorSelectedFamilyId') || '');
-  const [patientId, setPatientId] = useState(null); // ✅ Store patient ID separately
+  const [patientId, setPatientId] = useState(null);
 
   useEffect(() => {
     const fetchFamilyMembers = async () => {
       try {
-        const accessResponse = await fetch('http://localhost:4000/doctor/check-patient-access', {
-          method: 'GET',
-          credentials: 'include',
-        });
+        const selectedPatientId = localStorage.getItem('selectedPatientId');
+        const existingFamilyId = localStorage.getItem('doctorSelectedFamilyId');
+        
+        if (selectedPatientId) {
+          setPatientId(selectedPatientId);
+          const familyResponse = await fetch(
+            `http://localhost:4000/doctor/get-patient-family?patientId=${selectedPatientId}`,
+            {
+              method: 'GET',
+              credentials: 'include',
+            }
+          );
 
-        const accessData = await accessResponse.json();
-
-        if (accessData.success && accessData.hasPatients) {
-          setHasPatients(true);
-          const pid = accessData.firstPatientId;
-          setPatientId(pid); // ✅ save patientId in state
-
-          const familyResponse = await fetch(`http://localhost:4000/doctor/get-patient-family?patientId=${pid}`, {
+          const familyData = await familyResponse.json();
+          if (familyData.success) {
+            const familyMembers = familyData.data || [];
+            setMembers(familyMembers);
+            setHasPatients(true);
+            
+            // Try to find existing selected member first
+            const existingMember = familyMembers.find(m => m._id === existingFamilyId);
+            const memberToSelect = existingMember || familyMembers[0];
+            
+            if (memberToSelect) {
+              handleMemberSelect({ ...memberToSelect, patientId: selectedPatientId });
+            }
+          }
+        } else {
+          const accessResponse = await fetch('http://localhost:4000/doctor/check-patient-access', {
             method: 'GET',
             credentials: 'include',
           });
 
-          const familyData = await familyResponse.json();
+          const accessData = await accessResponse.json();
 
-          if (familyData.success) {
-            const familyMembers = familyData.data || [];
-            setMembers(familyMembers);
+          if (accessData.success && accessData.hasPatients) {
+            setHasPatients(true);
+            const pid = accessData.firstPatientId;
+            setPatientId(pid);
 
-            const storedId = localStorage.getItem('doctorSelectedFamilyId');
-            const foundMember = familyMembers.find((m) => m._id === storedId);
+            const familyResponse = await fetch(`http://localhost:4000/doctor/get-patient-family?patientId=${pid}`, {
+              method: 'GET',
+              credentials: 'include',
+            });
 
-            const defaultMember = foundMember || familyMembers[0];
-            if (defaultMember) {
-              handleMemberSelect({ ...defaultMember, patientId: pid });
+            const familyData = await familyResponse.json();
+
+            if (familyData.success) {
+              const familyMembers = familyData.data || [];
+              setMembers(familyMembers);
+
+              const storedId = localStorage.getItem('doctorSelectedFamilyId');
+              const foundMember = familyMembers.find((m) => m._id === storedId);
+
+              const defaultMember = foundMember || familyMembers[0];
+              if (defaultMember) {
+                handleMemberSelect({ ...defaultMember, patientId: pid });
+              }
+            } else {
+              setError(familyData.message || 'Failed to load family members');
             }
           } else {
-            setError(familyData.message || 'Failed to load family members');
+            setHasPatients(false);
           }
-        } else {
-          setHasPatients(false);
         }
       } catch (error) {
         console.error('Error:', error);
@@ -56,14 +85,30 @@ function FamilyMembers({ onMemberSelect }) {
     };
 
     fetchFamilyMembers();
+
+    const handlePatientSelection = () => {
+      fetchFamilyMembers();
+    };
+
+    window.addEventListener('patientSelected', handlePatientSelection);
+    
+    return () => {
+      window.removeEventListener('patientSelected', handlePatientSelection);
+    };
   }, []);
 
   const handleMemberSelect = (member) => {
     const { documents, ...cleanedMember } = member;
-    const selectedWithPatient = { ...cleanedMember, patientId }; // ✅ add patientId
+    const selectedWithPatient = { ...cleanedMember, patientId };
     setSelectedId(member._id);
     localStorage.setItem('doctorSelectedFamilyId', member._id);
-    onMemberSelect?.(selectedWithPatient); // ✅ pass cleaned member
+    
+    const event = new CustomEvent('familyMemberSelected', {
+      detail: { member: selectedWithPatient }
+    });
+    window.dispatchEvent(event);
+    
+    onMemberSelect?.(selectedWithPatient);
   };
 
   if (loading) return <div className="text-center">Loading...</div>;

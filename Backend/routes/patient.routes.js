@@ -27,6 +27,8 @@ router.post('/register', [
     next(); // pass to controller
 }, patientController.registerPatient);
 
+// Add this new route after register route
+router.post('/verify-registration', patientController.verifyRegistrationOTP);
 
 // Send OTP route
 router.post('/send-otp', async (req, res) => {
@@ -209,8 +211,6 @@ router.post('/upload/:familyId', uploadMiddleware, async (req, res) => {
     const familyId = req.params.familyId;
     const { documentName, documentType } = req.body;
     const file = req.file;
-
-    console.log('Received upload request:', { familyId, documentName, documentType, fileExists: !!file });
 
     if (!file) {
         return res.status(400).json({ message: '❌ No file uploaded' });

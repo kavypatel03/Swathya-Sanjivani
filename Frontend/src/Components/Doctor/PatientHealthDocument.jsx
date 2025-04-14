@@ -5,7 +5,11 @@ import { saveAs } from "file-saver";
 function PatientHealthDocuments({ selectedMember, documents, refreshDocuments, loading, error }) {
   const openPreview = (doc) => {
     if (doc.document?._id) {
-      const fileUrl = `http://localhost:4000/doctor/get-family-member-documents?documentId=${doc.document._id}&familyMemberId=${selectedMember._id}&patientId=${selectedMember.patientId}`;
+      const fileUrl = doc.document.documentType.toLowerCase() === 'prescription'
+        ? `http://localhost:4000/doctor/view-prescription/${doc.document._id}`
+        : `http://localhost:4000/doctor/get-family-member-documents?documentId=${doc.document._id}&familyMemberId=${selectedMember._id}&patientId=${selectedMember.patientId}`;
+      
+      // Open the file URL in a new tab
       window.open(fileUrl, "_blank", "noopener,noreferrer");
     } else {
       alert("❌ Unable to open document. Document ID is missing.");
@@ -14,21 +18,48 @@ function PatientHealthDocuments({ selectedMember, documents, refreshDocuments, l
 
   const downloadFile = async (doc) => {
     try {
-      const response = await axios.get(
-        `http://localhost:4000/doctor/get-family-member-documents`,
-        {
-          params: {
-            documentId: doc.document._id,
-            familyMemberId: selectedMember._id,
-            patientId: selectedMember.patientId
-          },
-          responseType: 'blob',
-          withCredentials: true
-        }
-      );
-
-      const blob = new Blob([response.data], { type: doc.document.file.contentType });
-      saveAs(blob, doc.document.documentName || 'document.pdf');
+      if (doc.document?.documentType.toLowerCase() === 'prescription') {
+        // Download prescription as a PDF
+        const response = await axios.get(
+          `http://localhost:4000/doctor/prescription-pdf/${doc.document._id}`,
+          {
+            responseType: 'blob',
+            withCredentials: true
+          }
+        );
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${doc.document.documentName || 'prescription'}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } else {
+        // Handle other documents
+        const response = await axios.get(
+          `http://localhost:4000/doctor/get-family-member-documents`,
+          {
+            params: {
+              documentId: doc.document._id,
+              familyMemberId: selectedMember._id,
+              patientId: selectedMember.patientId
+            },
+            responseType: 'blob',
+            withCredentials: true
+          }
+        );
+        const blob = new Blob([response.data], { type: doc.document.file.contentType });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = doc.document.documentName || 'document.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
     } catch (error) {
       console.error("Download error", error);
       alert("❌ Failed to download the document.");
@@ -47,31 +78,42 @@ function PatientHealthDocuments({ selectedMember, documents, refreshDocuments, l
         confirmButtonText: "Yes, delete it!",
         background: "#ffffff",
         iconColor: "#ff9700"
-      }).then((result) => {
+      }).then(async (result) => {
         if (result.isConfirmed) {
-          axios
-            .delete(`http://localhost:4000/doctor/delete-document/${docId}`, {
-              withCredentials: true
-            })
-            .then((res) => {
-              if (res.data.success) {
-                refreshDocuments(); // ✅ Auto refresh after delete
-                Swal.default.fire({
-                  title: "Deleted!",
-                  text: "The document has been deleted.",
-                  icon: "success",
-                  confirmButtonText: "Done",
-                  confirmButtonColor: "#0e606e",
-                  iconColor: "#0e606e"
-                });
-              } else {
-                Swal.default.fire("Failed!", res.data.message, "error");
+          try {
+            const response = await axios.delete(
+              `http://localhost:4000/doctor/delete-document/${docId}`,
+              {
+                withCredentials: true,
+                data: {
+                  familyMemberId: selectedMember._id,
+                  patientId: selectedMember.patientId
+                }
               }
-            })
-            .catch((error) => {
-              console.error("Delete error", error);
-              Swal.default.fire("Error!", "Something went wrong.", "error");
+            );
+
+            if (response.data.success) {
+              refreshDocuments();
+              Swal.default.fire({
+                title: "Deleted!",
+                text: "The document has been deleted.",
+                icon: "success",
+                confirmButtonText: "Done",
+                confirmButtonColor: "#0e606e",
+                iconColor: "#0e606e"
+              });
+            } else {
+              throw new Error(response.data.message);
+            }
+          } catch (error) {
+            console.error("Delete error", error);
+            Swal.default.fire({
+              title: "Error!",
+              text: error.response?.data?.message || "Failed to delete document",
+              icon: "error",
+              confirmButtonColor: "#ef4444"
             });
+          }
         }
       });
     });

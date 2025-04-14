@@ -39,15 +39,21 @@ function AssistantLogin() {
     }
 
     try {
-      const response = await axios.post('http://localhost:4000/assistant/login', {
-        mobile: formData.mobile,
-        email: formData.email,
-        password: formData.password
-      });
+      const response = await axios.post('http://localhost:4000/assistant/login', 
+        {
+          mobile: formData.mobile,
+          email: formData.email,
+          password: formData.password
+        },
+        {
+          withCredentials: true // Important: This allows cookies to be sent and received
+        }
+      );
 
       if (response.data.success) {
-        // Store token in localStorage or cookies
+        // Store token and assistantId in localStorage
         localStorage.setItem('token', response.data.data.token);
+        localStorage.setItem('assistantId', response.data.data.assistant._id);
         
         toast.success('Login successful! Redirecting...');
         setTimeout(() => {

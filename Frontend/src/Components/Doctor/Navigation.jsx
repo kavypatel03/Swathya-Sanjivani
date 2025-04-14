@@ -1,12 +1,18 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 
 function Navigation() {
+    const navigate = useNavigate();
     const navLinkClasses = ({ isActive }) =>
         isActive
             ? "border-b-2 border-[#0e606e] px-1 inline-flex items-center text-md font-medium text-[#0e606e]"
             : "border-b-2 border-transparent px-1 inline-flex items-center text-md font-medium text-gray-500 hover:text-gray-700";
+
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/DoctorLogin');
+    };
 
     return (
         <nav className="bg-white shadow z-50 relative py-2 mb-1">
@@ -33,10 +39,13 @@ function Navigation() {
 
                     {/* Logout Button */}
                     <div className="flex items-center">
-                        <NavLink to="/PatientLogin" className="text-[#0e606e] hover:text-[#0e606e] flex items-center text-l font-bold">
+                        <button 
+                            onClick={handleLogout}
+                            className="text-[#0e606e] hover:text-[#0e606e] flex items-center text-l font-bold"
+                        >
                             <i className="ri-logout-box-line mr-1"></i>
                             Logout
-                        </NavLink>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -50,10 +59,13 @@ function Navigation() {
                     <NavLink to="/Guide" className={navLinkClasses}>
                         Guide
                     </NavLink>
-                    <NavLink to="/PatientLogin" className="block px-3 py-2 rounded-md text-base font-bold text-[#0e606e] hover:text-[#0e606e] hover:bg-gray-50">
+                    <button 
+                        onClick={handleLogout}
+                        className="block px-3 py-2 rounded-md text-base font-bold text-[#0e606e] hover:text-[#0e606e] hover:bg-gray-50"
+                    >
                         <i className="ri-logout-box-line mr-1"></i>
                         Logout
-                    </NavLink>
+                    </button>
                 </div>
             </div>
         </nav>

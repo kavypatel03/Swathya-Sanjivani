@@ -44,6 +44,7 @@ function Login() {
   
       // Store token and redirect
       localStorage.setItem("token", data.data.token);
+      localStorage.setItem("doctorId", data.data.doctor._id);
       toast.success("✅ Login successful!");
       navigate("/Dashbord"); // Fixed typo in route
     } catch (error) {

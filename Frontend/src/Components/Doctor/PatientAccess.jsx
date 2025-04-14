@@ -76,6 +76,18 @@ const AccessPatientRecords = () => {
       );
 
       if (response.data.success) {
+        // Get patient details after successful verification
+        const patientResponse = await axios.get(`http://localhost:4000/doctor/get-patients`, {
+          withCredentials: true
+        });
+
+        if (patientResponse.data.success) {
+          // Get the most recently added patient (last in the array)
+          const latestPatient = patientResponse.data.data[patientResponse.data.data.length - 1];
+          // Store the patient ID in localStorage
+          localStorage.setItem('selectedPatientId', latestPatient._id);
+        }
+
         await showAlert({
           title: "Success",
           text: "Access granted successfully!",

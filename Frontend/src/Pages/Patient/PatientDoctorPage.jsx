@@ -14,7 +14,6 @@ axios.defaults.baseURL = 'http://localhost:4000';
 
 // Add request interceptor for debugging
 axios.interceptors.request.use(request => {
-  console.log('Request Headers:', request.headers);
   return request;
 });
 
@@ -40,7 +39,6 @@ function PatientDoctorPage() {
     const fetchDoctors = async () => {
       try {
         setLoading(true);
-        console.log('Using token:', token); // Debug log
         
         const response = await axios.get(`/patient/${userId}/doctors`, {
           headers: {
@@ -50,8 +48,6 @@ function PatientDoctorPage() {
           },
           withCredentials: true
         });
-        
-        console.log('Response:', response.data); // Debug log
         
         // Check for successful response
         if (response.data.success && response.data.data) {

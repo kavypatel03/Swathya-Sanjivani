@@ -97,9 +97,10 @@ assistantSchema.methods.comparePassword = async function(candidatePassword) {
 assistantSchema.methods.generateAuthToken = function() {
   return jwt.sign(
     { 
-      id: this._id,
-      userType: this.userType
-    },
+      _id: this._id,
+      assistantId: this._id,
+      role: 'assistant'
+    }, 
     process.env.JWT_SECRET,
     { expiresIn: '24h' }
   );

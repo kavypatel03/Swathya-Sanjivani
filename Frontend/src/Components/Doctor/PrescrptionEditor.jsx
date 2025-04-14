@@ -1,9 +1,115 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import axios from "axios";
 import logo from "../../assets/logo.png";
 
-const PrescriptionEditor = () => {
+const PrescriptionEditor = ({ existingPrescriptionId = null }) => {
   const editorRef = useRef(null);
   const [isEmpty, setIsEmpty] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [doctorDetails, setDoctorDetails] = useState(null);
+
+  useEffect(() => {
+    // Fetch doctor details on component mount
+    const fetchDoctorDetails = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/doctor/dashboard', {
+          withCredentials: true
+        });
+        if (response.data.success) {
+          setDoctorDetails(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching doctor details:', error);
+      }
+    };
+
+    fetchDoctorDetails();
+    if (existingPrescriptionId) {
+      loadExistingPrescription();
+    }
+  }, [existingPrescriptionId]);
+
+  const loadExistingPrescription = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4000/doctor/prescription/${existingPrescriptionId}`,
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        editorRef.current.textContent = response.data.data;
+        handleInput();
+      }
+    } catch (error) {
+      console.error("Error loading prescription:", error);
+    }
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault(); // Prevent form submission
+    try {
+      setSaving(true);
+      const content = editorRef.current.textContent;
+      
+      const patientId = localStorage.getItem('selectedPatientId');
+      const familyMemberId = localStorage.getItem('doctorSelectedFamilyId');
+
+      if (!patientId || !familyMemberId) {
+        throw new Error('Patient or family member not selected');
+      }
+
+      const response = existingPrescriptionId 
+        ? await axios.put(
+            `http://localhost:4000/doctor/prescription/${existingPrescriptionId}`,
+            { content },
+            { 
+              withCredentials: true,
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }
+          )
+        : await axios.post(
+            "http://localhost:4000/doctor/prescription",
+            {
+              content,
+              patientId,
+              familyMemberId
+            },
+            { 
+              withCredentials: true,
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+
+      if (response.data.success) {
+        import("sweetalert2").then((Swal) => {
+          Swal.default.fire({
+            title: "Success!",
+            text: `Prescription ${existingPrescriptionId ? 'updated' : 'saved'} successfully`,
+            icon: "success",
+            confirmButtonColor: "#0e606e"
+          }).then(() => {
+   d  // Use react-router navigation instead of window.history
+            window.location.replace('/dashbord');
+          });
+        });
+      }
+    } catch (error) {
+      console.error("Error saving prescription:", error);
+      import("sweetalert2").then((Swal) => {
+        Swal.default.fire({
+          title: "Error!",
+          text: error.message || "Failed to save prescription",
+          icon: "error",
+          confirmButtonColor: "#ef4444"
+        });
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleCommand = (command, value = null) => {
     const editor = editorRef.current;
@@ -31,14 +137,32 @@ const PrescriptionEditor = () => {
       <div className="flex justify-between items-center mb-4">
         <div>
           <h3 className="text-[#0e606e] text-lg font-semibold">Prescription Editor</h3>
-          <p className="text-sm text-gray-500">Patient: (Patient Name)</p>
+          <p className="text-sm text-gray-500">
+            Family Member ID: {localStorage.getItem('doctorSelectedFamilyId')}
+          </p>
         </div>
         <div className="flex space-x-2">
-          <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded">
+          <button 
+            type="button" // Add type="button"
+            className="border border-gray-300 text-gray-700 px-4 py-2 rounded"
+            onClick={() => window.location.replace('/doctor/dashboard')}
+          >
             Cancel
           </button>
-          <button className="bg-[#0e606e] text-white px-4 py-2 rounded">
-            Save Prescription
+          <button 
+            type="button" // Add type="button"
+            className="bg-[#0e606e] text-white px-4 py-2 rounded flex items-center"
+            onClick={handleSave}
+            disabled={saving || isEmpty}
+          >
+            {saving ? (
+              <>
+                <span className="mr-2">Saving...</span>
+                <i className="ri-loader-4-line animate-spin"></i>
+              </>
+            ) : (
+              'Save Prescription'
+            )}
           </button>
         </div>
       </div>
@@ -99,11 +223,19 @@ const PrescriptionEditor = () => {
       <div className="border border-t-0 border-gray-300 rounded-b-lg p-6 min-h-80">
         <div className="flex justify-between mb-6">
           <div>
-            <h4 className="font-semibold">Dr. Manoj Shah</h4>
-            <p className="text-sm text-gray-600">Cardiologist</p>
-            <p className="text-sm text-gray-600">License No: 12345</p>
+            <h4 className="font-semibold">
+              Dr. {doctorDetails?.fullname || 'Loading...'}
+            </h4>
+            <p className="text-sm text-gray-600">
+              {doctorDetails?.specialization || 'Loading...'}
+            </p>
+            <p className="text-sm text-gray-600">
+              License No: {doctorDetails?.mciNumber || 'Loading...'}
+            </p>
           </div>
-          <div className="text-sm text-gray-600">Date: March 15, 2024</div>
+          <div className="text-sm text-gray-600">
+            Date: {new Date().toLocaleDateString()}
+          </div>
         </div>
 
         {/* Editor with Placeholder */}
@@ -118,7 +250,8 @@ const PrescriptionEditor = () => {
             contentEditable
             onInput={handleInput}
             suppressContentEditableWarning
-            className="w-full h-64 p-2 rounded text-gray-700 border resize-none overflow-auto outline-none list-disc list-inside"
+            className="w-full h-64 p-2 rounded text-gray-700 border resize-none overflow-auto outline-none whitespace-pre-wrap"
+            style={{ fontFamily: 'monospace' }} // For better text formatting
           ></div>
         </div>
 

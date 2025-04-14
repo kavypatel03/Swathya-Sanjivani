@@ -20,6 +20,7 @@
     "file-server": "^2.2.1",
     "framer-motion": "^12.6.3",
     "lucide-react": "^0.487.0",
+    "pdfkit": "^0.17.0",
     "react": "^19.0.0",
     "react-datepicker": "^8.2.1",
     "react-doc-viewer": "^0.1.14",

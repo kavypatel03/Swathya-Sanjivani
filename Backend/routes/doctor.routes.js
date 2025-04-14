@@ -68,4 +68,22 @@ router.delete('/remove-patient/:patientId', authMiddleware, doctorController.rem
 // Add this route before module.exports
 router.get('/get-patients', authMiddleware, doctorController.getPatients);
 
+// Add this new route before module.exports
+router.get('/patient/:patientId', authMiddleware, doctorController.getPatientById);
+
+// Add this new route before module.exports
+router.get('/doctor/:doctorId', authMiddleware, doctorController.getDoctorById);
+
+// Add this route before module.exports
+router.put('/doctor/:doctorId', authMiddleware, doctorController.updateDoctorById);
+
+// Add these new prescription routes before module.exports
+router.post('/prescription', authMiddleware, doctorController.savePrescription);
+router.get('/prescription/:documentId', authMiddleware, doctorController.getPrescription);
+router.put('/prescription/:documentId', authMiddleware, doctorController.updatePrescription);
+router.get('/prescription-pdf/:documentId', authMiddleware, doctorController.downloadPrescriptionAsPdf);
+
+// Add this new route for viewing prescriptions
+router.get('/view-prescription/:documentId', authMiddleware, doctorController.viewPrescription);
+
 module.exports = router;

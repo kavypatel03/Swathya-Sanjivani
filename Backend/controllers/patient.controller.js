@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const patientModel = require('../models/patient.model');
 const doctorModel = require('../models/doctor.model');
 const patientService = require('../services/patient.service');
+const otpService = require('../services/otp.services'); // Add this import
 const { validationResult } = require('express-validator');
 const documentModel = require('../models/documents.model');
 const formatMobileNumber = require('../utils/mobileFormatter');
@@ -22,18 +23,77 @@ module.exports.registerPatient = async (req, res, next) => {
         // Format mobile number before registration
         const formattedMobile = formatMobileNumber(mobile);
 
-        const hashedPassword = await patientModel.hashPassword(password);
+        // First send OTP
+        try {
+            await otpService.sendOTP(formattedMobile, "patient");
+            
+            // Store registration data in session/cache for verification
+            req.session = req.session || {};
+            req.session.pendingRegistration = {
+                fullname,
+                mobile: formattedMobile,
+                email,
+                password,
+                userType
+            };
 
+            return res.status(200).json({
+                success: true,
+                message: 'OTP sent successfully',
+                requireOTP: true
+            });
+            
+        } catch (error) {
+            return res.status(400).json({
+                success: false,
+                message: 'Failed to send OTP',
+                error: error.message
+            });
+        }
+
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// Add a new verification endpoint
+module.exports.verifyRegistrationOTP = async (req, res) => {
+    try {
+        const { otp } = req.body;
+        
+        // Get pending registration data
+        const pendingReg = req.session?.pendingRegistration;
+        if (!pendingReg) {
+            return res.status(400).json({
+                success: false,
+                message: 'Registration session expired, please try again'
+            });
+        }
+
+        // Verify OTP
+        const isValid = await otpService.verifyOTP(pendingReg.mobile, otp);
+        if (!isValid) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid OTP'
+            });
+        }
+
+        // Complete registration
+        const hashedPassword = await patientModel.hashPassword(pendingReg.password);
         const patient = await patientService.createPatient({
-            fullname,
-            mobile: formattedMobile,
-            email,
+            fullname: pendingReg.fullname,
+            mobile: pendingReg.mobile,
+            email: pendingReg.email,
             password: hashedPassword,
-            userType
+            userType: pendingReg.userType
         });
 
+        // Generate token and set cookie
         const token = patient.generateAuthToken();
-
         res.cookie('token', token, {
             httpOnly: true,
             secure: true,
@@ -41,10 +101,13 @@ module.exports.registerPatient = async (req, res, next) => {
             maxAge: 24 * 60 * 60 * 1000
         });
 
+        // Clear pending registration
+        delete req.session.pendingRegistration;
+
         res.status(201).json({
             success: true,
             message: 'Registration successful',
-            data: { patient, token }  
+            data: { patient, token }
         });
 
     } catch (error) {
@@ -286,8 +349,6 @@ module.exports.getPatientDoctors = async (req, res) => {
     try {
         const patientId = req.params.patientId || req.user._id;
         
-        console.log('Fetching doctors for patient:', patientId); // Debug log
-
         if (!mongoose.Types.ObjectId.isValid(patientId)) {
             return res.status(400).json({
                 success: false,
@@ -399,6 +460,168 @@ module.exports.revokeDoctorAccess = async (req, res) => {
             message: 'Server error while revoking access',
             error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
+    }
+};
+
+// Add prescription HTML view for patient
+module.exports.viewPrescription = async (req, res) => {
+    try {
+        const documentId = req.params.documentId;
+        const document = await documentModel.findById(documentId);
+
+        if (!document || document.documentType.toLowerCase() !== 'prescription') {
+            return res.status(404).send("Prescription not found");
+        }
+
+        // Try to get doctor by assistant.doctor if uploadedBy is assistant
+        let doctor = null;
+        let assistant = null;
+        doctor = await doctorModel.findById(document.uploadedBy);
+        if (!doctor) {
+            assistant = await require('../models/assistant.model').findById(document.uploadedBy);
+            if (assistant && assistant.doctor) {
+                doctor = await doctorModel.findById(assistant.doctor);
+            }
+        }
+        if (!assistant && !doctor) {
+            assistant = await require('../models/assistant.model').findById(document.uploadedBy);
+        }
+
+        const patient = await patientModel.findById(document.patient);
+        const familyMember = patient?.family?.find(f => f._id.toString() === document.familyMember.toString());
+
+        // Set correct content type for HTML
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+
+        // Generate HTML content for the prescription
+        res.end(`<!DOCTYPE html>
+<html>
+<head>
+  <title>Prescription View</title>
+  <meta charset="utf-8" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      border: 1px solid #ddd;
+    }
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 40px;
+      position: relative;
+    }
+    .logo {
+      width: 200px;
+      height: auto;
+    }
+    .header-text {
+      text-align: right;
+      flex-grow: 1;
+    }
+    .header-text h1 {
+      color: #0e606e;
+      font-size: 24px;
+      margin: 0;
+      padding-top: 10px;
+    }
+    .separator {
+      border-bottom: 2px solid #0e606e;
+      margin-top: 10px;
+    }
+    .doctor-info {
+      margin: 30px 0 10px 0;
+      line-height: 2.2;
+    }
+    .doctor-name-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .assistant-info {
+      margin-bottom: 20px;
+      font-size: 0.95em;
+      color: #444;
+      background: #f3f7fa;
+      padding: 10px 15px;
+      border-radius: 4px;
+    }
+    .patient-info {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+    .prescription-content {
+      white-space: pre-wrap;
+      padding: 20px;
+      border: 1px solid #eee;
+      min-height: 200px;
+      line-height: 2;
+      margin: 20px 0;
+    }
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+      text-align: right;
+    }
+    .signature {
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-container">
+    <img src="http://localhost:4000/static/logo.png" alt="Swasthya Sanjivani Logo" class="logo" onerror="this.style.display='none'" />
+    <div class="header-text">
+      <h1>Medical Prescription</h1>
+    </div>
+  </div>
+  <div class="separator"></div>
+
+  <div class="doctor-info">
+    <div class="doctor-name-line">
+      <h3 style="margin: 0;">Dr. ${doctor?.fullName || 'Unknown Doctor'}</h3>
+      <p style="margin: 0;">Date: ${new Date(document.uploadedAt).toLocaleDateString()}</p>
+    </div>
+    <p style="margin: 10px 0;">${doctor?.specialization || ''}</p>
+    <p style="margin: 10px 0;">${doctor?.hospitalName || ''}</p>
+    <p style="margin: 10px 0;">License No: ${doctor?.mciRegistrationNumber || 'N/A'}</p>
+  </div>
+  
+  ${
+    assistant
+      ? `<div class="assistant-info">
+          <strong>Prepared by:</strong> ${assistant.fullName || 'Unknown Assistant'}
+        </div>`
+      : ''
+  }
+
+  <div class="patient-info">
+    <p><strong>Patient Name:</strong> ${familyMember?.fullName || 'Unknown'}</p>
+  </div>
+  <div class="prescription-content">
+    ${document.file.data.toString('utf-8').replace(/\n/g, '<br>')}
+  </div>
+  <div class="footer">
+    <div class="signature">
+      <p>Digital Signature</p>
+      <p>Dr. ${doctor?.fullName || 'Unknown Doctor'}</p>
+    </div>
+  </div>
+</body>
+</html>
+        `);
+
+    } catch (error) {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end("Failed to view prescription");
     }
 };
 
