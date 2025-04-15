@@ -15,33 +15,33 @@ exports.register = async (req, res) => {
         message: 'Medical document is required'
       });
     }
-
-    const { 
-      fullName, 
-      mciNumber, 
+    
+    const {
+      fullName,
+      mciNumber,
       hospitalName,
       email,
       mobile,
       password,
-      specialization 
+      specialization
     } = req.body;
-
+    
     if (!fullName || !mciNumber || !hospitalName || !email || !mobile || !password || !specialization) {
       return res.status(400).json({
         success: false,
         message: 'All fields are required'
       });
     }
-
-    // Create medicalDocuments array with the single uploaded document
-    const medicalDocuments = [{
+    
+    // Create a single medical document object first
+    const medicalDocument = {
       data: req.file.buffer,
       contentType: req.file.mimetype,
       originalName: req.file.originalname
-    }];
-
+    };
+    
     const formattedMobile = formatMobileNumber(mobile);
-
+    
     const doctor = await doctorService.registerDoctor({
       fullName,
       mciNumber,
@@ -50,16 +50,29 @@ exports.register = async (req, res) => {
       mobile: formattedMobile,
       password,
       specialization,
-      medicalDocuments // Changed from medicalDocument to medicalDocuments (array)
+      medicalDocuments: [medicalDocument] // Pass as an array with the single document
     });
-
+    
     res.status(201).json({
       success: true,
       message: 'Doctor registered successfully'
     });
-
   } catch (error) {
-    // ... rest of the error handling remains the same ...
+    console.error('Registration error:', error);
+    
+    // Handle duplicate key errors more specifically
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(409).json({
+        success: false,
+        message: `This ${field} is already registered`
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error registering doctor'
+    });
   }
 };
 
@@ -1147,10 +1160,16 @@ exports.viewPrescription = async (req, res) => {
   }
 };
 
+// In doctor.controller.js, modify the updateDoctorById function:
+
 exports.updateDoctorById = async (req, res) => {
   try {
     const { doctorId } = req.params;
     console.log("Update request for doctor:", doctorId, "with data:", req.body);
+
+    // Add more detailed logging for debugging
+    console.log("User ID from auth:", req.user._id);
+    console.log("Authorization check:", doctorId === req.user._id.toString());
 
     if (doctorId !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: "Unauthorized" });
@@ -1167,10 +1186,19 @@ exports.updateDoctorById = async (req, res) => {
       }
     });
 
-    // Handle password separately
+    // Handle password separately with proper error handling
     if (req.body.password?.trim()) {
-      const bcrypt = require('bcryptjs');
-      updateFields.password = await bcrypt.hash(req.body.password, 10);
+      try {
+        console.log("Password before hashing:", req.body.password);  
+        const bcrypt = require('bcryptjs');
+        updateFields.password = await bcrypt.hash(req.body.password, 10);
+      } catch (hashError) {
+        console.error('Password hash error:', hashError); 
+        return res.status(500).json({ 
+          success: false, 
+          message: "Error processing password" 
+        });
+      }
     }
 
     if (Object.keys(updateFields).length === 0) {
@@ -1180,10 +1208,12 @@ exports.updateDoctorById = async (req, res) => {
       });
     }
 
+    console.log("Final update fields:", updateFields);
+
     const updatedDoctor = await doctorModel.findByIdAndUpdate(
       doctorId,
       { $set: updateFields },
-      { new: true }
+      { new: true, runValidators: true }  // Add runValidators to enforce schema validation
     ).select('-password');
 
     if (!updatedDoctor) {
@@ -1200,11 +1230,12 @@ exports.updateDoctorById = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Update error:', error);
+    console.error('Update error details:', error);
     res.status(500).json({ 
       success: false, 
       message: "Failed to update profile",
-      error: error.message 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };

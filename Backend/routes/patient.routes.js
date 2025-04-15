@@ -8,6 +8,7 @@ const multer = require('multer');
 const documentModel = require('../models/documents.model');
 const uploadMiddleware = require('../middleware/upload.middlware');
 const authMiddleware = require('../middleware/auth.middleware');
+const doctorController = require('../controllers/doctor.controller');
 
 
 // Register patient route
@@ -299,6 +300,13 @@ router.get('/:patientId/doctors/:doctorId', authMiddleware, patientController.ge
 
 // Revoke doctor access
 router.delete('/:patientId/doctors/:doctorId', authMiddleware, patientController.revokeDoctorAccess);
+
+
+router.get('/view-prescription/:documentId', doctorController.viewPrescription);
+router.get('/download-prescription/:documentId', doctorController.downloadPrescriptionAsPdf);
+
+
+
 
 // Logout route
 router.get('/logout', authMiddleware, (req, res) => {

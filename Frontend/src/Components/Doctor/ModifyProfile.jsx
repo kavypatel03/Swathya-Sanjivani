@@ -1,6 +1,9 @@
 // ModifyProfile.jsx
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const ModifyProfile = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +28,7 @@ const ModifyProfile = () => {
       toast.error("Authentication required");
       return;
     }
-    
+
     fetch(`http://localhost:4000/doctor/doctor/${doctorId}`, {
       method: 'GET',
       headers: {
@@ -58,7 +61,7 @@ const ModifyProfile = () => {
             password: '', // Never prefill password for security
             gender: doctorData.gender || '',
             mciRegistrationNumber: doctorData.mciRegistrationNumber || '',
-            birthDate: doctorData.birthDate ? doctorData.birthDate.slice(0,10) : '',
+            birthDate: doctorData.birthDate ? doctorData.birthDate.slice(0, 10) : '',
             age: age,
             hospitalName: doctorData.hospitalName || '',
             // Use assistant's fullName if populated, else empty string
@@ -97,6 +100,8 @@ const ModifyProfile = () => {
     }
   };
 
+  // In ModifyProfile.jsx, enhance error handling in the handleSubmit function:
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const doctorId = localStorage.getItem('doctorId');
@@ -133,26 +138,42 @@ const ModifyProfile = () => {
         body: JSON.stringify(updateData)
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(data.message || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
       if (data.success) {
-        toast.success("Profile updated successfully");
-        // Reload the data after successful update
-        window.location.reload();
+        toast.success("Profile updated successfully", {
+          onClose: () => {
+            window.location.reload();
+          }
+        });
       } else {
         toast.error(data.message || "Failed to update profile");
       }
     } catch (err) {
       console.error('Error updating profile:', err);
-      toast.error("Server error");
+      toast.error(`Update failed: ${err.message}`);
     }
   };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
+      <ToastContainer
+        position="top-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+
       <h2 className="text-xl font-medium text-[#0e606e] mb-6">Modify Your Details</h2>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border border-gray-200 rounded">
@@ -359,7 +380,7 @@ const ModifyProfile = () => {
           <button
             type="submit"
             className="px-4 py-2 bg-[#0e606e] text-white rounded hover:bg-[#0a4c57]"
-          > 
+          >
             Save Changes
           </button>
         </div>

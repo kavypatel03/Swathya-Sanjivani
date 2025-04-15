@@ -11,3 +11,13 @@ DATE : 13-04-2025
 BOPARE 3:30
 -- Assistant have Tena doctor na badha patient nu list joi sakse and tena family member pn joi sakse 
 -- Patient na badha Report view,download,delete kari sakse
+
+DATE : 14-04-2025
+RATRE : 4:00
+-- Akhu assiatnt complete
+-- Doctor eni profile update kari sakse (Registartion ma error chhe)
+-- Joshi na number thi twilio nu OTP verification karavyu 
+
+DATE : 15-04-2025
+SANJE : 8:00
+--Doctor registration ni error solved

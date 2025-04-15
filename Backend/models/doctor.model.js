@@ -17,13 +17,11 @@ const doctorSchema = new mongoose.Schema({
     type: String,
     required: true,
   },  
-  medicalDocuments: [
-    {
-      data: Buffer,
-      contentType: String,
-      originalName: String
-    }
-  ],
+  medicalDocuments: [{
+    data: Buffer,
+    contentType: String,
+    originalName: String
+  }],
   specialization: {
     type: String,
     required: true,

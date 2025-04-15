@@ -20,6 +20,15 @@ module.exports.registerPatient = async (req, res, next) => {
 
         const { fullname, mobile, email, password, userType } = req.body;
 
+        // Check if mobile or email already exists
+        const existingUser = await patientModel.findOne({ $or: [{ mobile }, { email }] });
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                message: 'Mobile number or email already exists'
+            });
+        }
+
         // Format mobile number before registration
         const formattedMobile = formatMobileNumber(mobile);
 
@@ -625,3 +634,25 @@ module.exports.viewPrescription = async (req, res) => {
     }
 };
 
+module.exports.downloadPrescriptionAsPdf = async (req, res) => {
+    try {
+        const documentId = req.params.documentId;
+        const document = await documentModel.findById(documentId);
+
+        if (!document || document.documentType.toLowerCase() !== 'prescription') {
+            return res.status(404).send("Prescription not found");
+        }
+
+        // Check if the document is a PDF or generate one if necessary
+        if (document.file.contentType === 'application/pdf') {
+            res.contentType('application/pdf');
+            res.send(document.file.data); // Send the PDF data as a download
+        } else {
+            // If it's not a PDF, you could convert it here (e.g., using a library like pdfkit)
+            res.status(400).send("Document is not a PDF");
+        }
+
+    } catch (error) {
+        res.status(500).send("Failed to download prescription");
+    }
+};

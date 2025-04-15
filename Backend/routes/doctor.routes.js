@@ -82,8 +82,6 @@ router.post('/prescription', authMiddleware, doctorController.savePrescription);
 router.get('/prescription/:documentId', authMiddleware, doctorController.getPrescription);
 router.put('/prescription/:documentId', authMiddleware, doctorController.updatePrescription);
 router.get('/prescription-pdf/:documentId', authMiddleware, doctorController.downloadPrescriptionAsPdf);
-
-// Add this new route for viewing prescriptions
 router.get('/view-prescription/:documentId', authMiddleware, doctorController.viewPrescription);
 
 module.exports = router;

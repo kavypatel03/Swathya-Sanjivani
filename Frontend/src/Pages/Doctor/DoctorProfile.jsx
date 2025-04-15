@@ -1,5 +1,5 @@
-// DoctorProfile.jsx
 import React, { useState, useEffect } from 'react';
+import Nav from "../../Components/Doctor/Nav";
 import Navigation from "../../Components/Doctor/Navigation";
 import UserProfile from "../../Components/Doctor/UserProfile";
 import ModifyDetails from "../../Components/Doctor/ModifyProfile";
@@ -27,7 +27,7 @@ const DoctorProfilePage = () => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          credentials: 'include' // Important for cookies/sessions
+          credentials: 'include'
         });
         
         if (!response.ok) {
@@ -35,7 +35,7 @@ const DoctorProfilePage = () => {
         }
 
         const data = await response.json();
-        
+
         if (data.success && data.data) {
           setDoctorData(data.data);
         } else {
@@ -52,10 +52,18 @@ const DoctorProfilePage = () => {
     fetchDoctorData();
   }, []);
 
+  const renderNavigation = () => {
+    if (doctorData?.patients && doctorData.patients.length > 0) {
+      return <Nav />;
+    } else {
+      return <Navigation />;
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100">
-        <Navigation />
+        {renderNavigation()}
         <div className="container mx-auto py-6 px-4">
           <div className="text-center">Loading doctor profile...</div>
         </div>
@@ -66,7 +74,7 @@ const DoctorProfilePage = () => {
   if (!doctorData) {
     return (
       <div className="min-h-screen bg-gray-100">
-        <Navigation />
+        {renderNavigation()}
         <div className="container mx-auto py-6 px-4">
           <div className="text-center text-red-500">
             Failed to load doctor data. Please refresh the page.
@@ -78,7 +86,7 @@ const DoctorProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Navigation />
+      {renderNavigation()}
       <div className="container mx-auto py-6 px-4">
         <UserProfile 
           name={`Dr. ${doctorData.fullName}`} 

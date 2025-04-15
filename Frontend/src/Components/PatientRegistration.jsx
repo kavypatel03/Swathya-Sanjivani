@@ -126,14 +126,19 @@ const PatientRegistrationForm = () => {
       setotp("");
 
       if (error.response) {
-        toast.error(error.response.data.message || "Registration failed");
+        if (error.response.status === 409) {
+          toast.error("Mobile number or email already exists.");
+        } else {
+          toast.error(error.response.data.message || "Registration failed");
+        }
       } else if (error.request) {
         toast.error("No response from server. Please try again later.");
       } else {
         toast.error(`Error: ${error.message}`);
       }
     }
-  };
+};
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center pt-24">
