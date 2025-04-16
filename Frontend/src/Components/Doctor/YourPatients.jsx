@@ -4,6 +4,7 @@ import axios from "axios";
 const PatientList = () => {
   const [patients, setPatients] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPatientId, setSelectedPatientId] = useState(null);
 
   useEffect(() => {
     fetchPatients();
@@ -11,8 +12,9 @@ const PatientList = () => {
 
   useEffect(() => {
     if (patients.length > 0) {
-      // Automatically call handlePatientClick for the first patient
-      handlePatientClick(patients[0]._id);
+      const firstPatientId = patients[0]._id;
+      setSelectedPatientId(firstPatientId);
+      handlePatientClick(firstPatientId);
     }
   }, [patients]);
 
@@ -50,7 +52,6 @@ const PatientList = () => {
   };
 
   const cleanupPatientData = (patientId) => {
-    // Clear both patient and family member IDs
     localStorage.removeItem('selectedPatientId');
     localStorage.removeItem('doctorSelectedFamilyId');
     localStorage.removeItem(`patient_${patientId}_data`);
@@ -69,7 +70,7 @@ const PatientList = () => {
       });
       if (response.data.success) {
         cleanupPatientData(patientId);
-        fetchPatients(); // Refresh the list
+        fetchPatients();
         import("sweetalert2").then((Swal) => {
           Swal.default.fire({
             title: "Removed!",
@@ -103,14 +104,12 @@ const PatientList = () => {
       if (error.response?.data) {
         const { message } = error.response.data;
         
-        // Single Swal alert for all cases
         import("sweetalert2").then((Swal) => {
           let config = {
             confirmButtonColor: "#0e606e",
             background: "#ffffff",
           };
 
-          // Configure based on status
           if (message.includes("Verifying")) {
             config = {
               ...config,
@@ -147,42 +146,95 @@ const PatientList = () => {
     }
   };
 
-  const handlePatientClick = async (patientId) => {
-    try {
-      // First, get the patient's family members
-      const response = await axios.get(`http://localhost:4000/doctor/get-patient-family`, {
-        params: { patientId },
-        withCredentials: true
+ // In handlePatientClick function:
+ const handlePatientClick = async (patientId) => {
+  try {
+    setSelectedPatientId(patientId);
+    localStorage.setItem('selectedPatientId', patientId);
+
+    // Find the selected patient
+    const patient = patients.find(p => p._id === patientId);
+    if (patient) {
+      // Format patient's birthdate
+      const formattedPatientBirthDate = patient.dob ? 
+        new Date(patient.dob).toLocaleDateString('en-GB') : 'N/A';
+
+      // Store patient info including formatted birthdate
+      localStorage.setItem('patientContactInfo', JSON.stringify({
+        mobile: patient.mobile,
+        email: patient.email,
+        birthDate: formattedPatientBirthDate,
+        age: patient.age,
+        gender: patient.gender
+      }));
+    }
+
+    const response = await axios.get(`http://localhost:4000/doctor/get-patient-family`, {
+      params: { patientId },
+      withCredentials: true
+    });
+
+    if (response.data.success) {
+      const familyMembers = response.data.data || [];
+      localStorage.setItem(`patient_${patientId}_family`, JSON.stringify(familyMembers));
+      
+      // Dispatch patient selected event with all needed data
+      const event = new CustomEvent('patientSelected', {
+        detail: { 
+          patientId,
+          patientData: patient,
+          familyMembers,
+          // Include main member details as first item
+          allMembers: [
+            {
+              _id: patient._id,
+              fullName: patient.fullname,
+              birthDate: patient.dob ? new Date(patient.dob).toLocaleDateString('en-GB') : 'N/A',
+              age: patient.age,
+              relationWithMainPerson: 'Self',
+              gender: patient.gender,
+              isMainMember: true
+            },
+            ...familyMembers
+          ]
+        }
       });
+      window.dispatchEvent(event);
 
-      if (response.data.success && response.data.data.length > 0) {
-        // Store both patient ID and first family member's ID
-        localStorage.setItem('selectedPatientId', patientId);
-        localStorage.setItem('doctorSelectedFamilyId', response.data.data[0]._id);
-
-        // Dispatch custom event with both IDs
-        const event = new CustomEvent('patientSelected', {
-          detail: { 
-            patientId,
-            familyMemberId: response.data.data[0]._id
+      // Auto-select the main member (patient)
+      if (patient) {
+        const memberSelectEvent = new CustomEvent('familyMemberSelected', {
+          detail: {
+            familyMember: {
+              fullName: patient.fullname,
+              mobile: patient.mobile || 'N/A',
+              email: patient.email || 'N/A',
+              birthDate: patient.dob ? 
+                new Date(patient.dob).toLocaleDateString('en-GB') : 'N/A',
+              age: patient.age,
+              relationWithMainPerson: 'Self',
+              gender: patient.gender,
+              isMainMember: true
+            },
+            familyMemberId: patient._id
           }
         });
-        window.dispatchEvent(event);
+        window.dispatchEvent(memberSelectEvent);
       }
-    } catch (error) {
-      console.error('Error fetching family members:', error);
     }
-  };
+  } catch (error) {
+    console.error('Error fetching family members:', error);
+  }
+};
 
   const filteredPatients = patients.filter(patient =>
     patient.fullname?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Function to get avatar based on gender
   const getAvatarUrl = (gender) => {
     if (gender === "Male") return "https://avatar.iran.liara.run/public/boy";
     if (gender === "Female") return "https://avatar.iran.liara.run/public/girl";
-    return "https://avatar.iran.liara.run/public/"; // Default to random avtar
+    return "https://avatar.iran.liara.run/public/";
   };
 
   return (
@@ -212,7 +264,11 @@ const PatientList = () => {
         filteredPatients.map((patient) => (
           <div 
             key={patient._id} 
-            className="border border-gray-200  rounded-md p-4 mb-3 cursor-pointer hover:bg-gray-50 transition-colors"
+            className={`border rounded-md p-4 mb-3 cursor-pointer transition-colors ${
+              selectedPatientId === patient._id 
+                ? 'border-[#0e606e] bg-teal-50' 
+                : 'border-gray-200 hover:bg-gray-50'
+            }`}
             onClick={() => handlePatientClick(patient._id)}
           >
             <div className="flex justify-between items-center">

@@ -10,7 +10,7 @@ function PDoctorAccess({ doctors, onSelect, onRevoke }) {
 
   return (
     <div className="container mx-auto">
-      <div className="bg-white rounded-lg shadow p-6" style={{ height: "525px" }}>
+      <div className="bg-white rounded-lg shadow p-6" style={{ height: "570px" }}>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-medium text-[#0e606e]">Doctor Access</h2>
         </div>

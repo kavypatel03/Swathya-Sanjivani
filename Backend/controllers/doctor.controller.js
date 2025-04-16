@@ -701,13 +701,12 @@ exports.getDoctorById = async (req, res) => {
   try {
     const { doctorId } = req.params;
 
-    // Populate assistants with their fullName
     const doctor = await doctorModel
       .findById(doctorId)
-      .select('-password')
+      .select('-password -medicalDocuments -patients -assistants') // Exclude sensitive data
       .populate({
         path: 'assistants',
-        select: 'fullName'
+        select: 'fullName post verificationStatus'
       })
       .lean();
 
@@ -718,9 +717,27 @@ exports.getDoctorById = async (req, res) => {
       });
     }
 
+    // Format the response with all required fields
+    const formattedDoctor = {
+      _id: doctor._id,
+      fullName: doctor.fullName,
+      email: doctor.email,
+      mobile: doctor.mobile,
+      specialization: doctor.specialization,
+      licenseStatus: doctor.licenseStatus,
+      hospitalName: doctor.hospitalName,
+      mciRegistrationNumber: doctor.mciNumber || doctor.mciRegistrationNumber, // Handle both field names
+      experience: doctor.experience,
+      qualification: doctor.qualification,
+      location: doctor.location,
+      about: doctor.about,
+      // Add any other fields your frontend expects
+      assistants: doctor.assistants
+    };
+
     res.status(200).json({
       success: true,
-      data: doctor
+      data: formattedDoctor
     });
   } catch (error) {
     console.error('Error fetching doctor:', error);

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function DoctorConsulted() {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPatientId, setCurrentPatientId] = useState(null);
+  const navigate = useNavigate();
 
   const fetchDoctors = async (patientId) => {
     try {
@@ -41,8 +43,10 @@ function DoctorConsulted() {
           .filter(response => response.data.success)
           .map(response => ({
             ...response.data.data,
-            // Add "You" indicator if it's the current doctor
-            isCurrent: response.data.data._id === currentDoctorId
+            isCurrent: response.data.data._id === currentDoctorId,
+            avatarUrl: `https://avatar.iran.liara.run/public/${
+              response.data.data.gender === 'Female' ? 'girl' : 'boy'
+            }?seed=${response.data.data._id}`
           }));
 
         setDoctors(doctorData);
@@ -75,6 +79,10 @@ function DoctorConsulted() {
     };
   }, []);
 
+  const handleViewProfile = (doctorId) => {
+    navigate(`/AllDoctor/${doctorId}`);
+  };
+
   if (loading && !currentPatientId) {
     return (
       <div className="flex justify-center items-center py-4">
@@ -90,7 +98,10 @@ function DoctorConsulted() {
           {currentPatientId ? 'Other Consulting Doctors' : 'Select a patient first'}
         </h2>
         {doctors.length > 4 && (
-          <button className="text-blue-500 hover:text-blue-700 whitespace-nowrap ml-2">
+          <button 
+            className="text-blue-500 hover:text-blue-700 whitespace-nowrap ml-2"
+            onClick={() => navigate('/AllDoctor')}
+          >
             See All
           </button>
         )}
@@ -103,26 +114,40 @@ function DoctorConsulted() {
           </p>
         </div>
       ) : (
-        doctors.slice(0, 4).map(doctor => (
-          <div key={doctor._id} className="flex justify-between items-center">
-            <div className="flex items-center">
-              <div className="h-10 w-10 rounded-full bg-blue-200 flex items-center justify-center">
-                <i className="ri-user-3-line text-gray-600"></i>
-              </div>
-              <div className="ml-3">
-                <div className="font-medium">
-                  {doctor.isCurrent ? '(You) ' : ''}Dr. {doctor.fullName}
+        <div className="space-y-4">
+          {doctors.slice(0, 4).map(doctor => (
+            <div key={doctor._id} className="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg">
+              <div className="flex items-center flex-grow">
+                <div className="h-12 w-12 rounded-full bg-gray-100 overflow-hidden mr-3">
+                  <img
+                    src={doctor.avatarUrl}
+                    alt={`Dr. ${doctor.fullName}`}
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      e.target.src = doctor.gender === 'Female' 
+                        ? 'https://avatar.iran.liara.run/public/girl' 
+                        : 'https://avatar.iran.liara.run/public/boy';
+                    }}
+                  />
                 </div>
-                <div className="text-sm text-gray-500">
-                  {doctor.specialization} • {doctor.hospitalName}
+                <div className="flex-grow">
+                  <div className="font-medium">
+                    {doctor.isCurrent ? '(You) ' : ''}Dr. {doctor.fullName}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {doctor.specialization} • {doctor.hospitalName}
+                  </div>
                 </div>
+                <button 
+                  className="ml-4 px-4 py-2 border border-blue-500 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                  onClick={() => handleViewProfile(doctor._id)}
+                >
+                  View
+                </button>
               </div>
-              <button className="px-3 py-1 border border-blue-500 text-blue-500 hover:bg-blue-50 rounded flex-shrink-0">
-                View Profile
-              </button>
             </div>
-          </div>
-        ))
+          ))}
+        </div>
       )}
     </div>
   );
