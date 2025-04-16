@@ -467,8 +467,23 @@ exports.savePrescription = async (req, res) => {
 exports.getPatientDocuments = async (req, res) => {
   try {
     const { patientId, familyId } = req.params;
+    const { documentId } = req.query;
     const assistantId = req.user.id;
-
+    
+    // If documentId is provided, serve the file directly
+    if (documentId) {
+      const document = await documentsModel.findById(documentId);
+      if (!document) {
+        return res.status(404).json({
+          success: false,
+          message: 'Document not found'
+        });
+      }
+      
+      res.setHeader('Content-Type', document.file.contentType);
+      return res.send(document.file.data);
+    }
+    
     // Verify authorization
     const assistant = await assistantModel.findById(assistantId);
     if (!assistant) {
@@ -477,7 +492,7 @@ exports.getPatientDocuments = async (req, res) => {
         message: "Assistant not found"
       });
     }
-
+    
     const doctor = await doctorModel.findById(assistant.doctor);
     if (!doctor || !doctor.patients.includes(patientId)) {
       return res.status(403).json({
@@ -485,7 +500,7 @@ exports.getPatientDocuments = async (req, res) => {
         message: "Unauthorized to access these documents"
       });
     }
-
+    
     // Get patient and verify family member
     const patient = await patientModel.findById(patientId);
     if (!patient) {
@@ -494,7 +509,7 @@ exports.getPatientDocuments = async (req, res) => {
         message: "Patient not found"
       });
     }
-
+    
     const familyMember = patient.family.id(familyId);
     if (!familyMember) {
       return res.status(404).json({
@@ -502,21 +517,30 @@ exports.getPatientDocuments = async (req, res) => {
         message: "Family member not found"
       });
     }
-
+    
     // Get all documents for this family member
     const documents = await documentsModel
       .find({
         patient: patientId,
         familyMember: familyId
       })
-      .select('documentName documentType uploadedAt _id')
-      .sort({ uploadedAt: -1 });
-
+      .select('documentName documentType uploadedAt _id file.contentType')
+      .lean();
+    
+    // Format the response to match what the frontend expects
+    const formattedDocuments = documents.map(doc => ({
+      _id: doc._id,
+      documentName: doc.documentName || 'Untitled',
+      documentType: doc.documentType || 'Others',
+      uploadedAt: doc.uploadedAt || new Date(),
+      contentType: doc.file?.contentType
+    }));
+    
     res.status(200).json({
       success: true,
-      data: documents
+      data: formattedDocuments
     });
-
+    
   } catch (error) {
     console.error('Error in getPatientDocuments:', error);
     res.status(500).json({
@@ -526,7 +550,6 @@ exports.getPatientDocuments = async (req, res) => {
     });
   }
 };
-
 
 exports.viewDocument = async (req, res) => {
   try {
@@ -694,8 +717,19 @@ const generatePrescriptionHTML = (document, doctor, familyMember) => {
 exports.downloadDocument = async (req, res) => {
   try {
     const { documentId } = req.params;
+    const assistantId = req.user.id;
+
+    // Verify the assistant's authorization
+    const assistant = await assistantModel.findById(assistantId);
+    if (!assistant) {
+      return res.status(404).json({
+        success: false,
+        message: "Assistant not found"
+      });
+    }
+
+    // Find the document
     const document = await documentsModel.findById(documentId);
-    
     if (!document) {
       return res.status(404).json({
         success: false,
@@ -703,22 +737,29 @@ exports.downloadDocument = async (req, res) => {
       });
     }
 
-    // Set headers for download
-    const fileExtension = document.file.contentType.split('/')[1];
-    res.set({
-      'Content-Type': document.file.contentType,
-      'Content-Disposition': `attachment; filename="${document.documentName}.${fileExtension}"`,
-    });
+    // Verify the assistant has access to this document
+    if (document.uploadedBy.toString() !== assistantId && !assistant.doctor.patients.includes(document.patient.toString())) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized to download this document"
+      });
+    }
 
-    res.send(document.file.data);
+    // Set appropriate content type and disposition headers for download
+    res.setHeader('Content-Type', document.file.contentType);
+    res.setHeader('Content-Disposition', `attachment; filename="${document.documentName}"`);
+    return res.send(document.file.data);
+
   } catch (error) {
     console.error('Error downloading document:', error);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: "Error downloading document",
+      error: error.message
     });
   }
 };
+
 
 exports.deleteDocument = async (req, res) => {
   try {

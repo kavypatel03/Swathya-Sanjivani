@@ -35,13 +35,14 @@ const DocumentManager = ({ onCategorySelect }) => {
   const fetchDocuments = async (patientId, familyId) => {
     try {
       const response = await axios.get(
-        `http://localhost:4000/assistant/patient-documents/${patientId}/${familyId}`,
+        `http://localhost:4000/patient/get-family-member-documents/${familyId}`,
         { withCredentials: true }
       );
 
+
       if (response.data.success) {
         let docs = response.data.data;
-        
+
         // Normalize document data structure
         docs = docs.map(doc => {
           // Handle potential nested document structure
@@ -56,6 +57,7 @@ const DocumentManager = ({ onCategorySelect }) => {
           return doc;
         });
 
+        // Update category counts with normalized case-insensitive comparison
         // Update category counts with normalized case-insensitive comparison
         const counts = {
           'Prescriptions': { count: 0, icon: 'document' },
@@ -108,7 +110,7 @@ const DocumentManager = ({ onCategorySelect }) => {
           withCredentials: true
         }
       );
-
+      console.log(response);
       const contentType = response.headers['content-type'] || '';
       const blob = new Blob([response.data], { type: contentType });
       const url = window.URL.createObjectURL(blob);
@@ -278,7 +280,7 @@ const DocumentManager = ({ onCategorySelect }) => {
       case 'xray':
         return (
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-500" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v16a2 2 0 002 2h16a2 2 0 002-2V4a2 2 0 00-2-2zM4 20V4h16v16H4zm12-5c.55 0 1 .45 1 1s-.45 1-1 1H8c-.55 0-1-.45-1-1s.45-1 1-1h8zm0-4c.55 0 1 .45 1 1s-.45 1-1 1H8c-.55 0-1-.45-1-1s.45-1 1-1h8zm0-4c.55 0 1 .45 1 1s-.45 1-1 1H8c-.55 0-1-.45-1-1s.45-1 1-1h8z"/>
+            <path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v16a2 2 0 002 2h16a2 2 0 002-2V4a2 2 0 00-2-2zM4 20V4h16v16H4zm12-5c.55 0 1 .45 1 1s-.45 1-1 1H8c-.55 0-1-.45-1-1s.45-1 1-1h8zm0-4c.55 0 1 .45 1 1s-.45 1-1 1H8c-.55 0-1-.45-1-1s.45-1 1-1h8zm0-4c.55 0 1 .45 1 1s-.45 1-1 1H8c-.55 0-1-.45-1-1s.45-1 1-1h8z" />
           </svg>
         );
       case 'others':
@@ -303,10 +305,10 @@ const DocumentManager = ({ onCategorySelect }) => {
         return null;
     }
   };
-  
+
   const getIconDocument = (type) => {
     type = (type || '').toLowerCase();
-    
+
     if (type === 'prescription' || type === 'prescriptions') {
       return (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" viewBox="0 0 24 24">
@@ -436,11 +438,11 @@ const DocumentManager = ({ onCategorySelect }) => {
   const handleCategoryClick = (category) => {
     navigate('/assistantReportPage');
     const categoryLower = category.toLowerCase();
-    
+
     const filteredDocs = documents.filter(doc => {
-      const docType = (doc.documentType || '').trim().toLowerCase();
-      
-      if (categoryLower === 'prescriptions' && (docType === 'prescription' || docType === 'prescriptions')) {
+      const docType = (doc.documentType || '').trim();
+
+      if (categoryLower === 'prescriptions' && (docType === 'Prescription' || docType === 'prescriptions')) {
         return true;
       } else if (categoryLower === 'lab reports' && (docType === 'lab report' || docType === 'lab reports')) {
         return true;
@@ -452,7 +454,7 @@ const DocumentManager = ({ onCategorySelect }) => {
       }
       return false;
     });
-    
+
     onCategorySelect(category, filteredDocs);
   };
 

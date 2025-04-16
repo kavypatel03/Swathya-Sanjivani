@@ -62,7 +62,7 @@ function DoctorConsulted() {
     };
 
     window.addEventListener('patientSelected', handlePatientSelected);
-    
+
     // Initial load if patient is already selected
     const patientId = localStorage.getItem('selectedPatientId');
     if (patientId) {
@@ -101,28 +101,28 @@ function DoctorConsulted() {
           <p className="text-center text-gray-500">
             {currentPatientId ? 'No other consulting doctors' : 'Please select a patient'}
           </p>
-        ) : (
-          doctors.slice(0, 4).map(doctor => (
-            <div key={doctor._id} className="flex justify-between items-center">
-              <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full bg-blue-200 flex items-center justify-center">
-                  <i className="ri-user-3-line text-gray-600"></i>
-                </div>
-                <div className="ml-3">
-                  <div className="font-medium">
-                    {doctor.isCurrent ? '(You) ' : ''}Dr. {doctor.fullName}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {doctor.specialization} • {doctor.hospitalName}
-                  </div>
-                </div>
-                <button className="px-3 py-1 border border-blue-500 text-blue-500 hover:bg-blue-50 rounded flex-shrink-0">
-                  View Profile
-                </button>
-              </div>
-            ))}
-          </div>
         </div>
+      ) : (
+        doctors.slice(0, 4).map(doctor => (
+          <div key={doctor._id} className="flex justify-between items-center">
+            <div className="flex items-center">
+              <div className="h-10 w-10 rounded-full bg-blue-200 flex items-center justify-center">
+                <i className="ri-user-3-line text-gray-600"></i>
+              </div>
+              <div className="ml-3">
+                <div className="font-medium">
+                  {doctor.isCurrent ? '(You) ' : ''}Dr. {doctor.fullName}
+                </div>
+                <div className="text-sm text-gray-500">
+                  {doctor.specialization} • {doctor.hospitalName}
+                </div>
+              </div>
+              <button className="px-3 py-1 border border-blue-500 text-blue-500 hover:bg-blue-50 rounded flex-shrink-0">
+                View Profile
+              </button>
+            </div>
+          </div>
+        ))
       )}
     </div>
   );
