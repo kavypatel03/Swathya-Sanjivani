@@ -181,7 +181,7 @@ const PatientList = () => {
   );
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm my-4">
+    <div className="bg-white p-6 rounded-lg shadow-sm my-4 mb-0">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-[#0e606e]">Your Patients List</h3>
         <div className="flex gap-2">

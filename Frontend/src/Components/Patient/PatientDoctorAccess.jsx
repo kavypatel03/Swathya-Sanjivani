@@ -88,7 +88,7 @@ function PatientDoctorAccess({ patientId }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-6 h-[205px] overflow-hidden">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-medium text-[#0e606e]">Doctor Access</h2>
         <button className="text-blue-500 hover:text-blue-700" onClick={handleSeeAll}>

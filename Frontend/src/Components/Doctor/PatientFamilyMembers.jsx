@@ -8,6 +8,25 @@ function FamilyMembers({ onMemberSelect }) {
   const [selectedId, setSelectedId] = useState(localStorage.getItem('doctorSelectedFamilyId') || '');
   const [patientId, setPatientId] = useState(null);
 
+  // Custom scrollbar styles for webkit browsers
+  const scrollbarWebkitStyles = `
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 10px; // Increase this value to make the scrollbar wider
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #0e606e;
+    border-radius: 20px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-button {
+    height: 0;
+    width: 0;
+    background: transparent;
+  }
+`;
+
   useEffect(() => {
     const fetchFamilyMembers = async () => {
       try {
@@ -116,7 +135,7 @@ function FamilyMembers({ onMemberSelect }) {
 
   if (!hasPatients) {
     return (
-      <div className="bg-white rounded-lg shadow p-6 mt-4">
+      <div className="bg-white rounded-lg shadow p-6 mt-4 h-[250px]">
         <div className="text-center">
           <div className="text-4xl mb-3">👨‍⚕️</div>
           <h2 className="text-xl font-medium text-[#0e606e] mb-2">No Patient Access Yet</h2>
@@ -130,7 +149,8 @@ function FamilyMembers({ onMemberSelect }) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-3 mt-4">
+    <div className="bg-white rounded-lg shadow p-3 mt-4 h-[290px]">
+      <style>{scrollbarWebkitStyles}</style>
       <div className="flex justify-between items-center mb-3">
         <h2 className="text-xl font-medium text-[#0e606e]">Family Members</h2>
       </div>
@@ -138,7 +158,14 @@ function FamilyMembers({ onMemberSelect }) {
       {members.length === 0 ? (
         <p className="text-center text-gray-500">No family members found</p>
       ) : (
-        <div className="space-y-4 overflow-y-auto max-h-[228px]">
+        <div 
+          className="space-y-4 custom-scrollbar overflow-y-auto max-h-[228px]"
+          style={{
+            scrollbarWidth: 'auto',
+            scrollbarColor: '#0e606e transparent',
+            paddingRight: '10px',
+          }}
+        >
           {members.map((member) => {
             const isSelected = selectedId === member._id;
 

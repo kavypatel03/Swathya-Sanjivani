@@ -13,7 +13,7 @@ const UploadFiles = ({ selectedMember, onDocumentUploaded }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm my-4">
+    <div className="bg-white mx-[51px] p-6 rounded-lg shadow-sm">
       <h3 className="text-[#0e606e] text-lg font-semibold mb-4">Upload New Files</h3>
       <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 flex flex-col items-center justify-center">
         <div className="text-gray-400 mb-4">
