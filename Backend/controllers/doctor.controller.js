@@ -1182,11 +1182,6 @@ exports.viewPrescription = async (req, res) => {
 exports.updateDoctorById = async (req, res) => {
   try {
     const { doctorId } = req.params;
-    console.log("Update request for doctor:", doctorId, "with data:", req.body);
-
-    // Add more detailed logging for debugging
-    console.log("User ID from auth:", req.user._id);
-    console.log("Authorization check:", doctorId === req.user._id.toString());
 
     if (doctorId !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: "Unauthorized" });
@@ -1206,7 +1201,6 @@ exports.updateDoctorById = async (req, res) => {
     // Handle password separately with proper error handling
     if (req.body.password?.trim()) {
       try {
-        console.log("Password before hashing:", req.body.password);  
         const bcrypt = require('bcryptjs');
         updateFields.password = await bcrypt.hash(req.body.password, 10);
       } catch (hashError) {
@@ -1224,8 +1218,6 @@ exports.updateDoctorById = async (req, res) => {
         message: "No valid fields to update" 
       });
     }
-
-    console.log("Final update fields:", updateFields);
 
     const updatedDoctor = await doctorModel.findByIdAndUpdate(
       doctorId,

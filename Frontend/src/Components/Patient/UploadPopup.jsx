@@ -55,7 +55,6 @@ const UploadPopup = ({ isOpen, onClose, familyId }) => {
     formData.append("documentType", documentType);
   
     try {
-      console.log('Uploading to familyId:', familyId); // Debug log
       const response = await axios.post(
         `http://localhost:4000/patient/upload/${familyId}`,
         formData,
