@@ -94,7 +94,7 @@ const FamilyMembers = () => {
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm">
+    <div className="bg-white p-4 rounded-lg shadow-sm h-[592px]">
       <h2 className="text-[#0e606e] font-medium text-lg mb-4">Family Members</h2>
       {members.length === 0 ? (
         <p className="text-center text-gray-500">Select a patient to view family members</p>
