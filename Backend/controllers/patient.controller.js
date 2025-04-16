@@ -20,45 +20,33 @@ module.exports.registerPatient = async (req, res, next) => {
 
         const { fullname, mobile, email, password, userType } = req.body;
 
-        // Check if mobile or email already exists
-        const existingUser = await patientModel.findOne({ $or: [{ mobile }, { email }] });
-        if (existingUser) {
-            return res.status(409).json({
-                success: false,
-                message: 'Mobile number or email already exists'
-            });
-        }
-
         // Format mobile number before registration
         const formattedMobile = formatMobileNumber(mobile);
 
-        // First send OTP
-        try {
-            await otpService.sendOTP(formattedMobile, "patient");
-            
-            // Store registration data in session/cache for verification
-            req.session = req.session || {};
-            req.session.pendingRegistration = {
-                fullname,
-                mobile: formattedMobile,
-                email,
-                password,
-                userType
-            };
+        const hashedPassword = await patientModel.hashPassword(password);
 
-            return res.status(200).json({
-                success: true,
-                message: 'OTP sent successfully',
-                requireOTP: true
-            });
-            
-        } catch (error) {
-            return res.status(400).json({
-                success: false,
-                message: 'Failed to send OTP',
-                error: error.message
-            });
-        }
+        const patient = await patientService.createPatient({
+            fullname,
+            mobile: formattedMobile,
+            email,
+            password: hashedPassword,
+            userType
+        });
+
+        const token = patient.generateAuthToken();
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'Lax',
+            maxAge: 24 * 60 * 60 * 1000
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'Registration successful',
+            data: { patient, token }  
+        });
 
     } catch (error) {
         res.status(400).json({

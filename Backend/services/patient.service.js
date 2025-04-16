@@ -41,6 +41,7 @@ module.exports.createPatient = async ({
     return patient;
 };
 
+
 module.exports.loginPatient = async ({ mobile, email, password }) => {
     if (!mobile || !email || !password) {
         throw new Error('Mobile, Email, and Password are required');

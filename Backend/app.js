@@ -41,7 +41,7 @@ app.use(express.urlencoded({ extended: true }));
 // });
 
 app.get('/', (req, res) => {
-    res.redirect('/admin/login'); 
+    res.redirect('/admin    /login'); 
 });
 app.use('/otp', otpRoutes); // Now accessible at /otp/send-otp
 
