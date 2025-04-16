@@ -1,17 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 // Note: You'll need to install remix icons with: npm install remixicon
 // And include in your project: import 'remixicon/fonts/remixicon.css'
 import "remixicon/fonts/remixicon.css";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useLocation } from "react-router-dom";
 
 const PatientRegistrationForm = () => {
-  const [error, setError] = useState("");
   const [fullname, setfullname] = useState("");
   const [mobile, setmobile] = useState("");
   const [isMobileVerified, setisMobileVerified] = useState(false);
@@ -24,6 +22,7 @@ const PatientRegistrationForm = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const [userType, setUserType] = useState(params.get("userType") || "Patient");
+  const [termsAccepted, setTermsAccepted] = useState(false); // Added state for terms acceptance
 
   const normalizeMobile = (mobile) => {
     if (!mobile) return "";
@@ -98,8 +97,8 @@ const PatientRegistrationForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!isOtpVerified) {
-      toast.error("Please verify OTP before registration.");
+    if (!isOtpVerified || !termsAccepted) {
+      toast.error("Please verify OTP and accept terms before registration.");
       return;
     }
 
@@ -288,7 +287,7 @@ const PatientRegistrationForm = () => {
 
           <div className="mb-4">
             <div className="flex items-start">
-              <input type="checkbox" id="terms" className="mt-1" />
+              <input type="checkbox" id="terms" className="mt-1" onChange={(e) => setTermsAccepted(e.target.checked)} />
               <label htmlFor="terms" className="ml-2 text-xs text-gray-600">
                 Terms & Conditions
                 <br />
@@ -305,11 +304,11 @@ const PatientRegistrationForm = () => {
           <button
             type="submit"
             className={`w-full py-1 rounded-md font-medium text-sm 
-      ${isOtpVerified
+      ${isOtpVerified && termsAccepted
                 ? "bg-[#0e606e] hover:bg-[#0b5058] text-white"
                 : "bg-gray-400 cursor-not-allowed"
               }`}
-            disabled={!isOtpVerified} // ✅ Disabled until OTP is verified
+            disabled={!isOtpVerified || !termsAccepted} // ✅ Disabled until OTP is verified and terms are accepted
           >
             Register / Sign Up
           </button>

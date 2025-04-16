@@ -55,10 +55,9 @@ function AssistantLogin() {
         localStorage.setItem('token', response.data.data.token);
         localStorage.setItem('assistantId', response.data.data.assistant._id);
         
-        toast.success('Login successful! Redirecting...');
         setTimeout(() => {
           navigate('/AssistantDashbord');
-        }, 1500);
+        }, 1000);
       } else {
         toast.error(response.data.message || 'Login failed');
       }

@@ -61,7 +61,6 @@ const AssistantReportsPage = () => {
 
   const handleDownloadDocument = (document) => {
     // Implement download document logic
-    console.log('Download document:', document);
     window.open(`http://localhost:4000/assistant/download-document/${document._id}`, '_blank');
   };
 

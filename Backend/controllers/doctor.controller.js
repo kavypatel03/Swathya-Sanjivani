@@ -701,13 +701,12 @@ exports.getDoctorById = async (req, res) => {
   try {
     const { doctorId } = req.params;
 
-    // Populate assistants with their fullName
     const doctor = await doctorModel
       .findById(doctorId)
-      .select('-password')
+      .select('-password -medicalDocuments -patients -assistants') // Exclude sensitive data
       .populate({
         path: 'assistants',
-        select: 'fullName'
+        select: 'fullName post verificationStatus'
       })
       .lean();
 
@@ -718,9 +717,27 @@ exports.getDoctorById = async (req, res) => {
       });
     }
 
+    // Format the response with all required fields
+    const formattedDoctor = {
+      _id: doctor._id,
+      fullName: doctor.fullName,
+      email: doctor.email,
+      mobile: doctor.mobile,
+      specialization: doctor.specialization,
+      licenseStatus: doctor.licenseStatus,
+      hospitalName: doctor.hospitalName,
+      mciRegistrationNumber: doctor.mciNumber || doctor.mciRegistrationNumber, // Handle both field names
+      experience: doctor.experience,
+      qualification: doctor.qualification,
+      location: doctor.location,
+      about: doctor.about,
+      // Add any other fields your frontend expects
+      assistants: doctor.assistants
+    };
+
     res.status(200).json({
       success: true,
-      data: doctor
+      data: formattedDoctor
     });
   } catch (error) {
     console.error('Error fetching doctor:', error);
@@ -1165,11 +1182,6 @@ exports.viewPrescription = async (req, res) => {
 exports.updateDoctorById = async (req, res) => {
   try {
     const { doctorId } = req.params;
-    console.log("Update request for doctor:", doctorId, "with data:", req.body);
-
-    // Add more detailed logging for debugging
-    console.log("User ID from auth:", req.user._id);
-    console.log("Authorization check:", doctorId === req.user._id.toString());
 
     if (doctorId !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: "Unauthorized" });
@@ -1189,7 +1201,6 @@ exports.updateDoctorById = async (req, res) => {
     // Handle password separately with proper error handling
     if (req.body.password?.trim()) {
       try {
-        console.log("Password before hashing:", req.body.password);  
         const bcrypt = require('bcryptjs');
         updateFields.password = await bcrypt.hash(req.body.password, 10);
       } catch (hashError) {
@@ -1207,8 +1218,6 @@ exports.updateDoctorById = async (req, res) => {
         message: "No valid fields to update" 
       });
     }
-
-    console.log("Final update fields:", updateFields);
 
     const updatedDoctor = await doctorModel.findByIdAndUpdate(
       doctorId,

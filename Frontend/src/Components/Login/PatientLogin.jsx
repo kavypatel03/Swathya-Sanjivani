@@ -35,15 +35,12 @@ function Login() {
       });
 
       const data = await response.json();
-      console.log('Login response:', data);
 
       if (response.ok && data.success) {
         // Store the token correctly
         const token = data.data.token;
         const patientId = data.data.patient._id;
-        
-        console.log('Storing token:', token); // Debug log
-        console.log('Storing patientId:', patientId); // Debug log
+  
         
         localStorage.setItem("token", token);
         localStorage.setItem("patientId", patientId);

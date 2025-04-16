@@ -131,9 +131,7 @@ const DoctorDashboard = () => {
   };
 
   const handleCategorySelect = (category, filteredDocs) => {
-    console.log('Selected category:', category);
-    console.log('Docs before setting:', filteredDocs);
-    
+
     // Transform documents to match expected format if needed
     const formattedDocs = filteredDocs.map(doc => ({
       _id: doc._id,
