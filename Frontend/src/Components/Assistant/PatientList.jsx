@@ -51,28 +51,29 @@ const PatientList = () => {
     patient.fullname?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Custom scrollbar styles for webkit browsers - copied from FamilyMembers component
-  const scrollbarWebkitStyles = `
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 10px; 
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: #0e606e;
-    border-radius: 20px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-button {
-    height: 0;
-    width: 0;
-    background: transparent;
-  }
-`;
+  // Custom scrollbar styles for webkit browsers
+  const scrollbarStyles = `
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 10px; 
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #0e606e;
+      border-radius: 20px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-button {
+      display: none;
+    }
+  `;
+
+  // Determine if scrollbar should be visible
+  const shouldShowScrollbar = filteredPatients.length > 2;
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
-      <style>{scrollbarWebkitStyles}</style>
+      <style>{scrollbarStyles}</style>
       <h2 className="text-[#0e606e] font-medium text-lg mb-4">Doctor's Patients List</h2>
       <div className="flex mb-4">
         <input
@@ -88,11 +89,12 @@ const PatientList = () => {
         <p className="text-center text-gray-500 py-4">No patients found</p>
       ) : (
         <div 
-          className={`custom-scrollbar ${filteredPatients.length > 2 ? 'overflow-y-auto' : ''}`}
+          className={`${shouldShowScrollbar ? 'custom-scrollbar overflow-y-auto' : 'overflow-y-hidden'}`}
           style={{
-            scrollbarWidth: 'auto',
+            height: '155px',
+            scrollbarWidth: shouldShowScrollbar ? 'thin' : 'none',
             scrollbarColor: '#0e606e transparent',
-            paddingRight: '10px'
+            paddingRight: '5px'
           }}
         >
           {filteredPatients.map((patient) => {
