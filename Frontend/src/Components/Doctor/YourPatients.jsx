@@ -9,6 +9,13 @@ const PatientList = () => {
     fetchPatients();
   }, []);
 
+  useEffect(() => {
+    if (patients.length > 0) {
+      // Automatically call handlePatientClick for the first patient
+      handlePatientClick(patients[0]._id);
+    }
+  }, [patients]);
+
   const fetchPatients = async () => {
     try {
       const response = await axios.get("http://localhost:4000/doctor/get-patients", {
@@ -140,15 +147,6 @@ const PatientList = () => {
     }
   };
 
-  // Cleanup effect when component unmounts
-  useEffect(() => {
-    return () => {
-      // Cleanup any subscriptions or pending requests
-      const controller = new AbortController();
-      controller.abort();
-    };
-  }, []);
-
   const handlePatientClick = async (patientId) => {
     try {
       // First, get the patient's family members
@@ -179,6 +177,13 @@ const PatientList = () => {
   const filteredPatients = patients.filter(patient =>
     patient.fullname?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Function to get avatar based on gender
+  const getAvatarUrl = (gender) => {
+    if (gender === "Male") return "https://avatar.iran.liara.run/public/boy";
+    if (gender === "Female") return "https://avatar.iran.liara.run/public/girl";
+    return "https://avatar.iran.liara.run/public/"; // Default to random avtar
+  };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm my-4">
@@ -211,11 +216,18 @@ const PatientList = () => {
             onClick={() => handlePatientClick(patient._id)}
           >
             <div className="flex justify-between items-center">
-              <div>
-                <h4 className="font-medium">{patient.fullname}</h4>
-                <p className="text-sm text-gray-500">
-                  {patient.mobile} | {patient.email}
-                </p>
+              <div className="flex items-center space-x-4">
+                <img 
+                  src={getAvatarUrl(patient.gender)} 
+                  alt="Patient Avatar"
+                  className="w-12 h-12 rounded-full object-cover border-2 border-[#0e606e]"
+                />
+                <div>
+                  <h4 className="font-medium">{patient.fullname}</h4>
+                  <p className="text-sm text-gray-500">
+                    {patient.mobile} | {patient.email}
+                  </p>
+                </div>
               </div>
               <div className="flex space-x-4">
                 <button 

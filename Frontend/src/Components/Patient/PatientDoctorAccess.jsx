@@ -107,8 +107,17 @@ function PatientDoctorAccess({ patientId }) {
           doctors.map((doctor) => (
             <div key={doctor._id} className="flex justify-between items-center">
               <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full bg-blue-200 flex items-center justify-center">
-                  <i className="ri-user-3-line text-gray-600"></i>
+                <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-[#0e606e]">
+                  <img
+                    src={
+                      doctor.gender === "Female"
+                        ? "https://avatar.iran.liara.run/public/girl"
+                        : "https://avatar.iran.liara.run/public/boy"
+                    }
+                    alt="doctor avatar"
+                    className="h-full w-full object-cover"
+                  />
+
                 </div>
                 <div className="ml-3">
                   <div className="flex items-center gap-1 font-medium">

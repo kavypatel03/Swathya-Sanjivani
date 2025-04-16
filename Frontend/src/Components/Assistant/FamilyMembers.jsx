@@ -102,10 +102,12 @@ const FamilyMembers = () => {
         members.map((member) => (
           <div key={member._id} className="mb-4 flex justify-between items-center">
             <div className="flex items-center">
-              <div className="bg-gray-100 rounded-full p-2 mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#0e606e]" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                </svg>
+              <div className="h-12 w-12 rounded-full mr-3 border-2 border-[#0e606e] overflow-hidden">
+                <img
+                      src={member.gender === 'Male' ? 'https://avatar.iran.liara.run/public/boy' : 'https://avatar.iran.liara.run/public/girl'}
+                      alt={member.gender}
+                      className="h-full w-full object"
+                    />
               </div>
               <div>
                 <p className="font-medium">{member.fullname}</p>

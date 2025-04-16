@@ -527,6 +527,7 @@ exports.getPatientDocuments = async (req, res) => {
   }
 };
 
+
 exports.viewDocument = async (req, res) => {
   try {
     const { documentId } = req.params;

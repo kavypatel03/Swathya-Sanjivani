@@ -69,24 +69,32 @@ const PatientList = () => {
       {filteredPatients.length === 0 ? (
         <p className="text-center text-gray-500 py-4">No patients found</p>
       ) : (
-        filteredPatients.map((patient) => (
-          <div 
-            key={patient._id} 
-            className={`border border-gray-200 rounded-md p-3 mb-2 cursor-pointer ${
-              selectedPatientId === patient._id ? 'bg-[#0e606e1a]' : ''
-            }`}
-            onClick={() => handlePatientClick(patient._id)}
-          >
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-medium">{patient.fullname}</p>
-                <p className="text-gray-500 text-sm">
-                  {patient.mobile} | {patient.email}
-                </p>
+        filteredPatients.map((patient) => {
+          const avatarUrl = `https://avatar.iran.liara.run/public/Boy`; // Avatar URL based on patient ID
+
+          return (
+            <div 
+              key={patient._id} 
+              className={`border border-gray-200 rounded-md p-3 mb-2 cursor-pointer ${selectedPatientId === patient._id ? 'bg-[#0e606e1a]' : ''}`}
+              onClick={() => handlePatientClick(patient._id)}
+            >
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-[#0e606e] mr-3">
+                    {/* Display patient avatar */}
+                    <img src={avatarUrl} alt="Patient Avatar" className="h-full w-full object-cover" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{patient.fullname}</p>
+                    <p className="text-gray-500 text-sm">
+                      {patient.mobile} | {patient.email}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        ))
+          );
+        })
       )}
     </div>
   );

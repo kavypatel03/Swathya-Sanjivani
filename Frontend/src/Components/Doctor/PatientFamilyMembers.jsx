@@ -102,12 +102,7 @@ function FamilyMembers({ onMemberSelect }) {
     const selectedWithPatient = { ...cleanedMember, patientId };
     setSelectedId(member._id);
     localStorage.setItem('doctorSelectedFamilyId', member._id);
-    
-    const event = new CustomEvent('familyMemberSelected', {
-      detail: { member: selectedWithPatient }
-    });
-    window.dispatchEvent(event);
-    
+
     onMemberSelect?.(selectedWithPatient);
   };
 
@@ -118,7 +113,9 @@ function FamilyMembers({ onMemberSelect }) {
     return (
       <div className="bg-white rounded-lg shadow p-6 mt-4">
         <div className="text-center">
-          <div className="text-4xl mb-3">👨‍⚕️</div>
+          <div className="text-4xl mb-3">
+            <img src="https://avatar.iran.liara.run/public/job/doctor/male" alt="Doctor" className="h-12 w-12" />
+          </div>
           <h2 className="text-xl font-medium text-[#0e606e] mb-2">No Patient Access Yet</h2>
           <p className="text-gray-600 mb-4">
             To view patient family members, first add a patient using their mobile number.
@@ -145,18 +142,16 @@ function FamilyMembers({ onMemberSelect }) {
             return (
               <div
                 key={member._id}
-                className={`flex justify-between items-center cursor-pointer p-2 rounded-md transition-colors duration-200 border-l-4 ${
-                  isSelected ? 'bg-[#e0f7fa] border-l-[#0e606e] shadow' : 'border-l-transparent hover:bg-gray-50'
-                }`}
+                className={`flex justify-between items-center cursor-pointer p-2 rounded-md transition-colors duration-200 border-l-4 ${isSelected ? 'bg-[#e0f7fa] border-l-[#0e606e] shadow' : 'border-l-transparent hover:bg-gray-50'}`}
                 onClick={() => handleMemberSelect(member)}
               >
                 <div className="flex items-center">
-                  <div
-                    className={`h-10 w-10 rounded-full text-xl ${
-                      isSelected ? 'bg-[#0e606e] text-white' : 'bg-[#e0f7fa] text-gray-600'
-                    } flex items-center justify-center`}
-                  >
-                    {member.gender === 'Male' ? '👨' : member.gender === 'Female' ? '👩' : '👤'}
+                  <div className={`h-10 w-10 rounded-full overflow-hidden border-2 border-[#0e606e] ${isSelected ? 'bg-[#0e606e] text-white' : 'bg-[#e0f7fa] text-gray-600'} flex items-center justify-center`}>
+                    <img
+                      src={member.gender === 'Male' ? 'https://avatar.iran.liara.run/public/boy' : 'https://avatar.iran.liara.run/public/girl'}
+                      alt={member.gender}
+                      className="h-full w-full object-cover"
+                    />
                   </div>
                   <div className="ml-3">
                     <div className={`font-medium ${isSelected ? 'text-[#0e606e]' : ''}`}>{member.fullName}</div>
@@ -165,11 +160,7 @@ function FamilyMembers({ onMemberSelect }) {
                     </div>
                   </div>
                 </div>
-                {isSelected && (
-                  <div className="text-[#0e606e]">
-                    <i className="ri-check-line"></i>
-                  </div>
-                )}
+                {isSelected && <div className="text-[#0e606e]"><i className="ri-check-line"></i></div>}
               </div>
             );
           })}

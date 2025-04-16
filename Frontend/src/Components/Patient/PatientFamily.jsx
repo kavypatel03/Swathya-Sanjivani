@@ -14,11 +14,11 @@ function FamilyMembers({ setSelectedMember }) {
           method: 'GET',
           credentials: 'include'
         });
-        
+
         const data = await response.json();
         if (data.success) {
           setMembers(data.data);
-          
+
           // If there's a selected ID in localStorage but no member is selected yet
           const storedId = localStorage.getItem('selectedFamilyId');
           if (storedId && data.data.length > 0) {
@@ -37,7 +37,7 @@ function FamilyMembers({ setSelectedMember }) {
         setLoading(false);
       }
     };
-    
+
     fetchFamilyMembers();
   }, [setSelectedMember]);
 
@@ -46,7 +46,7 @@ function FamilyMembers({ setSelectedMember }) {
     setSelectedId(member._id);
     localStorage.setItem('selectedFamilyId', member._id);
   };
-  
+
   // Custom scrollbar styles for webkit browsers
   const scrollbarWebkitStyles = `
   .custom-scrollbar::-webkit-scrollbar {
@@ -75,13 +75,13 @@ function FamilyMembers({ setSelectedMember }) {
           Add New
         </Link>
       </div>
-      
+
       {loading ? (
         <p className="text-center text-gray-500">⏳ Loading...</p>
       ) : error ? (
         <p className="text-center text-red-500">{error}</p>
       ) : (
-          <div
+        <div
           className="space-y-4 custom-scrollbar overflow-y-auto h-[225px]"
           style={{
             scrollbarWidth: 'auto', // Changed from 'thin' to 'auto' for wider scrollbar in Firefox
@@ -92,20 +92,22 @@ function FamilyMembers({ setSelectedMember }) {
           {members.map((member) => (
             <div
               key={member._id}
-              className={`flex justify-between items-center cursor-pointer p-2 rounded-md transition-colors duration-200 border-l-4 ${
-                selectedId === member._id 
-                  ? 'bg-[#e0f7fa] border-l-[#0e606e] shadow' 
+              className={`flex justify-between items-center cursor-pointer p-2 rounded-md transition-colors duration-200 border-l-4 ${selectedId === member._id
+                  ? 'bg-[#e0f7fa] border-l-[#0e606e] shadow'
                   : 'border-l-transparent hover:bg-gray-50'
-              }`}
+                }`}
               onClick={() => handleMemberSelect(member)}
             >
               <div className="flex items-center">
-                <div className={`h-10 w-10 rounded-full text-xl ${
-                  selectedId === member._id ? 'bg-[#0e606e] text-white' : 'bg-[#e0f7fa] text-gray-600'
-                } flex items-center justify-center`}>
-                  {member.avatar || "👨"}
+                <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-[#0e606e]">
+                  <img
+                    src={`https://avatar.iran.liara.run/public/${member.gender === 'Female' ? 'girl' : 'boy'}`}
+                    alt="avatar"
+                    className="h-full w-full object-cover"
+                  />
                 </div>
-                
+
+
                 <div className="ml-3">
                   <div className={`font-medium ${selectedId === member._id ? 'text-[#0e606e]' : ''}`}>
                     {member.fullName}
@@ -115,7 +117,7 @@ function FamilyMembers({ setSelectedMember }) {
                   </div>
                 </div>
               </div>
-              
+
               {selectedId === member._id && (
                 <div className="text-[#0e606e]">
                   <i className="ri-check-line"></i>

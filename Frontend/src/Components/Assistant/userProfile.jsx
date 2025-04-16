@@ -6,6 +6,7 @@ const UserProfile = () => {
   const [assistantData, setAssistantData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [avatarUrl, setAvatarUrl] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,6 +33,10 @@ const UserProfile = () => {
             ...data,
             dob: data.birthDate ? new Date(data.birthDate).toLocaleDateString('en-GB') : ''
           });
+
+          // Fetch a random avatar URL from the API
+          const randomAvatar = `https://avatar.iran.liara.run/public/`;
+          setAvatarUrl(randomAvatar);
         } else {
           throw new Error(response.data.message || 'Failed to fetch data');
         }
@@ -58,10 +63,9 @@ const UserProfile = () => {
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm flex justify-between items-center mb-6">
       <div className="flex items-center">
-        <div className="bg-gray-100 rounded-full p-2 mr-4">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#0e606e]" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-          </svg>
+        <div className="overflow-hidden border-2 border-[#0e606e] rounded-full mr-4">
+          {/* Display random avatar */}
+          <img src={avatarUrl} alt="User Avatar" className="h-14 w-14 object-cover" />
         </div>
         <div>
           <div className="flex items-center">
