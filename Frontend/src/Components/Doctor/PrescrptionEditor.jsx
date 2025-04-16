@@ -133,7 +133,7 @@ const PrescriptionEditor = ({ existingPrescriptionId = null }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm my-4">
+    <div className="bg-white mx-[51px] p-6 rounded-lg shadow-sm mt-4">
       <div className="flex justify-between items-center mb-4">
         <div>
           <h3 className="text-[#0e606e] text-lg font-semibold">Prescription Editor</h3>

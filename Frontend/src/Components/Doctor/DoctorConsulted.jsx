@@ -76,24 +76,28 @@ function DoctorConsulted() {
   }, []);
 
   if (loading && !currentPatientId) {
-    return <div className="text-center py-4">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center py-4">
+        <div className="text-center">Loading...</div>
+      </div>
+    );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow py-11 px-5 mt-5">
-      <div className="flex justify-between items-center mb-6">
+    <div className="bg-white rounded-lg shadow py-6 px-5 mt-4 h-[400px] flex flex-col">
+      <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-medium text-[#0e606e]">
           {currentPatientId ? 'Other Consulting Doctors' : 'Select a patient first'}
         </h2>
         {doctors.length > 4 && (
-          <button className="text-blue-500 hover:text-blue-700">
+          <button className="text-blue-500 hover:text-blue-700 whitespace-nowrap ml-2">
             See All
           </button>
         )}
       </div>
       
-      <div className="space-y-4">
-        {doctors.length === 0 ? (
+      {doctors.length === 0 ? (
+        <div className="flex-grow flex justify-center items-center">
           <p className="text-center text-gray-500">
             {currentPatientId ? 'No other consulting doctors' : 'Please select a patient'}
           </p>
@@ -101,16 +105,8 @@ function DoctorConsulted() {
           doctors.slice(0, 4).map(doctor => (
             <div key={doctor._id} className="flex justify-between items-center">
               <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-[#0e606e]">
-                <img
-                    src={
-                      doctor.gender === "Female"
-                        ? "https://avatar.iran.liara.run/public/girl"
-                        : "https://avatar.iran.liara.run/public/boy"
-                    }
-                    alt="doctor avatar"
-                    className="h-full w-full object-cover"
-                  />
+                <div className="h-10 w-10 rounded-full bg-blue-200 flex items-center justify-center">
+                  <i className="ri-user-3-line text-gray-600"></i>
                 </div>
                 <div className="ml-3">
                   <div className="font-medium">
@@ -120,14 +116,14 @@ function DoctorConsulted() {
                     {doctor.specialization} • {doctor.hospitalName}
                   </div>
                 </div>
+                <button className="px-3 py-1 border border-blue-500 text-blue-500 hover:bg-blue-50 rounded flex-shrink-0">
+                  View Profile
+                </button>
               </div>
-              <button className="px-3 py-1 border border-blue-500 text-blue-500 hover:bg-blue-50 rounded">
-                View Profile
-              </button>
-            </div>
-          ))
-        )}
-      </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

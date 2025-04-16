@@ -176,9 +176,9 @@ const ModifyProfile = () => {
 
       <h2 className="text-xl font-medium text-[#0e606e] mb-6">Modify Your Details</h2>
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border border-gray-200 rounded">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border rounded">
           {/* Left Column */}
-          <div className="space-y-4 border-r border-gray-200 rounded">
+          <div className="space-y-4 border-r rounded p-6">
             <div>
               <label className="block mb-1">
                 Enter Full Name <span className="text-red-500">*</span>
@@ -285,7 +285,7 @@ const ModifyProfile = () => {
             </div>
           </div>
           {/* Right Column */}
-          <div className="space-y-4">
+          <div className="space-y-4 p-6">
             <div>
               <label className="block mb-1">
                 Enter MCI Registration Number <span className="text-red-500">*</span>

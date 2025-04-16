@@ -155,9 +155,9 @@ const DoctorDashboard = () => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div className="bg-gray-100 pb-4">
       {hasPatients ? <Nav /> : <Navigation />}
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto p-4">
         {showReports ? (
           <PatientPrescription 
             category={selectedCategory}
@@ -186,9 +186,9 @@ const DoctorDashboard = () => {
                 <DoctorConsult />
               </div>
             </div>
-            <PatientList />
           </>
         )}
+        <PatientList />
       </div>
       <UploadNew
         selectedMember={selectedMember}
