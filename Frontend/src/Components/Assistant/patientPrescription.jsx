@@ -91,15 +91,6 @@ const PatientPrescription = ({
           )}
           <h2 className="text-xl font-semibold text-[#0e606e]">{category}</h2>
         </div>
-        <div className="flex items-center space-x-2">
-          <button className="p-2 border rounded-md">
-            <i className="ri-calendar-line text-[#0e606e]"></i>
-          </button>
-          <button className="bg-[#0e606e] text-white px-4 py-2 rounded-md flex items-center">
-            <i className="ri-upload-line mr-1"></i>
-            Upload New
-          </button>
-        </div>
       </div>
 
       {loading ? (
