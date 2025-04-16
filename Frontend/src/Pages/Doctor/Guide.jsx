@@ -1,5 +1,5 @@
 import React from 'react';
-import Navigation from '../../Components/Doctor/Navigation';
+import Navigation from '../../Components/Doctor/Nav';
 import UserProfile from '../../Components/Doctor/UserProfile';
 import Guidance from '../../Components/Guide';
 

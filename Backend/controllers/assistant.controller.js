@@ -134,8 +134,6 @@ exports.loginAssistant = async (req, res) => {
       { expiresIn: '24h' } // Ensure the expiration time is appropriate
     );
 
-    console.log('Generated token:', token); // Log the generated token
-
     // Set cookie
     res.cookie('token', token, {
       httpOnly: true,
@@ -168,8 +166,6 @@ exports.loginAssistant = async (req, res) => {
 
 exports.getAssistantDetails = async (req, res) => {
   try {
-    console.log('Request user:', req.user); // Log the user object from middleware
-
     if (!req.user || !req.user.id) {
       return res.status(401).json({
         success: false,
@@ -181,8 +177,6 @@ exports.getAssistantDetails = async (req, res) => {
       .findById(req.user.id)
       .select('-idCard.data') // Exclude sensitive data
       .lean();
-
-    console.log('Fetched assistant:', assistant); // Log the fetched assistant data
 
     if (!assistant) {
       return res.status(404).json({

@@ -11,7 +11,6 @@ module.exports = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Decoded token:', decoded); // Log the decoded token
 
     const assistant = await assistantModel.findById(decoded._id);
     if (!assistant) {

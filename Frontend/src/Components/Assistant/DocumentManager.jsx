@@ -110,7 +110,6 @@ const DocumentManager = ({ onCategorySelect }) => {
           withCredentials: true
         }
       );
-      console.log(response);
       const contentType = response.headers['content-type'] || '';
       const blob = new Blob([response.data], { type: contentType });
       const url = window.URL.createObjectURL(blob);

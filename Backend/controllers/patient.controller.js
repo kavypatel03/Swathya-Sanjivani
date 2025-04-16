@@ -479,31 +479,28 @@ module.exports.viewPrescription = async (req, res) => {
         const document = await documentModel.findById(documentId);
 
         if (!document || document.documentType.toLowerCase() !== 'prescription') {
-            return res.status(404).send("Prescription not found");
+            return res.status(404).json({
+                success: false,
+                message: 'Prescription not found'
+            });
         }
 
-        // Try to get doctor by assistant.doctor if uploadedBy is assistant
-        let doctor = null;
+        // Get doctor/assistant info
+        let doctor = await doctorModel.findById(document.uploadedBy);
         let assistant = null;
-        doctor = await doctorModel.findById(document.uploadedBy);
+        
         if (!doctor) {
             assistant = await require('../models/assistant.model').findById(document.uploadedBy);
-            if (assistant && assistant.doctor) {
+            if (assistant?.doctor) {
                 doctor = await doctorModel.findById(assistant.doctor);
             }
-        }
-        if (!assistant && !doctor) {
-            assistant = await require('../models/assistant.model').findById(document.uploadedBy);
         }
 
         const patient = await patientModel.findById(document.patient);
         const familyMember = patient?.family?.find(f => f._id.toString() === document.familyMember.toString());
 
-        // Set correct content type for HTML
-        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-
-        // Generate HTML content for the prescription
-        res.end(`<!DOCTYPE html>
+        // Generate HTML
+        const html = `<!DOCTYPE html>
 <html>
 <head>
   <title>Prescription View</title>
@@ -587,7 +584,7 @@ module.exports.viewPrescription = async (req, res) => {
 </head>
 <body>
   <div class="header-container">
-    <img src="http://localhost:4000/static/logo.png" alt="Swasthya Sanjivani Logo" class="logo" onerror="this.style.display='none'" />
+    <img src="http://localhost:4000/static/logo.png" alt="Clinic Logo" class="logo" onerror="this.style.display='none'" />
     <div class="header-text">
       <h1>Medical Prescription</h1>
     </div>
@@ -604,13 +601,9 @@ module.exports.viewPrescription = async (req, res) => {
     <p style="margin: 10px 0;">License No: ${doctor?.mciRegistrationNumber || 'N/A'}</p>
   </div>
   
-  ${
-    assistant
-      ? `<div class="assistant-info">
-          <strong>Prepared by:</strong> ${assistant.fullName || 'Unknown Assistant'}
-        </div>`
-      : ''
-  }
+  ${assistant ? `<div class="assistant-info">
+      <strong>Prepared by:</strong> ${assistant.fullName || 'Unknown Assistant'}
+    </div>` : ''}
 
   <div class="patient-info">
     <p><strong>Patient Name:</strong> ${familyMember?.fullName || 'Unknown'}</p>
@@ -625,12 +618,17 @@ module.exports.viewPrescription = async (req, res) => {
     </div>
   </div>
 </body>
-</html>
-        `);
+</html>`;
+
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.send(html);
 
     } catch (error) {
-        res.writeHead(500, { 'Content-Type': 'text/plain' });
-        res.end("Failed to view prescription");
+        console.error('Error viewing prescription:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to view prescription'
+        });
     }
 };
 
@@ -640,19 +638,117 @@ module.exports.downloadPrescriptionAsPdf = async (req, res) => {
         const document = await documentModel.findById(documentId);
 
         if (!document || document.documentType.toLowerCase() !== 'prescription') {
-            return res.status(404).send("Prescription not found");
+            return res.status(404).json({
+                success: false,
+                message: 'Prescription not found'
+            });
         }
 
-        // Check if the document is a PDF or generate one if necessary
-        if (document.file.contentType === 'application/pdf') {
-            res.contentType('application/pdf');
-            res.send(document.file.data); // Send the PDF data as a download
-        } else {
-            // If it's not a PDF, you could convert it here (e.g., using a library like pdfkit)
-            res.status(400).send("Document is not a PDF");
-        }
+        const doctor = await doctorModel.findById(document.uploadedBy);
+        const patient = await patientModel.findById(document.patient);
+        const familyMember = patient?.family?.find(f => f._id.toString() === document.familyMember.toString());
+
+        // Create PDF with matching settings
+        const pdfDoc = new PDFDocument({ 
+            size: 'A4',
+            margin: 50,
+            font: 'Helvetica',
+            bufferPages: true
+        });
+        
+        // Set response headers
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=prescription_${new Date().toISOString().split('T')[0]}.pdf`);
+        
+        // Pipe PDF to response
+        pdfDoc.pipe(res);
+
+        // Add logo (make sure to adjust path as needed)
+        const logoPath = path.join(__dirname, '..', 'public', 'static', 'logo.png');
+        pdfDoc.image(logoPath, 50, 30, { width: 200 });
+
+        // Header text with matching styling
+        pdfDoc.fontSize(24)
+             .fillColor('#0e606e')
+             .text('Medical Prescription', 100, 40, { align: 'right' });
+
+        // Blue separator line
+        pdfDoc.moveTo(50, 90)
+             .lineTo(pdfDoc.page.width - 50, 90)
+             .strokeColor('#0e606e')
+             .lineWidth(2)
+             .stroke();
+
+        // Doctor info section
+        pdfDoc.moveDown(2)
+             .fontSize(14)
+             .fillColor('#000000')
+             .font('Helvetica-Bold')
+             .text(`Dr. ${doctor?.fullName || 'Unknown'}`, 50, 120)
+             .moveDown(1)
+             .font('Helvetica')
+             .fontSize(12)
+             .text(doctor?.specialization || '', 50)
+             .moveDown(1)
+             .text(doctor?.hospitalName || '')
+             .moveDown(1)
+             .text(`License No: ${doctor?.mciRegistrationNumber || 'N/A'}`);
+
+        // Date position
+        pdfDoc.text(
+            `Date: ${new Date(document.uploadedAt).toLocaleDateString()}`,
+            pdfDoc.page.width - 200,
+            120,
+            { align: 'right' }
+        );
+
+        // Patient info box with grey background
+        const patientBoxY = pdfDoc.y + 20;
+        pdfDoc.rect(50, patientBoxY, pdfDoc.page.width - 100, 30)
+             .fillColor('#f8f9fa')
+             .fill();
+        
+        pdfDoc.fillColor('#000000')
+             .text(
+                 `Patient Name: ${familyMember?.fullName || 'Unknown'}`,
+                 60,
+                 patientBoxY + 10
+             );
+
+        // Prescription content
+        pdfDoc.moveDown(2)
+             .font('Helvetica-Bold')
+             .text('Prescription:', 50)
+             .moveDown();
+
+        const prescriptionContent = document.file.data.toString('utf-8')
+            .split('\n')
+            .filter(line => line.trim())
+            .join('\n\n');
+
+        pdfDoc.font('Helvetica')
+             .fontSize(12)
+             .text(prescriptionContent, {
+                 width: pdfDoc.page.width - 100,
+                 align: 'left',
+                 lineGap: 8
+             });
+
+        // Footer with signature
+        pdfDoc.moveDown(4)
+             .fontSize(10)
+             .text('Digital Signature', pdfDoc.page.width - 200, pdfDoc.y, { align: 'right' })
+             .moveDown()
+             .font('Helvetica-Bold')
+             .text(`Dr. ${doctor?.fullName || 'Unknown'}`, { align: 'right' });
+
+        pdfDoc.end();
 
     } catch (error) {
-        res.status(500).send("Failed to download prescription");
+        console.error('Error generating PDF:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to generate PDF'
+        });
     }
 };

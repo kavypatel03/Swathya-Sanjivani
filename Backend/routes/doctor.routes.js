@@ -73,7 +73,7 @@ router.get('/patient/:patientId', authMiddleware, doctorController.getPatientByI
 
 // Add this new route before module.exports
 router.get('/doctor/:doctorId', authMiddleware, doctorController.getDoctorById);
-
+router.get('/:doctorId', authMiddleware, doctorController.getDoctorById);
 // Add this route before module.exports
 router.put('/doctor/:doctorId', authMiddleware, doctorController.updateDoctorById);
 

@@ -34,7 +34,6 @@ const ModifyDetailPage = () => {
           return;
         }
 
-        console.log('Token being sent:', token); // Log the token
 
         const response = await axios.get('http://localhost:4000/assistant/dashboard', {
           headers: { Authorization: `Bearer ${token}` } // Pass token in headers

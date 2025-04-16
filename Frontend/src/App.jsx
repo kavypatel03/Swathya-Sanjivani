@@ -27,6 +27,8 @@ import Guide from './Pages/Assistant/GuidePage';
 import DGuide from './Pages/Doctor/Guide';
 import Modify from './Pages/Assistant/modifyDetailPage'
 import PatientPrescription from './Components/Assistant/patientPrescription';
+import AllDoctor from './Pages/Doctor/AllDoctor';
+import PatientFamily from './Pages/Doctor/DoctorFamily';
 
 // Add import for DoctorProfile
 import DoctorProfile from './Pages/Doctor/DoctorProfile';
@@ -77,6 +79,8 @@ function App() {
     { path: "/Guide", element: <><DGuide /></> },
     // Add DoctorProfile route
     { path: "/DoctorProfile", element: <DoctorProfile /> },
+    { path: "/AllDoctor", element: <AllDoctor /> },
+    { path: "/DoctorFamily", element: <PatientFamily /> },
     
     // Assistant Routes
     { path: "/AssistantDashbord", element: <AssistantDashbord /> },
