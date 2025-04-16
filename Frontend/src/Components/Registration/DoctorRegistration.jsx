@@ -338,7 +338,7 @@ const DoctorRegistrationForm = () => {
 
               <button 
                 type="submit" 
-                className={`w-[28rem] py-1 mt-6 rounded-md font-medium text-sm ${
+                className={`w-[28rem] py-1 mt-7 rounded-md font-medium text-sm ${
                   firstFormSubmitted 
                     ? "bg-gray-400 cursor-not-allowed" 
                     : "bg-[#0e606e] text-white hover:bg-[#0b5058]"
@@ -372,7 +372,7 @@ const DoctorRegistrationForm = () => {
                     name="mobile" 
                     value={formData.mobile} 
                     onChange={handleChange} 
-                    placeholder="+91-94260-24009"
+                    placeholder="+91-90000-99000"
                     className="flex-grow p-1 border rounded-l" 
                     disabled={!firstFormSubmitted || mobileVerified}
                     required
@@ -453,15 +453,14 @@ const DoctorRegistrationForm = () => {
                     <i className={showPassword ? "ri-eye-off-line text-gray-500" : "ri-eye-line text-gray-500"}></i>
                   </div>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Must contain at least 8 characters with letters, numbers & special characters</p>
               </div>
 
-              <div className="mb-4">
+              <div className="mb-8 mt-8">
                 <label className="flex items-center">
                   <input type="checkbox" className="mr-2 h-4 w-4" required />
                   <span className="text-sm">I agree to the Terms & Conditions</span>
                 </label>
-                <p className="text-xs text-gray-600 mt-1">
+                <p className="text-xs text-gray-600 mt-2">
                   By registering, you agree to securely manage your credentials.
                   <a href="#" className="text-blue-500 ml-1">Read More</a>
                 </p>

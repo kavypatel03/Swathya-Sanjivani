@@ -82,7 +82,7 @@ function Login() {
             <label>Enter Mobile Number <span className="text-red-500">*</span></label>
             <input 
               type="tel"
-              placeholder="+91-94260-24009"
+              placeholder="+91-90000-99000"
               className="w-full p-2 border rounded mt-1" 
               onChange={(e) => setMobile(e.target.value)}
             />
@@ -98,19 +98,17 @@ function Login() {
             />
           </div>
 
-          <div className="mb-4">
+          <div className="mb-8">
             <label>Enter Password <span className="text-red-500">*</span></label>
             <input 
               type="password"
-              placeholder="Enter Your Created Password"
+              placeholder="Enter Your Password"
               className="w-full p-2 border rounded mt-1" 
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
-          <div className="mb-6">
-            <a href="#" className="text-blue-500">Forgot Password?</a>
-          </div>
+          
 
           <button
             type="submit"

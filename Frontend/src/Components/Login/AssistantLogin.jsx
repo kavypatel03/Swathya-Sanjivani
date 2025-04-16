@@ -122,7 +122,7 @@ function AssistantLogin() {
               name="mobile"
               value={formData.mobile}
               onChange={handleChange}
-              placeholder="+91-94260-24009"
+              placeholder="+91-90000-99000"
               className="w-full p-2 border rounded mt-1 focus:outline-none focus:ring-1 focus:ring-[#0e606e]" 
               required
             />
@@ -141,7 +141,7 @@ function AssistantLogin() {
             />
           </div>
           
-          <div className="mb-4">
+          <div className="mb-8">
             <label className="block">Enter Password <span className="text-red-500">*</span></label>
             <input 
               type="password"
@@ -154,11 +154,7 @@ function AssistantLogin() {
             />
           </div>
           
-          <div className="mb-6">
-            <Link to="/ForgotPassword" className="text-blue-500 hover:text-blue-700">
-              Forgot Password?
-            </Link>
-          </div>
+          
           
           <button 
             type="submit" 

@@ -361,7 +361,7 @@ const AssistantRegistrationForm = () => {
 
               <button 
                 type="submit" 
-                className={`w-[28rem] py-1 mt-6 rounded-md font-medium text-sm ${
+                className={`w-[28rem] py-1 mt-7 rounded-md font-medium text-sm ${
                   firstFormSubmitted 
                     ? "bg-gray-400 cursor-not-allowed" 
                     : "bg-[#0e606e] text-white hover:bg-[#0b5058]"
@@ -376,7 +376,7 @@ const AssistantRegistrationForm = () => {
           {/* Right - Contact Details */}
           <div className="w-full md:w-1/2 p-6">
             <form onSubmit={handleSubmit}>
-              <h2 className="text-xl font-semibold text-[#0e606e] mb-6">Contact Details</h2>
+              <h2 className="text-xl font-semibold text-[#0e606e] mb-5">Contact Details</h2>
 
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Enter Your Full Name</label>
@@ -395,7 +395,7 @@ const AssistantRegistrationForm = () => {
                     name="mobile" 
                     value={formData.mobile} 
                     onChange={handleChange} 
-                    placeholder="+91-94260-24009"
+                    placeholder="+91-90000-99000"
                     className="flex-grow p-1 border rounded-l" 
                     disabled={!firstFormSubmitted || mobileVerified}
                     required
@@ -476,10 +476,10 @@ const AssistantRegistrationForm = () => {
                     <i className={showPassword ? "ri-eye-off-line text-gray-500" : "ri-eye-line text-gray-500"}></i>
                   </div>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Must contain at least 8 characters with letters, numbers & special characters</p>
+                
               </div>
 
-              <div className="mb-4">
+              <div className="mb-8 mt-9">
                 <label className="flex items-center">
                   <input type="checkbox" className="mr-2 h-4 w-4" required />
                   <span className="text-sm">I agree to the Terms & Conditions</span>

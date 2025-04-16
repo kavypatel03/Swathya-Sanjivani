@@ -160,44 +160,103 @@ const AssistantPrescriptionEditor = ({ existingPrescriptionId = null }) => {
     }
   };
 
+  
+ 
+  const [activeCommands, setActiveCommands] = useState({
+    bold: false,
+    italic: false,
+    underline: false,
+    alignLeft: false,
+    alignCenter: false,
+    alignJustify: false,
+  });
+
   const handleCommand = (command, value = null) => {
     const editor = editorRef.current;
     editor.focus();
-
-    if (command === "createLink") {
-      const url = prompt("Enter URL:");
-      if (url) {
-        document.execCommand(command, false, url);
-      }
-    } else {
-      document.execCommand(command, false, value);
-    }
-
+    document.execCommand(command, false, value);
     handleInput();
+    updateActiveCommands();
+  };
+
+  const handleAlignment = (alignment) => {
+    const commandMap = {
+      Left: "alignLeft",
+      Center: "alignCenter",
+      Full: "alignJustify",
+    };
+
+    const editor = editorRef.current;
+    editor.focus();
+    document.execCommand(`justify${alignment}`);
+    setActiveCommands((prev) => ({
+      ...prev,
+      alignLeft: false,
+      alignCenter: false,
+      alignJustify: false,
+      [commandMap[alignment]]: true,
+    }));
+  };
+
+  const updateActiveCommands = () => {
+    setActiveCommands((prev) => ({
+      ...prev,
+      bold: document.queryCommandState("bold"),
+      italic: document.queryCommandState("italic"),
+      underline: document.queryCommandState("underline"),
+    }));
   };
 
   const handleInput = () => {
     const text = editorRef.current.innerText.trim();
     setIsEmpty(text === "");
+    updateActiveCommands();
   };
 
+  const removeTextFormatting = () => {
+    const editor = editorRef.current;
+    const tagsToRemove = ["B", "STRONG", "I", "EM", "U"];
+
+    const unwrapTags = (node) => {
+      if (tagsToRemove.includes(node.nodeName)) {
+        const parent = node.parentNode;
+        while (node.firstChild) {
+          parent.insertBefore(node.firstChild, node);
+        }
+        parent.removeChild(node);
+      } else {
+        for (let i = 0; i < node.childNodes.length; i++) {
+          unwrapTags(node.childNodes[i]);
+        }
+      }
+    };
+
+    unwrapTags(editor);
+    handleInput();
+  };
+
+  const handleClearEditor = () => {
+    const editor = editorRef.current;
+    editor.innerHTML = "";
+    setIsEmpty(true);
+    setActiveCommands({
+      bold: false,
+      italic: false,
+      underline: false,
+      alignLeft: false,
+      alignCenter: false,
+      alignJustify: false,
+    });
+  };
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm my-4">
       <div className="flex justify-between items-center mb-4">
         <div>
           <h3 className="text-[#0e606e] text-lg font-semibold">Prescription Editor</h3>
-          <p className="text-sm text-gray-500">
-            Family Member ID: {localStorage.getItem('selectedFamilyMemberId')}
-          </p>
+          
         </div>
         <div className="flex space-x-2">
-          <button 
-            type="button"
-            className="border border-gray-300 text-gray-700 px-4 py-2 rounded"
-            onClick={() => window.location.replace('/AssistantDashbord')}
-          >
-            Cancel
-          </button>
+          
           <button 
             type="button"
             className="bg-[#0e606e] text-white px-4 py-2 rounded flex items-center"
@@ -219,50 +278,50 @@ const AssistantPrescriptionEditor = ({ existingPrescriptionId = null }) => {
       {/* Toolbar */}
       <div className="flex border border-gray-300 rounded-t-lg bg-gray-50">
         <button
-          className="p-2 border-r border-gray-300 hover:bg-gray-400 hover:border-gray-400 hover:rounded-tr"
+          className="p-2 border-r border-gray-300 hover:bg-[#e0f7fa] hover:border-[#0e606e] hover:text-[#0e606e] hover:rounded-tl"
           onClick={() => handleCommand("bold")}
         >
           <i className="ri-bold"></i>
         </button>
 
         <button
-          className="p-2 border-r border-gray-300 hover:bg-gray-400 hover:border-gray-400"
+          className="p-2 border-r border-gray-300 hover:bg-[#e0f7fa] hover:border-[#0e606e] hover:text-[#0e606e]"
           onClick={() => handleCommand("italic")}
         >
           <i className="ri-italic"></i>
         </button>
 
         <button
-          className="p-2 border-r border-gray-300 hover:bg-gray-400 hover:border-gray-400"
+          className="p-2 border-r border-gray-300 hover:bg-[#e0f7fa] hover:border-[#0e606e] hover:text-[#0e606e]"
           onClick={() => handleCommand("underline")}
         >
           <i className="ri-underline"></i>
         </button>
 
         <button
-          className="p-2 border-r border-gray-300 hover:bg-gray-400 hover:border-gray-400"
-          onClick={() => handleCommand("insertUnorderedList")}
+          className="p-2 border-r border-gray-300 hover:bg-[#e0f7fa] hover:border-[#0e606e] hover:text-[#0e606e]"
+          onClick={() => handleAlignment("Left")}
         >
-          <i className="ri-list-unordered"></i>
+          <i className="ri-align-left"></i>
         </button>
 
         <button
-          className="p-2 border-r border-gray-300 hover:bg-gray-400 hover:border-gray-400"
-          onClick={() => handleCommand("insertOrderedList")}
+          className="p-2 border-r border-gray-300 hover:bg-[#e0f7fa] hover:border-[#0e606e] hover:text-[#0e606e]"
+          onClick={() => handleAlignment("Center")}
         >
-          <i className="ri-list-ordered"></i>
+          <i className="ri-align-center"></i>
         </button>
 
         <button
-          className="p-2 border-r border-gray-300 hover:bg-gray-400 hover:border-gray-400"
-          onClick={() => handleCommand("createLink")}
+          className="p-2 border-r border-gray-300 hover:bg-[#e0f7fa] hover:border-[#0e606e] hover:text-[#0e606e]"
+          onClick={() => handleAlignment("Full")}
         >
-          <i className="ri-link"></i>
+          <i className="ri-align-justify"></i>
         </button>
 
         <button
-          className="p-2 hover:bg-gray-400 hover:border-gray-400"
-          onClick={() => handleCommand("removeFormat")}
+          className="p-2  hover:bg-[#e0f7fa] hover:border-[#0e606e] hover:text-[#0e606e]"
+          onClick={handleClearEditor}
         >
           <i className="ri-delete-bin-line"></i>
         </button>

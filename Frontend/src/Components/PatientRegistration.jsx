@@ -208,7 +208,7 @@ const PatientRegistrationForm = () => {
               <input
                 type="text"
                 name="mobile"
-                placeholder="+91-94260-24009"
+                placeholder="+91-90000-99000"
                 className="flex-grow border border-gray-300 p-1 rounded-l text-sm"
                 value={mobile}
                 onChange={(e) => setmobile(e.target.value)}
