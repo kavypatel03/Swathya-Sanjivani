@@ -157,7 +157,7 @@ function PatientHealthDocuments({ selectedMember, documents, refreshDocuments, l
         <p className="text-center text-red-500">{error}</p>
       ) : (
         <div 
-          className="space-y-6 custom-scrollbar pl-1 pr-4 overflow-y-auto h-[300px]"
+          className="space-y-6 custom-scrollbar pl-1 pr-4 overflow-y-auto h-[320px]"
           style={{
             scrollbarWidth: 'auto',
             scrollbarColor: '#0e606e transparent',

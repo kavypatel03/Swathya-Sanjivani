@@ -103,26 +103,28 @@ function DoctorConsulted() {
           </p>
         </div>
       ) : (
-        doctors.slice(0, 4).map(doctor => (
-          <div key={doctor._id} className="flex justify-between items-center">
-            <div className="flex items-center">
-              <div className="h-10 w-10 rounded-full bg-blue-200 flex items-center justify-center">
+        <div className="space-y-4">
+          {doctors.slice(0, 4).map(doctor => (
+            <div key={doctor._id} className="flex items-center">
+              <div className="h-10 w-10 flex-shrink-0 rounded-full bg-blue-200 flex items-center justify-center">
                 <i className="ri-user-3-line text-gray-600"></i>
               </div>
-              <div className="ml-3">
-                <div className="font-medium">
+              <div className="ml-3 flex-grow min-w-0">
+                <div className="font-medium truncate">
                   {doctor.isCurrent ? '(You) ' : ''}Dr. {doctor.fullName}
                 </div>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 truncate">
                   {doctor.specialization} • {doctor.hospitalName}
                 </div>
               </div>
-              <button className="px-3 py-1 border border-blue-500 text-blue-500 hover:bg-blue-50 rounded flex-shrink-0">
-                View Profile
-              </button>
+              <div className="ml-3 flex-shrink-0">
+                <button className="px-3 py-1 border border-blue-500 text-blue-500 hover:bg-blue-50 rounded">
+                  View Profile
+                </button>
+              </div>
             </div>
-          </div>
-        ))
+          ))}
+        </div>
       )}
     </div>
   );
