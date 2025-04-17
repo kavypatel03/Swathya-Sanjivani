@@ -1,15 +1,45 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const PatientPrescription = ({ 
-  category = 'All Documents', 
-  documents = [], 
-  onBack, 
-  onView, 
-  onDownload, 
+const PatientPrescription = ({
+  category = 'All Documents',
+  documents = [],
+  onBack,
+  onView,
+  onDownload,
   onDelete,
   loading = false
 }) => {
+  const [localDocuments, setLocalDocuments] = useState(documents);
+
+  useEffect(() => {
+    // When component mounts or category changes, check localStorage for documents
+    const storedCategory = localStorage.getItem('selectedDocsCategory');
+    const storedDocuments = localStorage.getItem('filteredDocuments');
+    
+    console.log("Checking localStorage:", {
+      storedCategory,
+      storedDocsAvailable: !!storedDocuments,
+      propsCategory: category,
+      propsDocumentsCount: documents.length
+    });
+    
+    // If we have the same category in localStorage as the prop, and there are stored documents
+    if (storedCategory === category && storedDocuments) {
+      try {
+        const parsedDocs = JSON.parse(storedDocuments);
+        console.log("Using documents from localStorage:", parsedDocs.length);
+        setLocalDocuments(parsedDocs);
+      } catch (error) {
+        console.error("Error parsing documents from localStorage:", error);
+        setLocalDocuments(documents);
+      }
+    } else {
+      // Otherwise use props
+      setLocalDocuments(documents);
+    }
+  }, [category, documents]);
+
   const handleView = async (doc) => {
     try {
       if (doc.documentType.toLowerCase() === 'prescription') {
@@ -77,12 +107,19 @@ const PatientPrescription = ({
     }
   };
 
+  // Debug logging
+  console.log("PatientPrescription rendering:", {
+    category,
+    documentsCount: localDocuments.length,
+    documents: localDocuments
+  });
+
   return (
     <div className="bg-white rounded-lg p-6 shadow-sm">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-4">
           {category !== 'All Documents' && (
-            <button 
+            <button
               onClick={onBack}
               className="text-[#0e606e] hover:text-[#0e606e]/80"
             >
@@ -99,10 +136,10 @@ const PatientPrescription = ({
         </div>
       ) : (
         <div className="space-y-4">
-          {(!documents || documents.length === 0) ? (
+          {(!localDocuments || localDocuments.length === 0) ? (
             <p className="text-center text-gray-500 py-4">No documents found in this category</p>
           ) : (
-            documents.map((doc) => (
+            localDocuments.map((doc) => (
               <div key={doc._id} className="border rounded-lg p-4 flex justify-between items-center">
                 <div>
                   <h3 className="font-medium">{doc.documentName}</h3>
@@ -136,10 +173,10 @@ const PatientPrescription = ({
 PatientPrescription.defaultProps = {
   category: 'All Documents',
   documents: [],
-  onBack: () => {},
-  onView: () => {},
-  onDownload: () => {},
-  onDelete: () => {},
+  onBack: () => { },
+  onView: () => { },
+  onDownload: () => { },
+  onDelete: () => { },
   loading: false
 };
 

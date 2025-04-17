@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 const ReportManager = ({ onCategorySelect }) => {
+  const navigate = useNavigate();
   const [documents, setDocuments] = useState([]);
   const [categories, setCategories] = useState({
     'Prescriptions': { count: 0, icon: 'ri-file-list-line', color: 'bg-blue-100' },
@@ -73,9 +75,9 @@ const ReportManager = ({ onCategorySelect }) => {
           
           if (docType === 'prescription' || docType === 'prescriptions') {
             counts['Prescriptions'].count++;
-          } else if (docType === 'lab report' || docType === 'lab reports' || docType === 'labreport' || docType === 'labreports') {
+          } else if (docType.includes('lab')) {
             counts['Lab Reports'].count++;
-          } else if (docType === 'x-ray' || docType === 'x-rays' || docType === 'xray' || docType === 'xrays') {
+          } else if (docType.includes('x-ray') || docType.includes('xray')) {
             counts['X-Rays'].count++;
           } else {
             counts['Others'].count++;
@@ -99,7 +101,13 @@ const ReportManager = ({ onCategorySelect }) => {
   const handleCategoryClick = (category) => {
     const categoryLower = category.toLowerCase();
     
-    // Filter documents based on selected category
+    // Debug: Log all documents before filtering
+    console.log("All documents before filtering:", documents.map(doc => ({
+      id: doc._id,
+      name: doc.documentName,
+      type: doc.documentType
+    })));
+    
     let filteredDocs;
     
     if (categoryLower === 'all documents') {
@@ -108,39 +116,60 @@ const ReportManager = ({ onCategorySelect }) => {
       filteredDocs = documents.filter(doc => {
         const docType = (doc.documentType || '').trim().toLowerCase();
         
-        if (categoryLower === 'prescriptions' && (docType === 'prescription' || docType === 'prescriptions')) {
+        if (categoryLower === 'prescriptions' && (
+          docType === 'prescription' || 
+          docType === 'prescriptions'
+        )) {
           return true;
         } else if (categoryLower === 'lab reports' && (
           docType === 'lab report' || 
-          docType === 'lab reports' || 
-          docType === 'labreport' || 
-          docType === 'labreports' ||
+          docType === 'lab reports' ||
           docType.includes('lab')
         )) {
+          console.log("Found a lab report:", doc.documentName);
           return true;
         } else if (categoryLower === 'x-rays' && (
           docType === 'x-ray' || 
-          docType === 'x-rays' || 
-          docType === 'xray' || 
-          docType === 'xrays'
+          docType === 'x-rays' ||
+          docType.includes('xray') ||
+          docType.includes('x-ray')
         )) {
           return true;
         } else if (categoryLower === 'others') {
-          return ![
-            'prescription', 'prescriptions', 
-            'lab report', 'lab reports', 'labreport', 'labreports',
-            'x-ray', 'x-rays', 'xray', 'xrays'
-          ].some(type => docType.includes(type));
+          const isOther = !['prescription', 'prescriptions', 'lab report', 'lab reports', 'lab', 'x-ray', 'x-rays', 'xray']
+            .some(type => docType.includes(type));
+          
+          return isOther;
         }
         return false;
       });
     }
     
-    // Ensure we're passing the correct category name and documents
-    console.log(`Selected ${category} with ${filteredDocs.length} documents`);
+    // Debug: Log filtered documents
+    console.log(`Selected ${category} with ${filteredDocs.length} documents:`, 
+      filteredDocs.map(doc => ({
+        id: doc._id,
+        name: doc.documentName,
+        type: doc.documentType
+      }))
+    );
     
-    // Pass category and filtered documents to parent component
-    onCategorySelect(category, filteredDocs);
+    // Ensure we're storing a deep copy to avoid reference issues
+    const filteredDocsStringified = JSON.stringify(filteredDocs);
+    
+    // Store in localStorage before navigation
+    localStorage.setItem('selectedDocsCategory', category);
+    localStorage.setItem('filteredDocuments', filteredDocsStringified);
+    
+    // Call the callback first if it exists
+    if (onCategorySelect) {
+      // Make sure we pass the parsed version to avoid reference issues
+      const parsedDocs = JSON.parse(filteredDocsStringified);
+      onCategorySelect(category, parsedDocs);
+    }
+    
+    // Then navigate
+    navigate('/assistantReportPage');
   };
   
   // Convert categories object to array for rendering
